@@ -1,26 +1,15 @@
 import { Chevron } from "@/assets/icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import SingleProduct from "./singleProduct";
 import { Item, Modifier } from "@/app/abstraction/types";
 import FirestoreService from "@/servies/firestoreService";
 import ProductSkeleton from "./productSkeletone";
 
 interface ProductProps {
-  emitProducts: React.Dispatch<React.SetStateAction<Item[]>>;
+  products: Item[];
 }
 
-const Products: React.FC<ProductProps> = ({ emitProducts }) => {
-  const [products, setProducts] = useState<Item[]>([]);
-  useEffect(() => {
-    FirestoreService.getSubcollection("vendors", "UVCVz6a9GWLzuRGnGVfx", "products").then(
-      (fetchedProducts) => {
-        const formattedProducts = formatProducts(fetchedProducts);
-        setProducts(formattedProducts);
-        emitProducts(formattedProducts);
-      }
-    );
-  }, []);
-
+const Products: React.FC<ProductProps> = ({ products }) => {
   return (
     <article>
       <section className="flex justify-between items-center mb-4">
@@ -35,8 +24,8 @@ const Products: React.FC<ProductProps> = ({ emitProducts }) => {
           ? products.map((pr, i) => {
               return <SingleProduct key={i} product={pr} />;
             })
-          : new Array(10).fill(0).map(() => {
-              return <ProductSkeleton />;
+          : new Array(10).fill(0).map((num, index: number) => {
+              return <ProductSkeleton key={index} />;
             })}
       </section>
     </article>
@@ -45,7 +34,7 @@ const Products: React.FC<ProductProps> = ({ emitProducts }) => {
 
 export default Products;
 
-const formatProducts = (products: any[]): Item[] => {
+export const formatProducts = (products: any[]): Item[] => {
   const formattedProducts = products
     .filter((product) => product.stockQuantity > 0)
     .map((product) => {
@@ -82,8 +71,8 @@ const formatProducts = (products: any[]): Item[] => {
               };
 
               if (modifier.multiple) {
-                modifier.min = parseInt(md.minSelection);
-                modifier.max = parseInt(md.maxSelection);
+                modifier.min = parseInt(md.minSelection) || 0;
+                modifier.max = parseInt(md.maxSelection) || 0;
               }
 
               return modifier;

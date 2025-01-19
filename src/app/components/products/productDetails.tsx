@@ -113,9 +113,8 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
       const countSelections = temporaryItem.modifiers[modifierIndex]?.options.filter(
         (opt: ModifierOption) => opt.isSelected
       ).length;
-
-      if (countSelections >= (temporaryItem.modifiers[modifierIndex].max as number) && newValue)
-        return;
+      const max = temporaryItem.modifiers[modifierIndex].max as number;
+      if (max && countSelections >= max && newValue) return;
     }
 
     setTemporaryItem((prev: any) => {
@@ -206,6 +205,8 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
             <aside>
               {product?.modifiers.length &&
                 (product?.modifiers || []).map((modifier: Modifier, modifierIndex) => {
+                  console.log({ modifier });
+
                   return (
                     <article key={modifierIndex} className="">
                       <section className="flex justify-between items-center  mb-2 text-sm font-semibold text-secondary w-fill">

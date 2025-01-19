@@ -4,20 +4,58 @@ import allCategoriesIcon from "@/assets/images/categories.png";
 import { useEffect, useState } from "react";
 import { Category, Item } from "@/app/abstraction/types";
 import FirestoreService from "@/servies/firestoreService";
+import CategorySkeleton from "./categorySkeletone";
+import { useVendor } from "@/reduxStore/hooks";
+import { formatProducts } from "../products/products";
 
-const Categories: React.FC<{ products: Item[] }> = ({ products }) => {
+const Categories: React.FC<{
+  products: Item[];
+  setProducts: Function;
+  setAllProducts: Function;
+}> = ({ products, setProducts, setAllProducts }) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  const vendor = useVendor();
 
   useEffect(() => {
     if (products.length) {
-      FirestoreService.getSubcollection("vendors", "UVCVz6a9GWLzuRGnGVfx", "categories").then(
-        (fetchedCategories) => {
-          const formattedCategories: Category[] = formatCategories(fetchedCategories, products);
-          setCategories(formattedCategories);
+      FirestoreService.getSubcollection(
+        "vendors",
+        vendor?.id || "UVCVz6a9GWLzuRGnGVfx",
+        "categories"
+      ).then((fetchedCategories) => {
+        const formattedCategories: Category[] = formatCategories(fetchedCategories, products);
+        setCategories(formattedCategories);
+      });
+    }
+  }, [products]);
+
+  useEffect(() => {
+    console.log({ selectedVendor: vendor });
+
+    if (vendor?.id) {
+      setSelectedCategory("all");
+      // Fetch Products related to selected vendor
+      console.log(vendor.id);
+
+      FirestoreService.getSubcollection("vendors", vendor.id, "products").then(
+        (fetchedProducts) => {
+          const formattedProducts = formatProducts(fetchedProducts);
+          console.log({ formattedProducts });
+
+          setAllProducts(formattedProducts);
+          setProducts(formattedProducts);
         }
       );
     }
-  }, [products]);
+  }, [vendor]);
+
+  const handleCategoryClick = (category: Category) => {
+    setSelectedCategory(category.id);
+
+    setProducts(category.products);
+  };
 
   return (
     <article className="">
@@ -32,17 +70,47 @@ const Categories: React.FC<{ products: Item[] }> = ({ products }) => {
         </aside>
       </section>
 
-      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6    gap-5 ">
-        <SingleCategoryCard
-          category={{
-            name: "All Categories",
-            quantity: products.length,
-            image: "",
-          }}
-        />
-        {categories.map((cat, i) => {
-          return <SingleCategoryCard key={i} category={cat} className={""} />;
-        })}
+      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6   gap-5 ">
+        {categories.length ? (
+          <>
+            <SingleCategoryCard
+              className={
+                selectedCategory === "all"
+                  ? "border-secondary shadow-xl border-2"
+                  : "cursor-pointer"
+              }
+              category={{
+                name: "All Categories",
+                quantity: products.length,
+                image: "",
+              }}
+              onClick={() => {
+                setSelectedCategory("all");
+                setProducts(products);
+              }}
+            />
+            {categories.map((cat, i) => {
+              return (
+                <SingleCategoryCard
+                  key={i}
+                  category={cat}
+                  className={
+                    selectedCategory === cat.id
+                      ? "border-secondary shadow-xl border-2"
+                      : "cursor-pointer"
+                  }
+                  onClick={() => handleCategoryClick(cat)}
+                />
+              );
+            })}
+          </>
+        ) : (
+          <>
+            {new Array(10).fill(0).map((cat, i) => {
+              return <CategorySkeleton key={i} />;
+            })}
+          </>
+        )}
       </section>
     </article>
   );

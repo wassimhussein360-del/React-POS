@@ -42,3 +42,10 @@ export type Category = {
   quantity: number;
   products: Item[];
 };
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin: string;
+};

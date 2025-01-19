@@ -69,6 +69,9 @@ export default function LogIn() {
 
   const logInWithGoogle = () => {
     const googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({
+      tenant_id: "admin-eufqf", // Replace with your tenant ID
+    });
     signInWithPopup(auth, googleProvider)
       .then((result) => {
         const user = result.user;

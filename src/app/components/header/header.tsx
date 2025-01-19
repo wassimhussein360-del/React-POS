@@ -4,18 +4,57 @@ import {
   Chevron,
   Flag,
   MainIcon,
+  OutIcon,
   SearchIcons,
   Separator,
   SettingsIcon,
 } from "@/assets/icons";
-import { Badge, Input } from "@material-tailwind/react";
+import {
+  Badge,
+  Button,
+  Input,
+  Menu,
+  MenuHandler,
+  MenuItem,
+  MenuList,
+} from "@material-tailwind/react";
 import { Select, Option } from "@material-tailwind/react";
 import logo_sm from "../../../assets/logos/logo-sm.png";
 import logo_lg from "../../../assets/logos/logo-lg.png";
 import Image from "next/image";
 import "./header.css";
+import { useAppDispatch, useUser, useVendor, useVendors } from "@/reduxStore/hooks";
+import { useEffect } from "react";
+import { $toTitleCase, $writeOnLocal } from "@/app/helpers/helpers";
+import React from "react";
+import { useRouter } from "next/navigation";
+import { auth } from "../../../../firebaseConfig";
+import { SetVendor } from "@/reduxStore/slices/userSlice";
 
 export default function Header() {
+  const dispatch = useAppDispatch();
+  const user = useUser();
+  const vendors = useVendors();
+  const navigator = useRouter();
+
+  const [vendor, setVendor] = React.useState<any>();
+
+  useEffect(() => {
+    console.log({ 1234: vendors });
+  }, [vendors]);
+
+  const signOut = () => {
+    auth.signOut();
+    navigator.push("/register");
+  };
+
+  const onStoreSelect = (storeId: string) => {
+    console.log({ storeId });
+    setVendor(storeId);
+    dispatch(SetVendor({ id: storeId }));
+    $writeOnLocal("vendor", { id: storeId });
+  };
+
   return (
     <article>
       <div className="border-b border-gray-400 flex  justify-between items-end pt-1 pb-3 lg:pb-5  px-2  ">
@@ -37,8 +76,19 @@ export default function Header() {
         <article className="flex items-center lg:items-end mb-1 lg:mb-0">
           <section className="relative   lg:flex w-full max-w-[24rem] store-selector hidden">
             <Image src={logo_sm} className="absolute left-7 pt-1   w-5" alt="Small Logo" />
-            <Select label="Select Store" size="md" className="" placeholder="Select Store">
-              <Option>Option 1</Option>
+            <Select
+              label="Select Store"
+              size="md"
+              value={vendor}
+              className=""
+              placeholder="Select Store"
+              onChange={(value: any) => onStoreSelect(value)}
+            >
+              {vendors.map((vendor, index) => (
+                <Option key={vendor.id} value={vendor.id}>
+                  {vendor.id}
+                </Option>
+              ))}
             </Select>
           </section>
 
@@ -68,28 +118,67 @@ export default function Header() {
           {/* End Icons */}
 
           {/* profile */}
-          <section className="border border-gray-400 rounded-lg py-1 px-1 lg:flex justify-between items-center min-w-52 hidden">
-            <nav className="flex">
-              <img src={imgSRC} className="object-cover  w-8 h-8 rounded me-1"></img>
-              <nav>
-                <h5 className="text-xs font-semibold text-gray-800 text-nowrap">Wassim Hussein</h5>
-                <h4 className="text-xs text-gray-700">Admin</h4>
-              </nav>
-            </nav>
-            <span className="px-2">
-              <Chevron />
-            </span>
-          </section>
 
-          <section className="lg:hidden flex items-center">
-            <nav className="px-3">
-              <Separator />
-            </nav>
-            <img
-              src={imgSRC}
-              className="object-cover rounded-full aspect-square min-w-6 min-h-6 max-w-6 max-h-6 "
-            ></img>
-          </section>
+          <Menu
+            animate={{
+              mount: { y: 0 },
+              unmount: { y: 25 },
+            }}
+          >
+            <MenuHandler>
+              <section className="border cursor-pointer border-gray-400 rounded-lg py-1 px-1 lg:flex justify-between items-center min-w-52 hidden">
+                <nav className="flex">
+                  <img src={imgSRC} className="object-cover  w-8 h-8 rounded me-1"></img>
+                  <nav>
+                    <h5 className="text-xs font-semibold text-gray-800 text-nowrap">
+                      {$toTitleCase(user?.name)}
+                    </h5>
+                    <h4 className="text-xs text-gray-700">{user?.isAdmin ? "Admin" : ""}</h4>
+                  </nav>
+                </nav>
+                <span className="px-2">
+                  <Chevron />
+                </span>
+              </section>
+            </MenuHandler>
+            <MenuList className="p-1">
+              <MenuItem
+                onClick={() => signOut()}
+                className="flex items-center gap-2  text-danger hover:text-danger hover:bg-danger-light text-xs"
+              >
+                <OutIcon className="w-4 h-4" />
+                Sign Out
+              </MenuItem>
+            </MenuList>
+          </Menu>
+
+          <Menu
+            animate={{
+              mount: { y: 0 },
+              unmount: { y: 25 },
+            }}
+          >
+            <MenuHandler>
+              <section className="lg:hidden flex items-center">
+                <nav className="px-3">
+                  <Separator />
+                </nav>
+                <img
+                  src={imgSRC}
+                  className="object-cover rounded-full aspect-square min-w-6 min-h-6 max-w-6 max-h-6 "
+                ></img>
+              </section>
+            </MenuHandler>
+            <MenuList className="p-1">
+              <MenuItem
+                onClick={() => signOut()}
+                className="flex items-center gap-2  text-danger hover:text-danger hover:bg-danger-light text-xs"
+              >
+                <OutIcon className="w-4 h-4" />
+                Sign Out
+              </MenuItem>
+            </MenuList>
+          </Menu>
 
           {/* end profile */}
         </article>
@@ -99,7 +188,11 @@ export default function Header() {
         <section className="relative sm-store-selector max-w-[10rem]">
           <Image src={logo_sm} className="absolute left-4 pt-1  w-5" alt="Small Logo" />
           <Select label="Select Store" size="md" className="" placeholder="Select Store">
-            <Option>Option 1</Option>
+            {vendors.map((vendor, index) => (
+              <Option key={vendor.id} value={vendor.id}>
+                {vendor.id}
+              </Option>
+            ))}
           </Select>
         </section>
 

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Outfit, Sour_Gummy } from "next/font/google"; // Import the new font
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import AuthService from "./config/auth/auth";
+import StoreProvider from "@/reduxStore/storeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,8 +42,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${sourGummy.variable} antialiased`} // Add the new font variable
       >
-        <Toaster position="top-right" containerStyle={{ zIndex: 99999 }} />
-        {children}
+        <StoreProvider>
+          <Toaster position="top-right" containerStyle={{ zIndex: 99999 }} />
+          <AuthService />
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );

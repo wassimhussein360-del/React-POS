@@ -1,5 +1,5 @@
 import { Typography } from "@material-tailwind/react";
-import { Card, CardBody, CardFooter, CardHeader } from "@material-tailwind/react";
+import { Card, CardBody, CardHeader } from "@material-tailwind/react";
 
 export default function CategorySkeleton() {
   return (

@@ -20,3 +20,20 @@ export function $getSingularOrPlural(text: string, quantity: number): string {
   }
   return text;
 }
+
+export function $toTitleCase(text: any): string {
+  if (!text && typeof text !== "string") return text;
+  return text
+    .split(" ")
+    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+export function $writeOnLocal(key: string, value: any): void {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+export function $getFromLocal(key: string): any {
+  const item = localStorage.getItem(key);
+  return item ? JSON.parse(item) : null;
+}
