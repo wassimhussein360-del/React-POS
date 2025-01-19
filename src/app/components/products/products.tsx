@@ -1,21 +1,26 @@
 import { Chevron } from "@/assets/icons";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import SingleProduct from "./singleProduct";
 import { Item, Modifier } from "@/app/abstraction/types";
 import FirestoreService from "@/servies/firestoreService";
 import ProductSkeleton from "./productSkeletone";
 
-interface ProductProps {}
+interface ProductProps {
+  emitProducts: React.Dispatch<React.SetStateAction<Item[]>>;
+}
 
-const Products: React.FC<ProductProps> = ({}) => {
-  const [products, setProducts] = React.useState<Item[]>([]);
+const Products: React.FC<ProductProps> = ({ emitProducts }) => {
+  const [products, setProducts] = useState<Item[]>([]);
   useEffect(() => {
     FirestoreService.getSubcollection("vendors", "UVCVz6a9GWLzuRGnGVfx", "products").then(
       (fetchedProducts) => {
-        setProducts(formatProducts(fetchedProducts));
+        const formattedProducts = formatProducts(fetchedProducts);
+        setProducts(formattedProducts);
+        emitProducts(formattedProducts);
       }
     );
   }, []);
+
   return (
     <article>
       <section className="flex justify-between items-center mb-4">
@@ -85,6 +90,7 @@ const formatProducts = (products: any[]): Item[] => {
             }) || [],
 
         category: product.categories.map((cat: any) => cat.name.en).join(", "),
+        categoryId: product.categories.map((cat: any) => cat.id).join(", "),
         image: product.images[0].url,
       };
     });

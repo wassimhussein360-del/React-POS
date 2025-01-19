@@ -42,7 +42,6 @@ const cartSlice = createSlice({
     },
     RemoveItem: (state, action) => {
       const { id, key } = action.payload;
-      console.log({ key, id });
 
       const hasKey = key !== undefined; // Ensure `0` is treated as a valid key
 
@@ -67,10 +66,8 @@ const cartSlice = createSlice({
       const item = state.items.find((item) =>
         key ? item.key === action.payload.key : item.id === action.payload.id
       );
-      console.log({ item });
 
       const incOrDecQun = (item?.quantity as number) - action.payload.quantity;
-      console.log(incOrDecQun);
 
       if (item) item.quantity = action.payload.quantity;
 

@@ -14,6 +14,7 @@ export type Item = {
   discount?: Discount;
   modifiers: any[];
   category: string;
+  categoryId: string;
   image: string;
 };
 
@@ -32,4 +33,12 @@ export type Modifier = {
   min?: number;
   max?: number;
   options: ModifierOption[];
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  image: string;
+  quantity: number;
+  products: Item[];
 };

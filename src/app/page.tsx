@@ -9,9 +9,12 @@ import "./style.css";
 import Products from "./components/products/products";
 import StoreProvider from "../reduxStore/storeProvider";
 import { Toaster } from "react-hot-toast";
+import { Item } from "./abstraction/types";
 
 export default function Home() {
   const [openCart, setOpenCart] = useState(true);
+  const [allProducts, setAllProducts] = useState<Item[]>([]);
+
   return (
     <StoreProvider>
       <Toaster position="top-right" containerStyle={{ zIndex: 99999 }} />
@@ -20,9 +23,9 @@ export default function Home() {
         <SubHeader />
         <article className="flex justify-between ">
           <section className={`p-5 md:p-10 w-full   ${openCart && "hidden md:block"}`}>
-            <Categories />
+            <Categories products={allProducts} />
             <br />
-            <Products />
+            <Products emitProducts={setAllProducts} />
           </section>
           <CartInfo className={`${openCart || "hidden md:block"}`} />
         </article>

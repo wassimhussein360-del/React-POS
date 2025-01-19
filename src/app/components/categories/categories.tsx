@@ -1,12 +1,24 @@
 import { Chevron } from "@/assets/icons";
 import SingleCategoryCard from "./singleCategoryCard";
 import allCategoriesIcon from "@/assets/images/categories.png";
+import { useEffect, useState } from "react";
+import { Category, Item } from "@/app/abstraction/types";
+import FirestoreService from "@/servies/firestoreService";
 
-const Categories: React.FC<any> = ({}) => {
-  const totalCategories = () => {
-    const quantities = categories.map((cat) => cat.quantity);
-    return quantities.reduce((sum, quantity) => sum + quantity);
-  };
+const Categories: React.FC<{ products: Item[] }> = ({ products }) => {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    if (products.length) {
+      FirestoreService.getSubcollection("vendors", "UVCVz6a9GWLzuRGnGVfx", "categories").then(
+        (fetchedCategories) => {
+          const formattedCategories: Category[] = formatCategories(fetchedCategories, products);
+          setCategories(formattedCategories);
+        }
+      );
+    }
+  }, [products]);
+
   return (
     <article className="">
       <section className="flex justify-between items-center mb-4">
@@ -24,7 +36,7 @@ const Categories: React.FC<any> = ({}) => {
         <SingleCategoryCard
           category={{
             name: "All Categories",
-            quantity: totalCategories(),
+            quantity: products.length,
             image: "",
           }}
         />
@@ -38,28 +50,21 @@ const Categories: React.FC<any> = ({}) => {
 
 export default Categories;
 
-const categories = [
-  {
-    name: "Boukhour",
-    image:
-      "https://daralsmow.com/wp-content/uploads/2023/03/%D8%A8%D8%AE%D9%88%D8%B1-%D8%A7%D9%84%D9%88%D8%B1%D8%AF-%D8%A7%D9%84%D8%B7%D8%A7%D8%A6%D9%81%D9%8A-%D9%85%D8%B9-%D9%85%D9%83%D9%88%D9%86%D8%A7%D8%AA.jpg",
-    quantity: 120,
-  },
-  {
-    name: "Perfumes",
-    image:
-      "https://static.vecteezy.com/system/resources/previews/035/940/256/non_2x/ai-generated-perfume-glass-isolated-on-transparent-background-free-png.png",
-    quantity: 200,
-  },
-  {
-    name: "Mubkhars",
-    image:
-      "https://daralteeb.com.kw/wp-content/uploads/2020/03/Hair-Brazier-Black-e1584383449412.jpg",
-    quantity: 150,
-  },
-  {
-    name: "Oud",
-    image: "https://www.cotebougie.com/blog/wp-content/uploads/2022/03/diffuseur-oud-1.jpg",
-    quantity: 80,
-  },
-];
+function formatCategories(categories: any[], allProducts: Item[]): Category[] {
+  return categories
+    .filter((cat) => cat.active)
+    .filter((cat) => {
+      const relatedProducts = allProducts.filter((pr) => pr.categoryId.includes(cat.id));
+      return relatedProducts.length > 0;
+    })
+    .map((cat) => {
+      const relatedProducts = allProducts.filter((pr) => pr.categoryId.includes(cat.id));
+      return {
+        id: cat.id,
+        name: cat.name.en,
+        image: cat.images?.length ? cat.images[0].url : "",
+        quantity: relatedProducts.length,
+        products: relatedProducts,
+      };
+    });
+}

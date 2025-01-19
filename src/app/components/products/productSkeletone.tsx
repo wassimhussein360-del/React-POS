@@ -6,16 +6,12 @@ export default function ProductSkeleton() {
     <Card
       className=" animate-pulse aspect-[4/5] flex flex-col items-center p-2"
       placeholder={undefined}
-      onPointerEnterCapture={undefined}
-      onPointerLeaveCapture={undefined}
     >
       <CardHeader
         shadow={false}
         floated={false}
         className="relative grid m-0   place-items-center bg-gray-300 w-[90%] aspect-square object-cover rounded-xl"
         placeholder={undefined}
-        onPointerEnterCapture={undefined}
-        onPointerLeaveCapture={undefined}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -32,12 +28,7 @@ export default function ProductSkeleton() {
           />
         </svg>
       </CardHeader>
-      <CardBody
-        placeholder={undefined}
-        onPointerEnterCapture={undefined}
-        onPointerLeaveCapture={undefined}
-        className="p-0 w-full pt-5"
-      >
+      <CardBody placeholder={undefined} className="p-0 w-full pt-5">
         <Typography
           as="div"
           variant="h1"

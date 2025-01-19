@@ -28,7 +28,6 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
         quantity: matchings.reduce((sum, prd) => sum + prd.quantity, 0),
         stock: matchings[0].stock,
       };
-      console.log({ totals });
       if (matchings.length) setItemsTotals(totals);
     } else {
       setItemsTotals({
@@ -36,7 +35,7 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
         stock: 0,
       });
     }
-  }, [items]);
+  }, [items, product]);
 
   return (
     <Badge
