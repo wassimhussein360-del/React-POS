@@ -37,3 +37,7 @@ export function $getFromLocal(key: string): any {
   const item = localStorage.getItem(key);
   return item ? JSON.parse(item) : null;
 }
+
+export function $getImgSrc(vendorId: string, imageName: String, xParams: string): any {
+  return `https://static.menasa.io/${vendorId}/${imageName}?${xParams}&auto=compress`;
+}

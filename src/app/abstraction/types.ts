@@ -49,3 +49,9 @@ export type User = {
   email: string;
   isAdmin: string;
 };
+
+export type Vendor = {
+  id: string;
+  logo: string;
+  name: string;
+};

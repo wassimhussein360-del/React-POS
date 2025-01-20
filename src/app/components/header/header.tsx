@@ -25,11 +25,12 @@ import Image from "next/image";
 import "./header.css";
 import { useAppDispatch, useUser, useVendor, useVendors } from "@/reduxStore/hooks";
 import { useEffect } from "react";
-import { $toTitleCase, $writeOnLocal } from "@/app/helpers/helpers";
+import { $getFromLocal, $toTitleCase, $writeOnLocal } from "@/app/helpers/helpers";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "../../../../firebaseConfig";
 import { SetVendor } from "@/reduxStore/slices/userSlice";
+import { Vendor } from "@/app/abstraction/types";
 
 export default function Header() {
   const dispatch = useAppDispatch();
@@ -40,27 +41,31 @@ export default function Header() {
   const [vendor, setVendor] = React.useState<any>();
 
   useEffect(() => {
-    console.log({ 1234: vendors });
-  }, [vendors]);
+    const localVendor = $getFromLocal("vendor");
+    if (localVendor) {
+      dispatch(SetVendor(localVendor));
+      setVendor(localVendor);
+    }
+  }, []);
 
   const signOut = () => {
     auth.signOut();
     navigator.push("/register");
   };
 
-  const onStoreSelect = (storeId: string) => {
-    console.log({ storeId });
-    setVendor(storeId);
-    dispatch(SetVendor({ id: storeId }));
-    $writeOnLocal("vendor", { id: storeId });
+  const onStoreSelect = (id: Vendor) => {
+    const newVendor = vendors.find((v) => v.id === id);
+    setVendor(newVendor);
+    dispatch(SetVendor(newVendor));
+    $writeOnLocal("vendor", newVendor);
   };
 
   return (
     <article>
-      <div className="border-b border-gray-400 flex  justify-between items-end pt-1 pb-3 lg:pb-5  px-2  ">
+      <div className="border-b border-gray-400 flex  justify-between items-center py-3  px-2  ">
         <article className="flex items-end">
           {/* Logo  */}
-          <Image src={logo_lg} className="lg:w-64 w-48" alt="Logo" />
+          <img src={vendor?.logo} className="lg:w-10 rounded-xl me-2" alt="Small Logo" />
           {/* End Logo */}
 
           {/* Search */}
@@ -74,19 +79,19 @@ export default function Header() {
         </article>
 
         <article className="flex items-center lg:items-end mb-1 lg:mb-0">
-          <section className="relative   lg:flex w-full max-w-[24rem] store-selector hidden">
-            <Image src={logo_sm} className="absolute left-7 pt-1   w-5" alt="Small Logo" />
+          <section className="relative   lg:flex w-full max-w-[24rem] store-selector  hidden">
             <Select
               label="Select Store"
               size="md"
-              value={vendor}
-              className=""
+              className="flex"
+              containerProps={{ className: "flex" }}
               placeholder="Select Store"
               onChange={(value: any) => onStoreSelect(value)}
             >
-              {vendors.map((vendor, index) => (
-                <Option key={vendor.id} value={vendor.id}>
-                  {vendor.id}
+              {vendors.map((vendor: Vendor) => (
+                <Option key={vendor.id} value={vendor.id} className="flex gap-2">
+                  <img src={vendor.logo} className=" w-5 h-5" alt="Small Logo" />
+                  {vendor.name}
                 </Option>
               ))}
             </Select>

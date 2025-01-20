@@ -1,17 +1,28 @@
-import { User } from "@/app/abstraction/types";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { User, Vendor } from "@/app/abstraction/types";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserState {
   user: User | null;
   vendors: any[];
-  vendor: any;
+  vendor: Vendor | null;
+  isLoading: boolean;
 }
 
 const initialState: UserState = {
   user: null,
   vendors: [],
   vendor: null,
+  isLoading: true,
 };
+
+export const userVendorInfo = createAsyncThunk(
+  "cart/addItemAndDoSomethingElse",
+  async (userVendorInfo: UserState, { dispatch, getState }) => {
+    // You can also access the state if needed
+    const state: any = getState();
+    console.log(state);
+  }
+);
 
 const userSlice = createSlice({
   name: "user",

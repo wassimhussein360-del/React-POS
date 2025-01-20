@@ -1,5 +1,6 @@
 import { Discount, Item } from "@/app/abstraction/types";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { it } from "node:test";
 
 interface CartState {
@@ -87,3 +88,9 @@ const cartSlice = createSlice({
 export const { AddItem, RemoveItem, UpdateQuantity, AddDiscount, SetCartField, UpdateItem } =
   cartSlice.actions;
 export default cartSlice.reducer;
+
+function setCartToLocal(vendorId: string, cart: Item[]) {
+  const getLocalCarts = $getFromLocal("carts");
+  const newCarts = (getLocalCarts[vendorId] = cart);
+  $writeOnLocal("carts", newCarts);
+}

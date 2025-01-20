@@ -7,6 +7,7 @@ import FirestoreService from "@/servies/firestoreService";
 import CategorySkeleton from "./categorySkeletone";
 import { useVendor } from "@/reduxStore/hooks";
 import { formatProducts } from "../products/products";
+import { Spinner } from "@material-tailwind/react";
 
 const Categories: React.FC<{
   products: Item[];
@@ -19,30 +20,28 @@ const Categories: React.FC<{
   const vendor = useVendor();
 
   useEffect(() => {
-    if (products.length) {
-      FirestoreService.getSubcollection(
-        "vendors",
-        vendor?.id || "UVCVz6a9GWLzuRGnGVfx",
-        "categories"
-      ).then((fetchedCategories) => {
-        const formattedCategories: Category[] = formatCategories(fetchedCategories, products);
-        setCategories(formattedCategories);
-      });
+    if (products.length && vendor) {
+      FirestoreService.getSubcollection("vendors", vendor.id, "categories").then(
+        (fetchedCategories) => {
+          const formattedCategories: Category[] = formatCategories(fetchedCategories, products);
+
+          setCategories(formattedCategories);
+        }
+      );
     }
   }, [products]);
 
   useEffect(() => {
-    console.log({ selectedVendor: vendor });
+    console.log({ vendor });
 
     if (vendor?.id) {
+      setCategories([]);
       setSelectedCategory("all");
       // Fetch Products related to selected vendor
-      console.log(vendor.id);
 
       FirestoreService.getSubcollection("vendors", vendor.id, "products").then(
         (fetchedProducts) => {
           const formattedProducts = formatProducts(fetchedProducts);
-          console.log({ formattedProducts });
 
           setAllProducts(formattedProducts);
           setProducts(formattedProducts);
@@ -119,14 +118,28 @@ const Categories: React.FC<{
 export default Categories;
 
 function formatCategories(categories: any[], allProducts: Item[]): Category[] {
+  console.log({ categories });
+  console.log({ allProducts });
+
   return categories
     .filter((cat) => cat.active)
     .filter((cat) => {
-      const relatedProducts = allProducts.filter((pr) => pr.categoryId.includes(cat.id));
+      console.log({ cat });
+
+      const relatedProducts = allProducts.filter((pr) => {
+        console.log(pr.categoryId);
+        console.log(cat.id);
+        console.log("---------------------------------------");
+
+        return pr.categoryId.includes(cat.id);
+      });
+      console.log("++++++++++++++++++++");
+
       return relatedProducts.length > 0;
     })
     .map((cat) => {
       const relatedProducts = allProducts.filter((pr) => pr.categoryId.includes(cat.id));
+
       return {
         id: cat.id,
         name: cat.name.en,

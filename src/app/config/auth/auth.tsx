@@ -5,9 +5,10 @@ import { use, useEffect } from "react";
 import { auth } from "../../../../firebaseConfig";
 import FirestoreService from "@/servies/firestoreService";
 import toast from "react-hot-toast";
-import { User } from "@/app/abstraction/types";
+import { User, Vendor } from "@/app/abstraction/types";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import { SetUser, SetVendors } from "@/reduxStore/slices/userSlice";
+import { $getImgSrc } from "@/app/helpers/helpers";
 
 const AuthService = () => {
   const dispatch = useAppDispatch();
@@ -22,8 +23,8 @@ const AuthService = () => {
               dispatch(SetUser(formattedUser));
               if (formattedUser.isAdmin) {
                 FirestoreService.getCollection("vendors").then((vendors) => {
-                  console.log({ vendors });
                   const formattedVendors = formatVendors(vendors);
+
                   dispatch(SetVendors(formattedVendors));
                 });
               }
@@ -45,8 +46,6 @@ const AuthService = () => {
 export default AuthService;
 
 function formatUser(user: any): User {
-  console.log({ userToFormat: user });
-
   return {
     id: user.id,
     name: `${user.firstName} ${user.lastName}`,
@@ -55,8 +54,12 @@ function formatUser(user: any): User {
   };
 }
 
-function formatVendors(vendors: any[]): any[] {
+function formatVendors(vendors: any[]): Vendor[] {
   return vendors.map((vendor) => {
-    return vendor;
+    return {
+      id: vendor.id,
+      name: vendor.name.en,
+      logo: $getImgSrc(vendor.id, vendor.logo[0], "w=500"),
+    };
   });
 }

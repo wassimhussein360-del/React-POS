@@ -1,0 +1,6 @@
+
+1. store icon and image
+2. holding a cart
+3. void a cart
+4. order tax, shipping, discount ... where from 
+5. where to hold a cart 
