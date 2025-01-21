@@ -7,7 +7,7 @@ import ActionsBtns from "./actionsBtns";
 import PaymentMethods from "./paymentMethods";
 import CartItems from "./cartItems";
 import { useState } from "react";
-import { useAppDispatch } from "@/reduxStore/hooks";
+import { useAppDispatch, useVendor } from "@/reduxStore/hooks";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
 
 interface CartItemsProps {
@@ -15,6 +15,7 @@ interface CartItemsProps {
 }
 const CartInfo = ({ className }: { className: string }) => {
   const dispatch = useAppDispatch();
+  const vendor = useVendor();
 
   return (
     <section
@@ -64,7 +65,15 @@ const CartInfo = ({ className }: { className: string }) => {
 
         <Textarea
           label="Message"
-          onChange={(e) => dispatch(SetCartField({ fieldName: "message", value: e.target.value }))}
+          onChange={(e) =>
+            dispatch(
+              SetCartField({
+                fieldName: "message",
+                value: e.target.value,
+                vendorId: vendor?.id as string,
+              })
+            )
+          }
           className="rounded-xl  max-h-[100px] bg-[#F6F6F6]"
         />
         <hr />

@@ -1,10 +1,11 @@
 import { Select, Option, Input } from "@material-tailwind/react";
 import "./cart.css";
-import { useAppDispatch } from "@/reduxStore/hooks";
+import { useAppDispatch, useVendor } from "@/reduxStore/hooks";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
 
 const PricingDetails = () => {
   const dispatch = useAppDispatch();
+  const vendor = useVendor();
 
   return (
     <section>
@@ -42,7 +43,13 @@ const PricingDetails = () => {
           className="rounded-xl text-xs"
           crossOrigin={undefined}
           onChange={(e) =>
-            dispatch(SetCartField({ fieldName: "couponCode", value: e.target.value }))
+            dispatch(
+              SetCartField({
+                fieldName: "couponCode",
+                value: e.target.value,
+                vendorId: vendor?.id as string,
+              })
+            )
           }
         />
       </section>

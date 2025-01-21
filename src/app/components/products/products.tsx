@@ -34,12 +34,13 @@ const Products: React.FC<ProductProps> = ({ products }) => {
 
 export default Products;
 
-export const formatProducts = (products: any[]): Item[] => {
+export const formatProducts = (products: any[], vendorId: string): Item[] => {
   const formattedProducts = products
     .filter((product) => product.stockQuantity > 0)
     .map((product) => {
       return {
         id: product.id,
+        vendorId: vendorId,
         name: product.name.en,
         price: product.price,
         quantity: 1,

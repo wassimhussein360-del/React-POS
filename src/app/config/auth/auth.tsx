@@ -7,8 +7,8 @@ import FirestoreService from "@/servies/firestoreService";
 import toast from "react-hot-toast";
 import { User, Vendor } from "@/app/abstraction/types";
 import { useAppDispatch } from "@/reduxStore/hooks";
-import { SetUser, SetVendors } from "@/reduxStore/slices/userSlice";
-import { $getImgSrc } from "@/app/helpers/helpers";
+import { SetUser, SetVendor, SetVendors } from "@/reduxStore/slices/userSlice";
+import { $getFromLocal, $getImgSrc, $writeOnLocal } from "@/app/helpers/helpers";
 
 const AuthService = () => {
   const dispatch = useAppDispatch();
@@ -16,6 +16,8 @@ const AuthService = () => {
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        console.log({ user });
+
         FirestoreService.getDocument("users", "SD2lFSMXvpRkUKiyzIyt7brzXs22")
           .then((authUser) => {
             if (authUser) {
@@ -25,10 +27,13 @@ const AuthService = () => {
                 FirestoreService.getCollection("vendors").then((vendors) => {
                   const formattedVendors = formatVendors(vendors);
 
+                  const localVendor = $getFromLocal("vendor");
+                  const vendorToSave = localVendor || formattedVendors[2];
+                  if (!localVendor) $writeOnLocal("vendor", vendorToSave);
+                  dispatch(SetVendor(vendorToSave));
                   dispatch(SetVendors(formattedVendors));
                 });
               }
-              toast.success(`Welcome back ${authUser.name} 🤗`);
             }
           })
           .catch((error) => {

@@ -16,6 +16,7 @@ export type Item = {
   category: string;
   categoryId: string;
   image: string;
+  vendorId: string;
 };
 
 export type ModifierOption = {

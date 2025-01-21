@@ -36,17 +36,18 @@ export default function Header() {
   const dispatch = useAppDispatch();
   const user = useUser();
   const vendors = useVendors();
+  const globalVendor = useVendor();
   const navigator = useRouter();
 
   const [vendor, setVendor] = React.useState<any>();
 
   useEffect(() => {
-    const localVendor = $getFromLocal("vendor");
-    if (localVendor) {
-      dispatch(SetVendor(localVendor));
-      setVendor(localVendor);
+    console.log("xxxxxxxxxxxxxxxxxxxxxxx");
+
+    if (!vendor && globalVendor) {
+      setVendor(globalVendor);
     }
-  }, []);
+  }, [globalVendor]);
 
   const signOut = () => {
     auth.signOut();

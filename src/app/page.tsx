@@ -42,9 +42,7 @@ export default function Home() {
           <br />
           <Products products={categorizedProducts} />
         </section>
-        <CartInfo
-          className={`${!openCart ? "hidden md:block" : cartItems.length ? "" : "hidden"}`}
-        />
+        <CartInfo className={`${!openCart ? "hidden md:block" : ""}`} />
       </article>
     </div>
   );

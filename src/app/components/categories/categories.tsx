@@ -41,7 +41,7 @@ const Categories: React.FC<{
 
       FirestoreService.getSubcollection("vendors", vendor.id, "products").then(
         (fetchedProducts) => {
-          const formattedProducts = formatProducts(fetchedProducts);
+          const formattedProducts = formatProducts(fetchedProducts, vendor.id);
 
           setAllProducts(formattedProducts);
           setProducts(formattedProducts);
