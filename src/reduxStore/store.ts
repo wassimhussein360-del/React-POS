@@ -7,6 +7,7 @@ export const makeStore = () => {
     reducer: {
       cart: cartReducer,
       user: userReducer, // Add the user reducer
+      // products: productsReducer, // Add the products reducer
     },
   });
 };

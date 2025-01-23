@@ -9,6 +9,8 @@ import CartItems from "./cartItems";
 import { useState } from "react";
 import { useAppDispatch, useVendor } from "@/reduxStore/hooks";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
+import React from "react";
+import CustomerAndProductSelection from "./customerSelection";
 
 interface CartItemsProps {
   subtotal: number;
@@ -31,29 +33,7 @@ const CartInfo = ({ className }: { className: string }) => {
       <br />
 
       {/* customer info */}
-      <section>
-        <h6 className="text-sm">Customers Information</h6>
-        <div className="my-3 flex ">
-          <Select
-            label="Walk in Customer"
-            size="md"
-            className="rounded-xl"
-            placeholder="Select Store"
-          >
-            <Option>Option 1</Option>
-          </Select>
-          <Button
-            className="ms-2 bg-primary flex items-center justify-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
-            size="sm"
-            placeholder={undefined}
-          >
-            <Plus />
-          </Button>
-        </div>
-        <Select label="Search Products" size="md" className="rounded-xl" placeholder="Select Store">
-          <Option>Option 1</Option>
-        </Select>
-      </section>
+      <CustomerAndProductSelection />
       {/* end customer info */}
 
       <br />

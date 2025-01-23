@@ -1,11 +1,14 @@
 import { CardIcon, HoldIcon, TrashIcon } from "@/assets/icons";
-import { useCartItems } from "@/reduxStore/hooks";
+import { useAppDispatch, useCartItems, useVendor } from "@/reduxStore/hooks";
 import { Button } from "@material-tailwind/react";
 import { useState } from "react";
 import CartHolder from "./dialogs/cartHolder";
+import { VoidCart } from "@/reduxStore/slices/cartSlice";
 
 const ActionsBtns = () => {
   const cartItems = useCartItems();
+  const vendor = useVendor();
+  const dispatch = useAppDispatch();
   const [openCartHolder, setOpenCartHolder] = useState(false);
 
   return (
@@ -22,6 +25,7 @@ const ActionsBtns = () => {
           className="normal-case flex justify-center rounded gap-1 w-1/3 bg-danger "
           placeholder={undefined}
           disabled={cartItems.length == 0}
+          onClick={() => dispatch(VoidCart({ vendorId: vendor?.id as string }))}
         >
           <TrashIcon />
           Void

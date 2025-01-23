@@ -1,3 +1,4 @@
+import { $generateRandomNumber } from "@/app/helpers/helpers";
 import { HoldIcon } from "@/assets/icons";
 import { useAppDispatch, useVendor } from "@/reduxStore/hooks";
 import { HoldCart } from "@/reduxStore/slices/cartSlice";
@@ -24,7 +25,7 @@ const CartHolder: React.FC<DiscountDialogProps> = ({ open, handleOpen }) => {
           setHoldingName("");
           handleOpen();
           resolve(true);
-        }, 1000); // Simulate a 5-second delay
+        }, $generateRandomNumber(500, 3000)); // Simulate a 5-second delay
       });
     };
 

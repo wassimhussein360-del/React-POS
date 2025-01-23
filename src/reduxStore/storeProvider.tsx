@@ -10,7 +10,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     storeRef.current = makeStore();
 
     //TODO Dispatch an action to the cart slice
-    // items.forEach((item) => storeRef.current!.dispatch(AddItem(item)));
+    //  storeRef.current!.dispatch(AddItem(item))
   }
 
   return <Provider store={storeRef.current}>{children}</Provider>;

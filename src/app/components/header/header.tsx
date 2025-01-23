@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Bag,
   BellIcon,
@@ -5,7 +7,7 @@ import {
   Flag,
   MainIcon,
   OutIcon,
-  SearchIcons,
+  SearchIcon,
   Separator,
   SettingsIcon,
 } from "@/assets/icons";
@@ -31,6 +33,7 @@ import { useRouter } from "next/navigation";
 import { auth } from "../../../../firebaseConfig";
 import { SetVendor } from "@/reduxStore/slices/userSlice";
 import { Vendor } from "@/app/abstraction/types";
+import { ActivateCart } from "@/reduxStore/slices/cartSlice";
 
 export default function Header() {
   const dispatch = useAppDispatch();
@@ -42,10 +45,17 @@ export default function Header() {
   const [vendor, setVendor] = React.useState<any>();
 
   useEffect(() => {
-    console.log("xxxxxxxxxxxxxxxxxxxxxxx");
-
     if (!vendor && globalVendor) {
       setVendor(globalVendor);
+    }
+    if (globalVendor) {
+      let getLocalCarts = $getFromLocal("carts");
+      if (!getLocalCarts) return;
+      const foundCart = getLocalCarts[globalVendor.id]?.find((_cart: any) => _cart.active);
+
+      if (foundCart) {
+        dispatch(ActivateCart({ cart: foundCart }));
+      }
     }
   }, [globalVendor]);
 
@@ -66,14 +76,22 @@ export default function Header() {
       <div className="border-b border-gray-400 flex  justify-between items-center py-3  px-2  ">
         <article className="flex items-end">
           {/* Logo  */}
-          <img src={vendor?.logo} className="lg:w-10 rounded-xl me-2" alt="Small Logo" />
+          <img
+            src={vendor?.logo}
+            className="lg:w-10 rounded-xl me-2 cursor-pointer"
+            alt="Small Logo"
+            onClick={() => {
+              navigator.push("/");
+            }}
+          />
+
           {/* End Logo */}
 
           {/* Search */}
           <section className="relative lg:flex w-96 hidden">
             <Input label="Search" size="md" className="  " crossOrigin={undefined} />
             <div className="!absolute right-2 top-2 ">
-              <SearchIcons></SearchIcons>
+              <SearchIcon></SearchIcon>
             </div>
           </section>
           {/* End Search */}
@@ -204,7 +222,7 @@ export default function Header() {
 
         <section className="flex gap-2 items-center me-2">
           <div className="">
-            <SearchIcons></SearchIcons>
+            <SearchIcon></SearchIcon>
           </div>
           <Badge content="5" className="max-w-[20px] min-w-[20px] max-h-[20px] min-h-[20px]">
             <Bag />

@@ -1,9 +1,3 @@
-.flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Style for all scrollers to be thin, light, and have margin */
 ::-webkit-scrollbar {
   width: 5px;

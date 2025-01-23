@@ -20,15 +20,22 @@ const HoldingCartsDrawer = () => {
       const holdingCarts = currentVendorCarts.filter((cart: any) => cart.holdingName);
       if (holdingCarts.length) {
         setHoldenCars(holdingCarts);
+      } else {
+        setHoldenCars([]);
       }
     }
-  }, [vendor]);
+  }, [cart, vendor]);
 
   const openDrawerRight = () => setOpenRight(true);
   const closeDrawerRight = () => setOpenRight(false);
 
   const handleCartSelection = (cartKey: string) => {
-    dispatch(HoldCart({ holdingName: "", vendorId: vendor?.id as string, cartKey }));
+    // This will be the holding nam eof the existing cart
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString()}`;
+
+    dispatch(HoldCart({ holdingName: formattedDate, vendorId: vendor?.id as string, cartKey }));
+
     closeDrawerRight();
   };
 

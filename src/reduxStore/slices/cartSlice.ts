@@ -6,6 +6,7 @@ interface CartState {
   key: string | null;
   items: Item[];
   holdingName: string;
+  active: boolean;
   [key: string]: any;
 }
 
@@ -13,6 +14,7 @@ const initialState: CartState = {
   items: [] as Item[],
   key: null,
   holdingName: "",
+  active: false,
 };
 
 const cartSlice = createSlice({
@@ -20,7 +22,10 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     AddItem: (state, action) => {
-      if (!state.items.length) state.key = new Date().getTime().toString();
+      if (!state.items.length) {
+        state.key = new Date().getTime().toString();
+        state.active = true;
+      }
 
       state.items.push({ ...action.payload });
 
@@ -83,21 +88,26 @@ const cartSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; quantity: number; key?: number }>
     ) => {
-      const key = action.payload.key;
-      const item = state.items.find((item) =>
-        key ? item.key === action.payload.key : item.id === action.payload.id
-      );
+      const { id, quantity, key } = action.payload;
 
-      const incOrDecQun = (item?.quantity as number) - action.payload.quantity;
+      console.log({ id, quantity, key });
 
-      if (item) item.quantity = action.payload.quantity;
+      const item = state.items.find((item) => (key ? item.key === key : item.id === id));
+      const previousQuantity = item?.quantity as number;
+      console.log({ item: item?.quantity });
+
+      const incOrDecQun = previousQuantity - quantity;
+
+      console.log({ incOrDecQun });
+
+      if (item) item.quantity = quantity;
 
       state.items = state.items.map((itm) =>
-        itm.id == action.payload.id ? { ...itm, stock: itm.stock + incOrDecQun } : itm
+        itm.id == id ? { ...itm, stock: itm.stock + incOrDecQun } : itm
       );
 
       // ? Save to local storage
-      setCartToLocal(item?.id as string, state);
+      setCartToLocal(item?.vendorId as string, state);
     },
     AddDiscount: (state, action: PayloadAction<{ id: string; discount: Discount }>) => {
       const item = state.items.find((item) => item.id === action.payload.id);
@@ -106,7 +116,7 @@ const cartSlice = createSlice({
       }
 
       // ? Save to local storage
-      setCartToLocal(item?.id as string, state);
+      setCartToLocal(item?.vendorId as string, state);
     },
 
     ResetCart: (state, action: PayloadAction<{ vendorId: string }>) => {
@@ -124,40 +134,48 @@ const cartSlice = createSlice({
       state,
       action: PayloadAction<{ vendorId: string; holdingName: string; cartKey?: string }>
     ) => {
-      console.log(action.payload.cartKey);
-      console.log(action.payload.holdingName);
-      console.log(action.payload.vendorId);
+      const { vendorId, holdingName, cartKey } = action.payload;
 
-      const vendorId = action.payload.vendorId;
-      if (action.payload.cartKey) {
-        console.log(1);
+      if (cartKey) {
+        // If `cartKey` is provided and `state.items` is not empty, clear the cart first
+        if (state.items.length > 0) {
+          state.holdingName = holdingName;
+          state.active = false;
+          setCartToLocal(vendorId, state); // Save current state to local storage
+          state.items = [];
+          Object.keys(state).forEach((key) => {
+            if (key !== "items") delete state[key];
+          });
+        }
 
-        const holdenCart = getHoldenCart(vendorId, action.payload.cartKey);
-        console.log({ holdenCart });
-
-        state.items = holdenCart.items;
-        state.key = holdenCart.key;
-        state.holdingName = holdenCart.holdingName;
-        Object.keys(holdenCart).forEach((key) => {
-          if (key !== "items" && key !== "key" && key !== "holdingName") {
-            state[key] = holdenCart[key];
-          }
-        });
+        // Load the holden cart
+        const holdenCart = getHoldenCart(vendorId, cartKey);
+        holdenCart.active = true;
+        Object.assign(state, holdenCart);
       } else {
-        console.log(2);
-
-        state.holdingName = action.payload.holdingName;
-
-        // ? Save to local storage
-        setCartToLocal(vendorId, state);
-
+        // Handle saving the current cart
+        state.holdingName = holdingName;
+        setCartToLocal(vendorId, state); // Save current state to local storage
         state.items = [];
         Object.keys(state).forEach((key) => {
-          if (key !== "items") {
-            delete state[key];
-          }
+          if (key !== "items") delete state[key];
         });
       }
+
+      // ? Save to local storage
+      setCartToLocal(action.payload.vendorId, state);
+    },
+    VoidCart: (state, action: PayloadAction<{ vendorId: string }>) => {
+      const key = state.key as string;
+      state.items = [];
+      Object.keys(state).forEach((key) => {
+        if (key !== "items") delete state[key];
+      });
+
+      deleteCartFromLocal(action.payload.vendorId, key);
+    },
+    ActivateCart: (state, action: PayloadAction<{ cart: CartState }>) => {
+      Object.assign(state, action.payload.cart);
     },
   },
 });
@@ -171,6 +189,8 @@ export const {
   UpdateItem,
   ResetCart,
   HoldCart,
+  VoidCart,
+  ActivateCart,
 } = cartSlice.actions;
 export default cartSlice.reducer;
 
@@ -196,12 +216,12 @@ function setCartToLocal(vendorId: string, cart: CartState) {
     let updateCarts = getLocalCarts[vendorId]
       .map((_cart: CartState) => {
         if (_cart.key === cart.key) {
-          // delete cart if cart.items.length === 0
-          if (cart.items.length === 0) {
-            console.log(["cart is empty"]);
+          //TODO delete cart if cart.items.length === 0 (optional)
+          // if (cart.items.length === 0) {
+          //   console.log(["cart is empty"]);
 
-            return null;
-          }
+          //   return null;
+          // }
           return cart;
         }
         return _cart;
@@ -213,7 +233,16 @@ function setCartToLocal(vendorId: string, cart: CartState) {
   $writeOnLocal("carts", getLocalCarts);
 }
 
-function getHoldenCart(vendorId: string, cartKey: string) {
+function deleteCartFromLocal(vendorId: string, cartKey: string) {
+  let getLocalCarts = $getFromLocal("carts");
+  const findCartIndex = getLocalCarts[vendorId].findIndex((cart: CartState) => cart.key == cartKey);
+  if (findCartIndex !== -1) {
+    getLocalCarts[vendorId].splice(findCartIndex, 1);
+  }
+  $writeOnLocal("carts", getLocalCarts);
+}
+
+export function getHoldenCart(vendorId: string, cartKey: string) {
   let getLocalCarts = $getFromLocal("carts");
 
   let cartToReturn: CartState = { key: "", items: [], holdingName: "" };

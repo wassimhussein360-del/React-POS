@@ -56,3 +56,8 @@ export type Vendor = {
   logo: string;
   name: string;
 };
+
+export type customer = {
+  id: string;
+  name: string;
+};

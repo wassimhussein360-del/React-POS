@@ -34,7 +34,7 @@ const CartItems: React.FC<CartItemsProps> = ({}) => {
         </section>
       )}
       {items.map((itm, i) => (
-        <SingleItem key={itm.id} item={itm} index={i} />
+        <SingleItem key={i} item={itm} index={i} />
       ))}
     </article>
   );
