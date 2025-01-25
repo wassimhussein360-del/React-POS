@@ -1,11 +1,25 @@
 import { useState, useEffect, use } from "react";
 import { Card, Input, Button, Typography, Spinner } from "@material-tailwind/react";
 import toast from "react-hot-toast";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth } from "../../../firebaseConfig";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/reduxStore/hooks";
+import { SetLoader } from "@/reduxStore/slices/userSlice";
 
 export default function LogIn() {
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(SetLoader(false));
+  }, []);
+
   const router = useRouter();
 
   // State for form inputs
@@ -69,18 +83,52 @@ export default function LogIn() {
 
   const logInWithGoogle = () => {
     const googleProvider = new GoogleAuthProvider();
-    googleProvider.setCustomParameters({
-      tenant_id: "admin-eufqf", // Replace with your tenant ID
-    });
+
     signInWithPopup(auth, googleProvider)
       .then((result) => {
         const user = result.user;
+
+        console.log({ user });
 
         toast.success("Google Sign-In successful!");
         router.push("/");
       })
       .catch((error) => {
         toast.error("Google Sign-In failed!");
+      });
+  };
+
+  const logInWithApple = () => {
+    const appleProvider = new OAuthProvider("apple.com");
+
+    signInWithPopup(auth, appleProvider)
+      .then((result) => {
+        const user = result.user;
+
+        console.log({ user });
+
+        toast.success("Apple Sign-In successful!");
+        router.push("/");
+      })
+      .catch((error) => {
+        toast.error("Apple Sign-In failed!");
+        console.error("Error:", error.message);
+      });
+  };
+
+  const logInWithUsernameAndPassword = (email: string, password: string) => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((result) => {
+        const user = result.user;
+
+        console.log({ user });
+
+        toast.success("Login successful!");
+        router.push("/");
+      })
+      .catch((error) => {
+        toast.error("Login failed! Please check your credentials.");
+        console.error("Error:", error.message);
       });
   };
 
@@ -119,6 +167,7 @@ export default function LogIn() {
 
             <Button
               size="sm"
+              onClick={() => logInWithApple()}
               className="flex items-center justify-center gap-3 w-full bg-transparent border border-white/30"
             >
               <img
@@ -209,7 +258,8 @@ export default function LogIn() {
         <Button
           type="submit"
           className="mt-6  bg-secondary flex items-center justify-center gap-3 text-primary"
-          disabled={submitCounter > 1}
+          disabled={submitCounter > 1 || !email || !password}
+          onClick={() => logInWithUsernameAndPassword(email, password)}
           fullWidth
         >
           {submitCounter > 1 ? (

@@ -55,9 +55,19 @@ export type Vendor = {
   id: string;
   logo: string;
   name: string;
+  apiKey: string;
 };
 
 export type customer = {
   id: string;
   name: string;
+};
+
+export type AnalyticsVariables = {
+  limit?: number;
+  page?: number;
+  sortBy?: string[];
+  query?: any;
+  filter?: any;
+  interval?: string;
 };

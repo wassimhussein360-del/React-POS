@@ -54,16 +54,12 @@ const CustomerAndProductSelection = () => {
 
   useEffect(() => {
     if (!vendor || productSearch.length < 3) return;
-    console.log({ productSearch });
     setProductLoading(true);
 
     algoliaSearch(vendor.id, "products", productSearch)
       .then((productRes) => {
-        console.log(productRes);
-
         const formattedProducts = formatProducts(productRes, vendor.id);
         setProducts(formattedProducts);
-        console.log({ formattedProducts });
       })
       .catch((error) => {
         console.error(error);
@@ -75,13 +71,11 @@ const CustomerAndProductSelection = () => {
 
   useEffect(() => {
     if (!vendor || customerSearch.length < 3) return;
-    console.log({ customerSearch });
     setCustomerLoading(true);
 
     algoliaSearch(vendor.id, "customers", customerSearch)
       .then((hits) => {
         setCustomers(hits);
-        console.log({ hits });
       })
       .catch((error) => {
         console.error(error);
@@ -101,7 +95,6 @@ const CustomerAndProductSelection = () => {
   useEffect(() => {
     const cus = cart.customer;
     const name = cus ? cus.name : "";
-    console.log({ name });
 
     setSelectedCustomerName(name);
   }, [cart]);

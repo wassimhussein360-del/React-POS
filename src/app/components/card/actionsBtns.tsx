@@ -22,7 +22,7 @@ const ActionsBtns = () => {
       </Button>
       <aside className="flex gap-3">
         <Button
-          className="normal-case flex justify-center rounded gap-1 w-1/3 bg-danger "
+          className="normal-case flex justify-center rounded gap-1 w-1/2 bg-danger "
           placeholder={undefined}
           disabled={cartItems.length == 0}
           onClick={() => dispatch(VoidCart({ vendorId: vendor?.id as string }))}
@@ -30,15 +30,9 @@ const ActionsBtns = () => {
           <TrashIcon />
           Void
         </Button>
+
         <Button
-          className="normal-case flex justify-center rounded gap-1 w-1/3 bg-primary "
-          placeholder={undefined}
-        >
-          <CardIcon />
-          Payment
-        </Button>
-        <Button
-          className="normal-case flex justify-center rounded items-center gap-1 w-1/3 bg-warning "
+          className="normal-case flex justify-center rounded items-center gap-1 w-1/2 bg-warning "
           placeholder={undefined}
           disabled={cartItems.length == 0}
           onClick={() => setOpenCartHolder(true)}

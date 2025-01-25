@@ -21,12 +21,10 @@ import {
   MenuList,
 } from "@material-tailwind/react";
 import { Select, Option } from "@material-tailwind/react";
-import logo_sm from "../../../assets/logos/logo-sm.png";
-import logo_lg from "../../../assets/logos/logo-lg.png";
-import Image from "next/image";
+
 import "./header.css";
-import { useAppDispatch, useUser, useVendor, useVendors } from "@/reduxStore/hooks";
-import { useEffect } from "react";
+import { useAppDispatch, useLoader, useUser, useVendor, useVendors } from "@/reduxStore/hooks";
+import { use, useEffect } from "react";
 import { $getFromLocal, $toTitleCase, $writeOnLocal } from "@/app/helpers/helpers";
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -41,6 +39,8 @@ export default function Header() {
   const vendors = useVendors();
   const globalVendor = useVendor();
   const navigator = useRouter();
+
+  const isLoading = useLoader();
 
   const [vendor, setVendor] = React.useState<any>();
 
@@ -60,8 +60,9 @@ export default function Header() {
   }, [globalVendor]);
 
   const signOut = () => {
+    localStorage.clear();
     auth.signOut();
-    navigator.push("/register");
+    window.location.reload();
   };
 
   const onStoreSelect = (id: Vendor) => {
@@ -71,14 +72,37 @@ export default function Header() {
     $writeOnLocal("vendor", newVendor);
   };
 
+  const getSelectVendorMenu = (className: string) => {
+    return (
+      <section className={className}>
+        <Select
+          label="Select Store"
+          className="flex"
+          placeholder="Select Store"
+          value={globalVendor?.id || ""}
+          onChange={(value: any) => onStoreSelect(value)}
+        >
+          {vendors.map((vendor: Vendor, vendorIndex) => (
+            <Option key={vendorIndex} value={vendor.id} className="flex gap-2">
+              <img src={vendor.logo} className=" w-5 h-5" alt="Small Logo" />
+              {vendor.name}
+            </Option>
+          ))}
+        </Select>
+      </section>
+    );
+  };
+
+  if (!vendor || !user) return <div className="hidden"></div>;
+
   return (
-    <article>
+    <article className={"sticky top-0 z-[9999] bg-white bg-opacity-90"}>
       <div className="border-b border-gray-400 flex  justify-between items-center py-3  px-2  ">
         <article className="flex items-end">
           {/* Logo  */}
           <img
             src={vendor?.logo}
-            className="lg:w-10 rounded-xl me-2 cursor-pointer"
+            className="lg:w-10 w-8 rounded-xl me-2 cursor-pointer"
             alt="Small Logo"
             onClick={() => {
               navigator.push("/");
@@ -86,60 +110,11 @@ export default function Header() {
           />
 
           {/* End Logo */}
-
-          {/* Search */}
-          <section className="relative lg:flex w-96 hidden">
-            <Input label="Search" size="md" className="  " crossOrigin={undefined} />
-            <div className="!absolute right-2 top-2 ">
-              <SearchIcon></SearchIcon>
-            </div>
-          </section>
-          {/* End Search */}
         </article>
 
-        <article className="flex items-center lg:items-end mb-1 lg:mb-0">
-          <section className="relative   lg:flex w-full max-w-[24rem] store-selector  hidden">
-            <Select
-              label="Select Store"
-              size="md"
-              className="flex"
-              containerProps={{ className: "flex" }}
-              placeholder="Select Store"
-              onChange={(value: any) => onStoreSelect(value)}
-            >
-              {vendors.map((vendor: Vendor) => (
-                <Option key={vendor.id} value={vendor.id} className="flex gap-2">
-                  <img src={vendor.logo} className=" w-5 h-5" alt="Small Logo" />
-                  {vendor.name}
-                </Option>
-              ))}
-            </Select>
-          </section>
-
+        <article className="flex items-center lg:items-end gap-5 mb-1 lg:mb-0 ">
           {/* Select store */}
-
-          {/* Icons */}
-          <section className="lg:mx-5 my-auto flex flex-row-reverse lg:flex-row">
-            <aside className="flex flex-row-reverse lg:flex-row">
-              <Flag />
-              <nav className="px-3">
-                <Separator />
-              </nav>
-            </aside>
-
-            <aside className="flex items-center cursor-pointer">
-              <SettingsIcon />
-              <nav className="px-3">
-                <Separator />
-              </nav>
-              <MainIcon />
-              <nav className="px-3">
-                <Separator />
-              </nav>
-              <BellIcon />
-            </aside>
-          </section>
-          {/* End Icons */}
+          {getSelectVendorMenu("relative   lg:flex w-full max-w-[24rem] store-selector  hidden ")}
 
           {/* profile */}
 
@@ -184,12 +159,9 @@ export default function Header() {
           >
             <MenuHandler>
               <section className="lg:hidden flex items-center">
-                <nav className="px-3">
-                  <Separator />
-                </nav>
                 <img
                   src={imgSRC}
-                  className="object-cover rounded-full aspect-square min-w-6 min-h-6 max-w-6 max-h-6 "
+                  className="object-cover rounded-full aspect-square min-w-6 min-h-6 max-w-6 max-h-6 cursor-pointer"
                 ></img>
               </section>
             </MenuHandler>
@@ -208,22 +180,10 @@ export default function Header() {
         </article>
       </div>
       {/* Mobile */}
-      <aside className="pt-2 lg:hidden flex justify-between overflow-hidden">
-        <section className="relative sm-store-selector max-w-[10rem]">
-          <Image src={logo_sm} className="absolute left-4 pt-1  w-5" alt="Small Logo" />
-          <Select label="Select Store" size="md" className="" placeholder="Select Store">
-            {vendors.map((vendor, index) => (
-              <Option key={vendor.id} value={vendor.id}>
-                {vendor.id}
-              </Option>
-            ))}
-          </Select>
-        </section>
+      <aside className="pt-2 lg:hidden flex justify-between px-3 ">
+        {getSelectVendorMenu("  store-selector items-center justify-center")}
 
-        <section className="flex gap-2 items-center me-2">
-          <div className="">
-            <SearchIcon></SearchIcon>
-          </div>
+        <section className="flex gap-2 items-center">
           <Badge content="5" className="max-w-[20px] min-w-[20px] max-h-[20px] min-h-[20px]">
             <Bag />
           </Badge>

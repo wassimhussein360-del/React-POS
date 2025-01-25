@@ -20,7 +20,6 @@ export const userVendorInfo = createAsyncThunk(
   async (userVendorInfo: UserState, { dispatch, getState }) => {
     // You can also access the state if needed
     const state: any = getState();
-    console.log(state);
   }
 );
 
@@ -39,8 +38,11 @@ const userSlice = createSlice({
     SetVendor: (state, action: PayloadAction<UserState["vendor"]>) => {
       state.vendor = action.payload;
     },
+    SetLoader: (state, action: PayloadAction<UserState["isLoading"]>) => {
+      state.isLoading = action.payload;
+    },
   },
 });
 
-export const { SetUser, SetVendors, SetVendor } = userSlice.actions;
+export const { SetUser, SetVendors, SetVendor,SetLoader } = userSlice.actions;
 export default userSlice.reducer;

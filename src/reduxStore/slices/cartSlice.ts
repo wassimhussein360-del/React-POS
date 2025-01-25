@@ -1,6 +1,7 @@
 import { Discount, Item } from "@/app/abstraction/types";
 import { $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { nanoid } from "nanoid";
 
 interface CartState {
   key: string | null;
@@ -23,7 +24,7 @@ const cartSlice = createSlice({
   reducers: {
     AddItem: (state, action) => {
       if (!state.items.length) {
-        state.key = new Date().getTime().toString();
+        state.key = nanoid(10);
         state.active = true;
       }
 
@@ -90,15 +91,10 @@ const cartSlice = createSlice({
     ) => {
       const { id, quantity, key } = action.payload;
 
-      console.log({ id, quantity, key });
-
       const item = state.items.find((item) => (key ? item.key === key : item.id === id));
       const previousQuantity = item?.quantity as number;
-      console.log({ item: item?.quantity });
 
       const incOrDecQun = previousQuantity - quantity;
-
-      console.log({ incOrDecQun });
 
       if (item) item.quantity = quantity;
 
@@ -150,7 +146,6 @@ const cartSlice = createSlice({
 
         // Load the holden cart
         const holdenCart = getHoldenCart(vendorId, cartKey);
-        holdenCart.active = true;
         Object.assign(state, holdenCart);
       } else {
         // Handle saving the current cart
@@ -161,9 +156,6 @@ const cartSlice = createSlice({
           if (key !== "items") delete state[key];
         });
       }
-
-      // ? Save to local storage
-      setCartToLocal(action.payload.vendorId, state);
     },
     VoidCart: (state, action: PayloadAction<{ vendorId: string }>) => {
       const key = state.key as string;
@@ -196,19 +188,15 @@ export default cartSlice.reducer;
 
 function setCartToLocal(vendorId: string, cart: CartState) {
   let getLocalCarts = $getFromLocal("carts");
-  console.log({ 1: cart });
 
   if (!getLocalCarts) {
     const openStorage: any = {};
     openStorage[vendorId] = [cart];
     $writeOnLocal("carts", openStorage);
-    console.log({ 2: openStorage });
     return;
   }
 
   let findCart = getLocalCarts[vendorId].find((_cart: CartState) => _cart.key === cart.key);
-
-  console.log({ 3: findCart });
 
   if (!findCart) {
     getLocalCarts[vendorId].push(cart);
@@ -218,7 +206,6 @@ function setCartToLocal(vendorId: string, cart: CartState) {
         if (_cart.key === cart.key) {
           //TODO delete cart if cart.items.length === 0 (optional)
           // if (cart.items.length === 0) {
-          //   console.log(["cart is empty"]);
 
           //   return null;
           // }
@@ -245,7 +232,7 @@ function deleteCartFromLocal(vendorId: string, cartKey: string) {
 export function getHoldenCart(vendorId: string, cartKey: string) {
   let getLocalCarts = $getFromLocal("carts");
 
-  let cartToReturn: CartState = { key: "", items: [], holdingName: "" };
+  let cartToReturn: CartState = { key: "", items: [], holdingName: "", active: true };
   getLocalCarts[vendorId] = getLocalCarts[vendorId].map((_cart: CartState) => {
     if (_cart.key === cartKey) {
       const foundCart = { ..._cart, holdingName: "" };

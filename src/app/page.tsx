@@ -10,8 +10,10 @@ import Products, { formatProducts } from "./components/products/products";
 
 import { Item } from "./abstraction/types";
 import FirestoreService from "@/servies/firestoreService";
-import { useCartItems, useUser, useVendor } from "@/reduxStore/hooks";
+import { useCartItems, useLoader, useUser, useVendor } from "@/reduxStore/hooks";
 import { Spinner } from "@material-tailwind/react";
+import PageLoader from "./components/pageLoader/pageLoader";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [openCart, setOpenCart] = useState(true);
@@ -19,8 +21,13 @@ export default function Home() {
   const [allProducts, setAllProducts] = useState<Item[]>([]);
   const [categorizedProducts, setCategorizedProducts] = useState<Item[]>([]);
 
+  const navigator = useRouter();
+
   const vendor = useVendor();
   const user = useUser();
+
+  const isLoading = useLoader();
+  if (isLoading) return;
 
   return (
     <div className="">

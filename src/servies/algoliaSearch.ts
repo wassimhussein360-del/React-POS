@@ -19,8 +19,6 @@ export async function algoliaSearch(storeId: string, index: string, text: string
     filters = [`vendors:${storeId}`];
   }
 
-  console.log(filters);
-
   try {
     const response = await client.search({
       requests: [

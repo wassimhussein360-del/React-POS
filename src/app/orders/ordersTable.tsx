@@ -20,26 +20,48 @@ import {
 } from "@material-tailwind/react";
 import { SearchIcon } from "@/assets/icons";
 import { get } from "http";
+import { _getProducts } from "@/servies/analyticsServise";
+import Paginator from "../components/table/paginator";
 
-const TABLE_HEAD = ["Customer", "Amount", "Status", "Status", "Account", ""];
+const TABLE_HEAD = ["Customer", "Cart Items", "Quantity", "Total", "Ordered", "Status"];
 
 const OrdersTable = () => {
   const vendor = useVendor();
   const [orders, setOrders] = useState<any[]>([]);
+  const [constOrders, setConstOrders] = useState<any[]>([]);
+
+  const itemsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const handlePageClick = (event: any) => {
+    setCurrentPage(event.selected);
+  };
+
+  const startIndex = currentPage * itemsPerPage;
+  const paginatedData = orders.slice(startIndex, startIndex + itemsPerPage);
 
   useEffect(() => {
-    console.log(vendor);
-
     if (!vendor) return;
 
     FirestoreService.getSubcollection("vendors", vendor.id, "orders").then((orders) => {
-      console.log({ orders });
-
       const formattedOrders = formatOrders(orders);
-      setOrders(formattedOrders);
-      console.log({ formattedOrders });
+      setConstOrders(formattedOrders);
+      setCurrentPage(1);
+    });
+
+    _getProducts({ limit: 10 }).then((ordersRep) => {
+      console.log(ordersRep);
     });
   }, [vendor]);
+
+  useEffect(() => {
+    // Calculate the start and end indices for the slice
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+
+    // Slice the orders based on the calculated indices
+    setOrders(constOrders.slice(startIndex, endIndex));
+  }, [currentPage]);
 
   return (
     <Card className="container shadow-[0px_0px_20px_rgba(0,0,0,0.1)]">
@@ -101,11 +123,11 @@ const OrdersTable = () => {
                       <td className={classes}>
                         <div className="flex items-center gap-3 max-w-[350px]">
                           <div className="flex flex-wrap gap-2">
-                            {items.map((item: any) => {
+                            {items.map((item: any, itemIndex: number) => {
                               return (
                                 <Badge
                                   content={item.quantity}
-                                  key={item.id}
+                                  key={itemIndex}
                                   withBorder
                                   className="text-[9px] !w-2 !h-2 bg-gray-200 text-secondary"
                                 >
@@ -159,35 +181,12 @@ const OrdersTable = () => {
         </table>
       </CardBody>
       <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-        <Button variant="outlined" size="sm">
-          Previous
-        </Button>
-        <div className="flex items-center gap-2">
-          <IconButton variant="outlined" size="sm">
-            1
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            2
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            3
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            ...
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            8
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            9
-          </IconButton>
-          <IconButton variant="text" size="sm">
-            10
-          </IconButton>
-        </div>
-        <Button variant="outlined" size="sm">
-          Next
-        </Button>
+        <Paginator
+          itemsPerPage={itemsPerPage}
+          dataSize={constOrders.length}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
       </CardFooter>
     </Card>
   );

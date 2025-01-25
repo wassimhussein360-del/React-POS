@@ -10,12 +10,7 @@ const PricingDetails = () => {
   return (
     <section>
       <section className="flex gap-2 w-full">
-        <div className="pricing-select w-1/3">
-          <Select label="Order Tax" className="rounded-xl " placeholder="Select Store">
-            <Option className="text-xs">Option 1</Option>
-          </Select>
-        </div>
-        <div className="pricing-select w-1/3">
+        <div className="pricing-select w-1/2">
           <Select
             label="Shipping"
             size="md"
@@ -25,7 +20,7 @@ const PricingDetails = () => {
             <Option className="text-xs">Option 1</Option>
           </Select>
         </div>
-        <div className="pricing-select w-1/3">
+        <div className="pricing-select w-1/2">
           <Select
             label="Discount"
             size="md"

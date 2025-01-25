@@ -7,7 +7,7 @@ import ActionsBtns from "./actionsBtns";
 import PaymentMethods from "./paymentMethods";
 import CartItems from "./cartItems";
 import { useState } from "react";
-import { useAppDispatch, useVendor } from "@/reduxStore/hooks";
+import { useAppDispatch, useCart, useVendor } from "@/reduxStore/hooks";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
 import React from "react";
 import CustomerAndProductSelection from "./customerSelection";
@@ -18,6 +18,7 @@ interface CartItemsProps {
 const CartInfo = ({ className }: { className: string }) => {
   const dispatch = useAppDispatch();
   const vendor = useVendor();
+  const cart = useCart();
 
   return (
     <section
@@ -25,8 +26,8 @@ const CartInfo = ({ className }: { className: string }) => {
     >
       {/* category info */}
       <section>
-        <h6 className="text-sm">Categories</h6>
-        <p className="text-gray-700 text-xs">Transaction ID: #569985</p>
+        <h6 className="text-sm">Cart</h6>
+        {cart.key && <p className="text-gray-700 text-xs">Transaction ID: {cart.key}</p>}
       </section>
       {/* end category info */}
 

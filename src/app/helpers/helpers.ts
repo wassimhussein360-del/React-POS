@@ -66,3 +66,14 @@ export function $getColorFromString(text: string): string {
   }
   return color;
 }
+
+export function $loader(show: boolean) {
+  const element = document.getElementById("my-loader");
+  if (element) {
+    if (!show) {
+      element.classList.add("hidden"); // Add hidden class
+    } else {
+      element.classList.remove("hidden"); // Remove hidden class
+    }
+  }
+}

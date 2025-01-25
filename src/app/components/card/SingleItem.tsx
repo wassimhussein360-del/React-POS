@@ -69,9 +69,8 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
           alt={item.name}
         />
 
-        <section className="text-xs">
+        <section className="text-xs flex flex-col justify-between">
           <aside>
-            <p className="text-xs text-gray-400">{item.barcode}</p>
             <p className="text-xs font-semibold truncate max-w-32">{item.name}</p>
           </aside>
           <aside className="flex items-center">

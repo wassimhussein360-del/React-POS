@@ -5,9 +5,9 @@ import { Toaster } from "react-hot-toast";
 import AuthService from "./config/auth/auth";
 import StoreProvider from "@/reduxStore/storeProvider";
 import Header from "./components/header/header";
-import HeaderWrapper from "./components/header/headerWrappers";
-import PageLoaderWrapper from "./components/pageLoader/LoaderWrapper";
 import PageLoader from "./components/pageLoader/pageLoader";
+import { useLoader } from "@/reduxStore/hooks";
+import Loader from "./components/pageLoader/loader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,11 +47,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${sourGummy.variable} antialiased`} // Add the new font variable
       >
         <StoreProvider>
-          <PageLoader />
           <Header />
+          <PageLoader />
+          <Loader />
 
           <Toaster position="top-right" containerStyle={{ zIndex: 99999 }} />
           <AuthService />
+
           {children}
         </StoreProvider>
       </body>

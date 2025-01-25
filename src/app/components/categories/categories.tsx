@@ -32,8 +32,6 @@ const Categories: React.FC<{
   }, [products]);
 
   useEffect(() => {
-    console.log({ vendor });
-
     if (vendor?.id) {
       setCategories([]);
       setSelectedCategory("all");
@@ -118,22 +116,12 @@ const Categories: React.FC<{
 export default Categories;
 
 function formatCategories(categories: any[], allProducts: Item[]): Category[] {
-  console.log({ categories });
-  console.log({ allProducts });
-
   return categories
     .filter((cat) => cat.active)
     .filter((cat) => {
-      console.log({ cat });
-
       const relatedProducts = allProducts.filter((pr) => {
-        console.log(pr.categoryId);
-        console.log(cat.id);
-        console.log("---------------------------------------");
-
         return pr.categoryId.includes(cat.id);
       });
-      console.log("++++++++++++++++++++");
 
       return relatedProducts.length > 0;
     })
