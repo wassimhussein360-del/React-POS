@@ -1,7 +1,19 @@
 import { Button, IconButton } from "@material-tailwind/react";
 import React from "react";
 
-const Paginator = ({ itemsPerPage, dataSize, currentPage, setCurrentPage }) => {
+interface PaginatorProps {
+  itemsPerPage: number;
+  dataSize: number;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+}
+
+const Paginator: React.FC<PaginatorProps> = ({
+  itemsPerPage,
+  dataSize,
+  currentPage,
+  setCurrentPage,
+}) => {
   const totalPages = Math.ceil(dataSize / itemsPerPage);
 
   // Function to handle page change

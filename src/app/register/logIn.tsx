@@ -88,8 +88,6 @@ export default function LogIn() {
       .then((result) => {
         const user = result.user;
 
-        console.log({ user });
-
         toast.success("Google Sign-In successful!");
         router.push("/");
       })
@@ -105,8 +103,6 @@ export default function LogIn() {
       .then((result) => {
         const user = result.user;
 
-        console.log({ user });
-
         toast.success("Apple Sign-In successful!");
         router.push("/");
       })
@@ -120,8 +116,6 @@ export default function LogIn() {
     signInWithEmailAndPassword(auth, email, password)
       .then((result) => {
         const user = result.user;
-
-        console.log({ user });
 
         toast.success("Login successful!");
         router.push("/");

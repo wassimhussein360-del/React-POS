@@ -12,3 +12,4 @@ export const useUser = () => useAppSelector((state) => state.user.user);
 export const useVendors = () => useAppSelector((state) => state.user.vendors);
 export const useVendor = () => useAppSelector((state) => state.user.vendor);
 export const useLoader = () => useAppSelector((state) => state.user.isLoading);
+export const useCustomer = () => useAppSelector((state) => state.cart.customer);

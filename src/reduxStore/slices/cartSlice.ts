@@ -8,6 +8,7 @@ interface CartState {
   items: Item[];
   holdingName: string;
   active: boolean;
+  customer: any;
   [key: string]: any;
 }
 

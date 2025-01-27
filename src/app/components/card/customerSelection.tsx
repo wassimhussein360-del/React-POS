@@ -19,14 +19,20 @@ import { formatProducts } from "../products/products";
 import { $getColorFromString, $getImgAlter } from "@/app/helpers/helpers";
 import ProductDetails from "../products/productDetails";
 import { AddItem, SetCartField, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
+import NewCustomerDialog from "./dialogs/newCustomer";
+import FirestoreService from "@/servies/firestoreService";
+import AddressesDialog from "./dialogs/addressesDialo";
 
 const CustomerAndProductSelection = () => {
   const [customerSearch, setCustomerSearch] = useState<string>("");
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+  const [newCustomer, setNewCustomer] = useState<any>();
   const [selectedCustomerName, setSelectedCustomerName] = useState<string>("");
   const [customerLoading, setCustomerLoading] = useState<boolean>(false);
   const [productLoading, setProductLoading] = useState<boolean>(false);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [addressesDialog, setAddressesDialog] = useState(true);
+  const [addCustomerDialog, setAddCustomerDialog] = useState<boolean>(false);
   const [product, setProduct] = useState<Item>();
 
   const [openDetails, setOpenDetails] = useState(false);
@@ -75,6 +81,8 @@ const CustomerAndProductSelection = () => {
 
     algoliaSearch(vendor.id, "customers", customerSearch)
       .then((hits) => {
+        console.log(hits);
+
         setCustomers(hits);
       })
       .catch((error) => {
@@ -88,9 +96,17 @@ const CustomerAndProductSelection = () => {
   useEffect(() => {
     if (!selectedCustomer) return;
     const foundCustomer = customers.find((cus) => cus.id == selectedCustomer);
-    if (!foundCustomer) return;
-    dispatch(SetCartField({ fieldName: "customer", value: foundCustomer, vendorId: vendor.id }));
+    if (foundCustomer) {
+      dispatch(SetCartField({ fieldName: "customer", value: foundCustomer, vendorId: vendor.id }));
+    }
   }, [selectedCustomer]);
+
+  useEffect(() => {
+    if (newCustomer) {
+      setSelectedCustomerName(newCustomer.name);
+      dispatch(SetCartField({ fieldName: "customer", value: newCustomer, vendorId: vendor.id }));
+    }
+  }, [newCustomer]);
 
   useEffect(() => {
     const cus = cart.customer;
@@ -101,6 +117,18 @@ const CustomerAndProductSelection = () => {
 
   return (
     <section>
+      <NewCustomerDialog
+        open={addCustomerDialog}
+        handleOpen={() => setAddCustomerDialog(!addCustomerDialog)}
+        setCustomer={setNewCustomer}
+      />
+      {selectedCustomerName && (
+        <AddressesDialog
+          open={addressesDialog}
+          handleOpen={() => setAddressesDialog(!addressesDialog)}
+        />
+      )}
+
       {product && (
         <ProductDetails
           open={openDetails}
@@ -170,19 +198,31 @@ const CustomerAndProductSelection = () => {
           </MenuList>
         </Menu>
         {/* End Customer Selection */}
+
         <Button
-          className="ms-2 bg-primary flex items-center justify-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
+          className="ms-2 bg-secondary flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
           size="sm"
           placeholder={undefined}
+          onClick={() => setAddressesDialog(true)}
+        >
+          <i className="bi bi-geo-alt-fill flex-center  text-primary text-lg"></i>
+        </Button>
+
+        <Button
+          className="ms-2 bg-primary flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
+          size="sm"
+          placeholder={undefined}
+          onClick={() => setAddCustomerDialog(true)}
         >
           <Plus />
         </Button>
       </div>
+
       {/* Product Selection */}
       <Menu>
         <MenuHandler>
           <Button
-            className={`w-full text-start  normal-case bg-transparent hover:shadow-none flex justify-between items-center   border border-gray-500 shadow-none rounded-xl
+            className={`w-full text-start shadow  normal-case bg-transparent hover:shadow-none flex justify-between items-center   border border-gray-500 shadow-none rounded-xl
                 ${"text-gray-400"}`}
           >
             {"Search Products"}

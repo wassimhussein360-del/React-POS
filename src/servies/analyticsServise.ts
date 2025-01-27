@@ -3,8 +3,6 @@ import { $getFromLocal } from "@/app/helpers/helpers";
 import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 
 const createApolloClient = () => {
-  console.log(($getFromLocal("vendor") as Vendor).apiKey);
-
   return new ApolloClient({
     uri: "https://analyticsapi.menasa.io/",
     cache: new InMemoryCache(),
@@ -21,8 +19,6 @@ function fetchData(query: any, variables: AnalyticsVariables): Promise<any> {
     client
       .query({ query, variables })
       .then((res) => {
-        console.log(res);
-
         resolve(res.data);
       })
       .catch((err) => {

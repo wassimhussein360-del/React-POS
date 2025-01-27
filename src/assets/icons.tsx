@@ -189,9 +189,16 @@ export const Return = () => {
 };
 export const Plus = () => {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 17V7" stroke="#012E3F" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M7 12L17 12" stroke="#012E3F" strokeWidth="1.5" strokeLinecap="round" />
+    <svg
+      width="24"
+      height="24"
+      className="stroke-secondary"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M12 17V7" strokeWidth="2" strokeLinecap="round" />
+      <path d="M7 12L17 12" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 };

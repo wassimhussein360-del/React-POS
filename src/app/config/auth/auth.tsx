@@ -29,6 +29,7 @@ const AuthService = () => {
 
                   const localVendor = $getFromLocal("vendor");
                   const vendorToSave = localVendor || formattedVendors[2];
+
                   if (!localVendor) $writeOnLocal("vendor", vendorToSave);
                   dispatch(SetVendor(vendorToSave));
                   dispatch(SetLoader(false));
@@ -62,6 +63,7 @@ function formatUser(user: any): User {
 
 function formatVendors(vendors: any[]): Vendor[] {
   console.log({ vendors });
+
   return vendors.map((vendor) => {
     return {
       id: vendor.id,
