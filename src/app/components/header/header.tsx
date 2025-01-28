@@ -1,66 +1,80 @@
 "use client";
 
-import {
-  Bag,
-  BellIcon,
-  Chevron,
-  Flag,
-  MainIcon,
-  OutIcon,
-  SearchIcon,
-  Separator,
-  SettingsIcon,
-} from "@/assets/icons";
-import {
-  Badge,
-  Button,
-  Input,
-  Menu,
-  MenuHandler,
-  MenuItem,
-  MenuList,
-} from "@material-tailwind/react";
+import { Bag, Chevron, OutIcon } from "@/assets/icons";
+import { Badge, Menu, MenuHandler, MenuItem, MenuList } from "@material-tailwind/react";
 import { Select, Option } from "@material-tailwind/react";
 
 import "./header.css";
-import { useAppDispatch, useLoader, useUser, useVendor, useVendors } from "@/reduxStore/hooks";
-import { use, useEffect } from "react";
+import {
+  useAppDispatch,
+  useCart,
+  useGeneral,
+  useUser,
+  useVendor,
+  useVendors,
+} from "@/reduxStore/hooks";
+import { use, useEffect, useState } from "react";
 import { $getFromLocal, $toTitleCase, $writeOnLocal } from "@/app/helpers/helpers";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "../../../../firebaseConfig";
 import { SetVendor } from "@/reduxStore/slices/userSlice";
-import { Vendor } from "@/app/abstraction/types";
-import { ActivateCart } from "@/reduxStore/slices/cartSlice";
+import { Indexable, Vendor } from "@/app/abstraction/types";
+import { ActivateCart, SetCartField, VoidCart } from "@/reduxStore/slices/cartSlice";
+import FirestoreService from "@/servies/firestoreService";
+import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 
 export default function Header() {
   const dispatch = useAppDispatch();
   const user = useUser();
   const vendors = useVendors();
-  const globalVendor = useVendor();
-  const navigator = useRouter();
 
-  const isLoading = useLoader();
+  const $vendor = useVendor();
+  const $general = useGeneral();
+  const navigator = useRouter();
 
   const [vendor, setVendor] = React.useState<any>();
 
-  useEffect(() => {
-    if (!vendor && globalVendor) {
-      setVendor(globalVendor);
-    }
-    if (globalVendor) {
-      let getLocalCarts = $getFromLocal("carts");
-      if (!getLocalCarts) return;
-      const foundCart = getLocalCarts[globalVendor.id]?.find((_cart: any) => _cart.active);
+  const [outlets, setOutlets] = React.useState<Array<any>>([]);
 
-      if (foundCart) {
-        dispatch(ActivateCart({ cart: foundCart }));
-      }
+  useEffect(() => {
+    if (!vendor && $vendor) {
+      setVendor($vendor);
     }
-  }, [globalVendor]);
+    if ($vendor) {
+      FirestoreService.getSubcollection("vendors", $vendor.id, "outlets", {
+        whereConditions: [{ field: "active", operator: "==", value: true }],
+      }).then((_outlets) => {
+        const storedOutlet = $getFromLocal("branch");
+        const selectedOutlet =
+          storedOutlet && _outlets.some((ou) => ou.id === storedOutlet.id)
+            ? storedOutlet
+            : _outlets[0];
+
+        setOutlets(() => _outlets);
+
+        onOutletSelect(selectedOutlet.id, selectedOutlet);
+      });
+    }
+  }, [$vendor]);
+
+  useEffect(() => {
+    if (!$vendor?.id && !$general.branch.id) return;
+
+    let getLocalCarts = $getFromLocal("carts") || {};
+    const cartKey = `${$vendor?.id}_${$general.branch.id}`;
+    const foundCart = getLocalCarts[cartKey]?.find((_cart: any) => _cart.active);
+
+    if (foundCart) {
+      dispatch(ActivateCart({ cart: foundCart }));
+    } else {
+      dispatch(VoidCart({ vendorId: "" }));
+    }
+  }, [$general.branch]);
 
   const signOut = () => {
     localStorage.clear();
+
     auth.signOut();
     window.location.reload();
   };
@@ -70,6 +84,19 @@ export default function Header() {
     setVendor(newVendor);
     dispatch(SetVendor(newVendor));
     $writeOnLocal("vendor", newVendor);
+
+    window.location.reload();
+  };
+
+  const onOutletSelect = (id: string, branch?: any) => {
+    const newOutlet = branch ? branch : outlets.find((o) => o.id === id);
+    $writeOnLocal("branch", newOutlet);
+    dispatch(
+      SetGeneralField({
+        field: "branch",
+        value: newOutlet,
+      })
+    );
   };
 
   const getSelectVendorMenu = (className: string) => {
@@ -79,13 +106,35 @@ export default function Header() {
           label="Select Store"
           className="flex"
           placeholder="Select Store"
-          value={globalVendor?.id || ""}
+          value={$vendor?.id || ""}
           onChange={(value: any) => onStoreSelect(value)}
         >
           {vendors.map((vendor: Vendor, vendorIndex) => (
             <Option key={vendorIndex} value={vendor.id} className="flex gap-2">
               <img src={vendor.logo} className=" w-5 h-5" alt="Small Logo" />
               {vendor.name}
+            </Option>
+          ))}
+        </Select>
+      </section>
+    );
+  };
+
+  const getSelectOutletMenu = (className: string) => {
+    return (
+      <section className={className}>
+        <Select
+          label="Select Branch"
+          className="flex"
+          placeholder="Select Branch"
+          value={$general.branch?.id || ""}
+          selected={() => $general.branch?.name?.en}
+          onChange={(value: any) => onOutletSelect(value)}
+        >
+          {outlets.map((outlet: any, index) => (
+            <Option key={index} value={outlet.id} className="flex gap-2">
+              <img src={outlet.image} className=" w-5 h-5" alt="Small Logo" />
+              {outlet.name.en}
             </Option>
           ))}
         </Select>
@@ -114,7 +163,8 @@ export default function Header() {
 
         <article className="flex items-center lg:items-end gap-5 mb-1 lg:mb-0 ">
           {/* Select store */}
-          {getSelectVendorMenu("relative   lg:flex w-full max-w-[24rem] store-selector  hidden ")}
+          {getSelectOutletMenu("relative   lg:flex w-full max-w-[24rem] store-selector  hidden ")}
+          {getSelectVendorMenu("relative   lg:flex w-full max-w-[24rem] store-selector   ")}
 
           {/* profile */}
 
@@ -181,7 +231,7 @@ export default function Header() {
       </div>
       {/* Mobile */}
       <aside className="pt-2 lg:hidden flex justify-between px-3 ">
-        {getSelectVendorMenu("  store-selector items-center justify-center")}
+        {getSelectOutletMenu("  store-selector items-center justify-center")}
 
         <section className="flex gap-2 items-center">
           <Badge content="5" className="max-w-[20px] min-w-[20px] max-h-[20px] min-h-[20px]">

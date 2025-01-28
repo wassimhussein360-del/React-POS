@@ -19,7 +19,7 @@ const Products: React.FC<ProductProps> = ({ products }) => {
           <Chevron className=" -rotate-90 w-4 h-4 cursor-pointer" />
         </aside>
       </section>
-      <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6  gap-5">
+      <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6  gap-5  grid-flow-row grid-rows-2 custom-grid">
         {products.length
           ? products.map((pr, i) => {
               return <SingleProduct key={i} product={pr} />;
@@ -34,9 +34,9 @@ const Products: React.FC<ProductProps> = ({ products }) => {
 
 export default Products;
 
-export const formatProducts = (products: any[], vendorId: string): Item[] => {
+export const formatProducts = (products: any[], vendorId: string, outletId: string): Item[] => {
   const formattedProducts = products
-    .filter((product) => product.stockQuantity > 0)
+    .filter((product) => product.stockQuantity > 0 && product.branchesIds.includes(outletId))
     .map((product) => {
       return {
         id: product.id,
@@ -53,9 +53,11 @@ export const formatProducts = (products: any[], vendorId: string): Item[] => {
               if (!md.active) return;
 
               const modifier: Modifier = {
+                id: md.id,
                 type: md.type,
                 required: md.required,
                 multiple: md.multiple,
+
                 name: md.name?.en || md.nameEn,
 
                 options: md.list
@@ -82,6 +84,10 @@ export const formatProducts = (products: any[], vendorId: string): Item[] => {
         category: product.categories.map((cat: any) => cat.name.en).join(", "),
         categoryId: product.categories.map((cat: any) => cat.id).join(", "),
         image: product.images[0].url,
+        branchesIds: product.branchesIds || [],
+        images: product.images.map((img: any) => img.url),
+        originalPrice: product.originalPrice || 0,
+        productSpecialInstruction: product.productSpecialInstruction || "",
       };
     });
 

@@ -1,23 +1,18 @@
-import { CancelIcon, Plus } from "@/assets/icons";
-import { Select, Option, Button, Textarea } from "@material-tailwind/react";
-import SingleItem from "./SingleItem";
+import { Button, Textarea, ButtonGroup } from "@material-tailwind/react";
 import PricingDetails from "./pricing";
 import CardTotals from "./cardTotals";
 import ActionsBtns from "./actionsBtns";
 import PaymentMethods from "./paymentMethods";
 import CartItems from "./cartItems";
-import { useState } from "react";
 import { useAppDispatch, useCart, useVendor } from "@/reduxStore/hooks";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
 import React from "react";
 import CustomerAndProductSelection from "./customerSelection";
+import { Vendor } from "@/app/abstraction/types";
 
-interface CartItemsProps {
-  subtotal: number;
-}
 const CartInfo = ({ className }: { className: string }) => {
   const dispatch = useAppDispatch();
-  const vendor = useVendor();
+  const vendor = useVendor() as Vendor;
   const cart = useCart();
 
   return (
@@ -26,7 +21,36 @@ const CartInfo = ({ className }: { className: string }) => {
     >
       {/* category info */}
       <section>
-        <h6 className="text-sm">Cart</h6>
+        <aside className="flex justify-between ">
+          <h6 className="text-sm">Cart</h6>
+          <ButtonGroup size="sm">
+            {["Delivery", "Pickup"].map((orderType) => {
+              return (
+                <Button
+                  className={`p-0 px-2 normal-case  border-none shadow ${
+                    cart.selections?.orderType == orderType.toLowerCase()
+                      ? "bg-primary"
+                      : "bg-transparent text-primary"
+                  }`}
+                  onClick={() => {
+                    dispatch(
+                      SetCartField({
+                        fieldName: "selections",
+                        value: {
+                          ...cart.selections,
+                          orderType: orderType.toLowerCase(),
+                        },
+                        vendorId: vendor.id,
+                      })
+                    );
+                  }}
+                >
+                  {orderType}
+                </Button>
+              );
+            })}
+          </ButtonGroup>
+        </aside>
         {cart.key && <p className="text-gray-700 text-xs">Transaction ID: {cart.key}</p>}
       </section>
       {/* end category info */}

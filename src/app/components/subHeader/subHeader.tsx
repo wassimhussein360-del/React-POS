@@ -29,10 +29,6 @@ const SubHeader = () => {
           <Return />
           Rest
         </Button>
-        <Button className="normal-case flex gap-1 bg-warning" placeholder={undefined}>
-          <OppositeArrows />
-          Transaction
-        </Button>
       </section>
       <section>
         <HoldingCartsDrawer />

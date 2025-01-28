@@ -44,7 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${sourGummy.variable} antialiased`} // Add the new font variable
+        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${sourGummy.variable} antialiased `} // Add the new font variable
       >
         <StoreProvider>
           <Header />

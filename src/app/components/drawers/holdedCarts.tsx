@@ -1,5 +1,5 @@
 import { $getFromLocal } from "@/app/helpers/helpers";
-import { useAppDispatch, useCart, useVendor } from "@/reduxStore/hooks";
+import { useAppDispatch, useCart, useGeneral, useVendor } from "@/reduxStore/hooks";
 import { HoldCart } from "@/reduxStore/slices/cartSlice";
 import { Button, Drawer, IconButton, Typography } from "@material-tailwind/react";
 import React, { useEffect } from "react";
@@ -10,13 +10,16 @@ const HoldingCartsDrawer = () => {
   const [holdenCarts, setHoldenCars] = React.useState([]);
   const cart = useCart();
   const vendor = useVendor();
+  const $general = useGeneral();
 
   useEffect(() => {
-    if (!vendor) return;
+    if (!vendor && !$general.branch?.id) return;
 
     const allVendorsCarts = $getFromLocal("carts");
     if (allVendorsCarts) {
-      const currentVendorCarts = allVendorsCarts[vendor?.id as string] || [];
+      const cartKey = `${vendor?.id as string}_${$general.branch?.id}`;
+
+      const currentVendorCarts = allVendorsCarts[cartKey] || [];
       const holdingCarts = currentVendorCarts.filter((cart: any) => cart.holdingName);
       if (holdingCarts.length) {
         setHoldenCars(holdingCarts);
@@ -24,7 +27,7 @@ const HoldingCartsDrawer = () => {
         setHoldenCars([]);
       }
     }
-  }, [cart, vendor]);
+  }, [cart, vendor, $general.branch]);
 
   const openDrawerRight = () => setOpenRight(true);
   const closeDrawerRight = () => setOpenRight(false);

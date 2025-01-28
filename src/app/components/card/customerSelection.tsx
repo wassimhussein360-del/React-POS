@@ -1,18 +1,15 @@
 import { Item, Vendor } from "@/app/abstraction/types";
 import { Plus } from "@/assets/icons";
-import { useAppDispatch, useCart, useCartItems, useVendor } from "@/reduxStore/hooks";
-import { algoliaSearch } from "@/servies/algoliaSearch";
 import {
-  Select,
-  Option,
-  Button,
-  Textarea,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Spinner,
-} from "@material-tailwind/react";
+  useAddress,
+  useAppDispatch,
+  useCart,
+  useCartItems,
+  useGeneral,
+  useVendor,
+} from "@/reduxStore/hooks";
+import { algoliaSearch } from "@/servies/algoliaSearch";
+import { Button, Menu, MenuHandler, MenuList, MenuItem, Spinner } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
 import React from "react";
 import { formatProducts } from "../products/products";
@@ -20,7 +17,6 @@ import { $getColorFromString, $getImgAlter } from "@/app/helpers/helpers";
 import ProductDetails from "../products/productDetails";
 import { AddItem, SetCartField, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import NewCustomerDialog from "./dialogs/newCustomer";
-import FirestoreService from "@/servies/firestoreService";
 import AddressesDialog from "./dialogs/addressesDialo";
 
 const CustomerAndProductSelection = () => {
@@ -31,7 +27,7 @@ const CustomerAndProductSelection = () => {
   const [customerLoading, setCustomerLoading] = useState<boolean>(false);
   const [productLoading, setProductLoading] = useState<boolean>(false);
   const [customers, setCustomers] = useState<any[]>([]);
-  const [addressesDialog, setAddressesDialog] = useState(true);
+  const [addressesDialog, setAddressesDialog] = useState(false);
   const [addCustomerDialog, setAddCustomerDialog] = useState<boolean>(false);
   const [product, setProduct] = useState<Item>();
 
@@ -44,6 +40,8 @@ const CustomerAndProductSelection = () => {
   const vendor = useVendor() as Vendor;
   const cartItems = useCartItems();
   const cart = useCart();
+  const address = useAddress();
+  const $general = useGeneral();
 
   function handleProductSelect(_product: Item) {
     setProduct(_product);
@@ -64,7 +62,7 @@ const CustomerAndProductSelection = () => {
 
     algoliaSearch(vendor.id, "products", productSearch)
       .then((productRes) => {
-        const formattedProducts = formatProducts(productRes, vendor.id);
+        const formattedProducts = formatProducts(productRes, vendor.id, $general.branch.id);
         setProducts(formattedProducts);
       })
       .catch((error) => {
@@ -81,8 +79,6 @@ const CustomerAndProductSelection = () => {
 
     algoliaSearch(vendor.id, "customers", customerSearch)
       .then((hits) => {
-        console.log(hits);
-
         setCustomers(hits);
       })
       .catch((error) => {
@@ -98,6 +94,7 @@ const CustomerAndProductSelection = () => {
     const foundCustomer = customers.find((cus) => cus.id == selectedCustomer);
     if (foundCustomer) {
       dispatch(SetCartField({ fieldName: "customer", value: foundCustomer, vendorId: vendor.id }));
+      dispatch(SetCartField({ fieldName: "address", value: undefined, vendorId: vendor.id }));
     }
   }, [selectedCustomer]);
 
@@ -137,7 +134,7 @@ const CustomerAndProductSelection = () => {
         />
       )}
 
-      <h6 className="text-sm">Customers Information</h6>
+      <h6 className="text-sm">Customers </h6>
       <div className="my-3 flex ">
         {/* Customer Selection */}
         <Menu>
@@ -200,12 +197,19 @@ const CustomerAndProductSelection = () => {
         {/* End Customer Selection */}
 
         <Button
-          className="ms-2 bg-secondary flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
+          className={`ms-2  flex-center rounded-full p-0 shadow aspect-square min-w-10 min-h-10
+            ${cart.customer && cart.selections?.orderType == "delivery" ? "" : " !hidden "}  ${
+            address ? "bg-secondary" : "bg-transparent"
+          }`}
           size="sm"
           placeholder={undefined}
           onClick={() => setAddressesDialog(true)}
         >
-          <i className="bi bi-geo-alt-fill flex-center  text-primary text-lg"></i>
+          <i
+            className={`bi  flex-center   text-lg ${
+              address ? "text-primary bi-geo-alt-fill" : "bi-geo-alt text-secondary"
+            }`}
+          ></i>
         </Button>
 
         <Button
@@ -222,7 +226,7 @@ const CustomerAndProductSelection = () => {
       <Menu>
         <MenuHandler>
           <Button
-            className={`w-full text-start shadow  normal-case bg-transparent hover:shadow-none flex justify-between items-center   border border-gray-500 shadow-none rounded-xl
+            className={`w-full text-start   normal-case bg-transparent hover:shadow-none flex justify-between items-center   border border-gray-500 shadow-none rounded-xl
                 ${"text-gray-400"}`}
           >
             {"Search Products"}

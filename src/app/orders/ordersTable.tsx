@@ -49,9 +49,7 @@ const OrdersTable = () => {
       setCurrentPage(1);
     });
 
-    _getProducts({ limit: 10 }).then((ordersRep) => {
-      console.log(ordersRep);
-    });
+    _getProducts({ limit: 10 }).then((ordersRep) => {});
   }, [vendor]);
 
   useEffect(() => {

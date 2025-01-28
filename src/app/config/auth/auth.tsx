@@ -62,14 +62,13 @@ function formatUser(user: any): User {
 }
 
 function formatVendors(vendors: any[]): Vendor[] {
-  console.log({ vendors });
-
   return vendors.map((vendor) => {
     return {
       id: vendor.id,
       name: vendor.name.en,
       logo: $getImgSrc(vendor.id, vendor.logo[0], "w=500"),
       apiKey: vendor.apikey,
+      defaultCurrency: vendor.defaultCurrency || "KWD",
     };
   });
 }

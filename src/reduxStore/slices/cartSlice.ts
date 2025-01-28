@@ -1,4 +1,4 @@
-import { Discount, Item } from "@/app/abstraction/types";
+import { Discount, Indexable, Item } from "@/app/abstraction/types";
 import { $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
@@ -8,7 +8,9 @@ interface CartState {
   items: Item[];
   holdingName: string;
   active: boolean;
-  customer: any;
+  customer?: any;
+  address?: any;
+  selections: Indexable;
   [key: string]: any;
 }
 
@@ -17,6 +19,7 @@ const initialState: CartState = {
   key: null,
   holdingName: "",
   active: false,
+  selections: {},
 };
 
 const cartSlice = createSlice({
@@ -42,6 +45,11 @@ const cartSlice = createSlice({
       state,
       action: PayloadAction<{ fieldName: string; value: any; vendorId: string }>
     ) => {
+      if (!state.key) {
+        state.key = nanoid(10);
+        state.active = true;
+      }
+
       state[action.payload.fieldName] = action.payload.value;
 
       // ? Save to local storage
@@ -146,7 +154,8 @@ const cartSlice = createSlice({
         }
 
         // Load the holden cart
-        const holdenCart = getHoldenCart(vendorId, cartKey);
+        const vendorOutletKey = `${action.payload.vendorId}_${$getFromLocal("branch").id}`;
+        const holdenCart = getHoldenCart(vendorOutletKey, cartKey);
         Object.assign(state, holdenCart);
       } else {
         // Handle saving the current cart
@@ -164,8 +173,8 @@ const cartSlice = createSlice({
       Object.keys(state).forEach((key) => {
         if (key !== "items") delete state[key];
       });
-
-      deleteCartFromLocal(action.payload.vendorId, key);
+      const vendorOutletKey = `${action.payload.vendorId}_${$getFromLocal("branch").id}`;
+      deleteCartFromLocal(vendorOutletKey, key);
     },
     ActivateCart: (state, action: PayloadAction<{ cart: CartState }>) => {
       Object.assign(state, action.payload.cart);
@@ -190,6 +199,8 @@ export default cartSlice.reducer;
 function setCartToLocal(vendorId: string, cart: CartState) {
   let getLocalCarts = $getFromLocal("carts");
 
+  vendorId += `_${$getFromLocal("branch").id}`;
+
   if (!getLocalCarts) {
     const openStorage: any = {};
     openStorage[vendorId] = [cart];
@@ -197,7 +208,8 @@ function setCartToLocal(vendorId: string, cart: CartState) {
     return;
   }
 
-  let findCart = getLocalCarts[vendorId].find((_cart: CartState) => _cart.key === cart.key);
+  if (!getLocalCarts[vendorId]) getLocalCarts[vendorId] = [];
+  let findCart = getLocalCarts[vendorId]?.find((_cart: CartState) => _cart.key === cart.key);
 
   if (!findCart) {
     getLocalCarts[vendorId].push(cart);
@@ -223,7 +235,9 @@ function setCartToLocal(vendorId: string, cart: CartState) {
 
 function deleteCartFromLocal(vendorId: string, cartKey: string) {
   let getLocalCarts = $getFromLocal("carts");
-  const findCartIndex = getLocalCarts[vendorId].findIndex((cart: CartState) => cart.key == cartKey);
+  const findCartIndex = (getLocalCarts[vendorId] || []).findIndex(
+    (cart: CartState) => cart.key == cartKey
+  );
   if (findCartIndex !== -1) {
     getLocalCarts[vendorId].splice(findCartIndex, 1);
   }

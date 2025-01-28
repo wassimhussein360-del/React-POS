@@ -6,11 +6,15 @@ import {
   MenuHandler,
   MenuItem,
   MenuList,
+  Spinner,
   Typography,
 } from "@material-tailwind/react";
 import "./cartDialogs.css";
 import { useEffect, useState } from "react";
-import { useCart } from "@/reduxStore/hooks";
+import { useCart, useVendor } from "@/reduxStore/hooks";
+import { nanoid } from "nanoid";
+import { createCustomer } from "@/servies/fire-functions";
+import toast from "react-hot-toast";
 
 interface CashPayProps {
   open: boolean;
@@ -19,10 +23,13 @@ interface CashPayProps {
 }
 
 const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustomer }) => {
+  const $vendor = useVendor();
+
   const [form, setForm] = useState<{ name: string; number: string }>({
     name: "",
     number: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const cart = useCart();
   useEffect(() => {
@@ -48,8 +55,36 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
 
   const handleSubmit = () => {
     if (validateForm()) {
+      setIsLoading(true);
+      const id = nanoid(30);
+      const created = new Date().getTime();
       setCustomer({ ...form });
-      handleOpen();
+      const payload = {
+        createdAt: created,
+        providerId: "",
+        updatedAt: created,
+        image: "",
+        email: "",
+        id: id,
+        name: form.name,
+        vendorId: $vendor?.id,
+        phone: `${CODES[country]}${form.number}`,
+        uid: id,
+      };
+      createCustomer(payload)
+        .then((res: any) => {
+          if (res.data.success) {
+            setCustomer(res.data.customerData);
+            toast.success("New Customer Has Been Added! 👍");
+            handleOpen();
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   };
   const getBody = () => {
@@ -150,11 +185,18 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
         <br />
         <br />
         <Button
-          className="normal-case  bg-secondary w-full"
+          className="normal-case  bg-secondary w-full flex-center gap-3"
           placeholder={undefined}
+          disabled={isLoading}
           onClick={() => handleSubmit()}
         >
-          Save Customer
+          {isLoading ? (
+            <>
+              Adding Customer ... <Spinner className="w-4" />
+            </>
+          ) : (
+            "Save Customer"
+          )}
         </Button>
       </div>
     );

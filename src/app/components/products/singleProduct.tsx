@@ -48,7 +48,7 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
         product={product}
       />
       <figure
-        className={`flex flex-col justify-between border aspect-[4/5] p-2 w-full   rounded ${
+        className={`flex flex-col justify-between border  p-2 w-full   rounded ${
           itemsTotals.quantity
             ? "rounded-xl border-secondary shadow-xl border-2"
             : "border-gray-300"

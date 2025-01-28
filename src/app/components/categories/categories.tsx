@@ -5,19 +5,25 @@ import { useEffect, useState } from "react";
 import { Category, Item } from "@/app/abstraction/types";
 import FirestoreService from "@/servies/firestoreService";
 import CategorySkeleton from "./categorySkeletone";
-import { useVendor } from "@/reduxStore/hooks";
+import { useCart, useGeneral, useVendor } from "@/reduxStore/hooks";
 import { formatProducts } from "../products/products";
 import { Spinner } from "@material-tailwind/react";
+import { useDispatch } from "react-redux";
+import { SetCartField } from "@/reduxStore/slices/cartSlice";
+import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 
 const Categories: React.FC<{
   products: Item[];
   setProducts: Function;
   setAllProducts: Function;
 }> = ({ products, setProducts, setAllProducts }) => {
+  const dispatch = useDispatch();
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const vendor = useVendor();
+  const $cart = useCart();
+  const $general = useGeneral();
 
   useEffect(() => {
     if (products.length && vendor) {
@@ -32,21 +38,23 @@ const Categories: React.FC<{
   }, [products]);
 
   useEffect(() => {
-    if (vendor?.id) {
+    if (vendor?.id && $general.branch?.id) {
       setCategories([]);
       setSelectedCategory("all");
       // Fetch Products related to selected vendor
 
       FirestoreService.getSubcollection("vendors", vendor.id, "products").then(
         (fetchedProducts) => {
-          const formattedProducts = formatProducts(fetchedProducts, vendor.id);
+          const formattedProducts = formatProducts(fetchedProducts, vendor.id, $general.branch.id);
 
           setAllProducts(formattedProducts);
           setProducts(formattedProducts);
+
+          dispatch(SetGeneralField({ field: "products", value: formattedProducts }));
         }
       );
     }
-  }, [vendor]);
+  }, [vendor, $general.branch]);
 
   const handleCategoryClick = (category: Category) => {
     setSelectedCategory(category.id);

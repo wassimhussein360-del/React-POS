@@ -1,13 +1,14 @@
 import { Dialog } from "@material-tailwind/react";
 import "./cartDialogs.css";
 import { useEffect, useState } from "react";
-import { useCustomer } from "@/reduxStore/hooks";
+import { useAddress, useAppDispatch, useCustomer, useVendor } from "@/reduxStore/hooks";
 import FirestoreService from "@/servies/firestoreService";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import AddressForm from "../forms/address";
+import { SetCartField } from "@/reduxStore/slices/cartSlice";
 
 interface CashPayProps {
   open: boolean;
@@ -15,28 +16,43 @@ interface CashPayProps {
 }
 
 const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
+  const dispatch = useAppDispatch();
   const customer = useCustomer();
+  const address = useAddress();
+  const vendor = useVendor();
   const [addresses, setAddresses] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<{ [key: string]: any }>({});
-  const [addNew, setAddNew] = useState<boolean>(true);
+  const [addNew, setAddNew] = useState<boolean>(false);
 
   useEffect(() => {
     if (!customer) return;
 
     FirestoreService.getSubcollection("customers", customer.id, "addresses").then((res: any[]) => {
-      console.log({ res });
-      setAddresses(res);
+      if (address) {
+        const foundAddress = res.find((add) => add.id == address.id);
+        if (foundAddress) {
+          setSelectedAddress(foundAddress);
+        }
+      }
+
+      if (!res.length) setAddNew(true);
+      else setAddresses(res);
     });
   }, [customer]);
 
-  if (!addresses.length) return;
+  useEffect(() => {
+    if (!Object.keys(selectedAddress).length) return;
+    setAddNew(false);
 
-  const pagination = {
-    clickable: true,
-    renderBullet: function (index: number, className: string) {
-      return '<span class="' + className + '">' + (index + 1) + "</span>";
-    },
-  };
+    const tryFind = addresses.find((add) => add.id == selectedAddress.id);
+    if (!tryFind) {
+      addresses.unshift(selectedAddress);
+    }
+
+    dispatch(
+      SetCartField({ fieldName: "address", value: selectedAddress, vendorId: vendor?.id as string })
+    );
+  }, [selectedAddress]);
 
   const getBody = () => {
     return (
@@ -51,14 +67,6 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
         modules={[Pagination, Navigation]}
         className=" max-w-[400px] min-w-[350px] "
       >
-        {addNew && (
-          <SwiperSlide
-            className="shadow-lg min-h-[300px]  rounded-lg p-4 border   text-xs border-gray-200 mt-5 mb-10 text-secondary
-         "
-          >
-            <AddressForm discard={() => setAddNew(false)} />
-          </SwiperSlide>
-        )}
         {addresses.map((address, index) => (
           <SwiperSlide
             key={index}
@@ -137,13 +145,15 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
           <p className="text-center text-secondary font-medium">Choose Address</p>
           <i className="bi bi-geo text-primary font-semibold "></i>
         </div>
-        <p
-          className="text-center text-xs underline cursor-pointer hover:font-semibold hover:scale-105 transition-transform"
-          onClick={() => setAddNew(true)}
-        >
-          Add New Address ?
-        </p>
-        {getBody()}
+        {!!addresses.length && (
+          <p
+            className="text-center text-xs underline cursor-pointer hover:font-semibold hover:scale-105 transition-transform"
+            onClick={() => setAddNew(!addNew)}
+          >
+            {addNew ? "Select An Existing Address ?" : " Add New Address ?"}
+          </p>
+        )}
+        {addNew ? <AddressForm setSelectedAddress={setSelectedAddress} /> : getBody()}
       </article>
     </Dialog>
   );

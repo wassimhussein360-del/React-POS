@@ -1,3 +1,8 @@
 .pricing-select div {
   min-width: unset;
 }
+
+.min-0 div {
+  min-width: unset !important;
+  min-height: unset !important;
+}

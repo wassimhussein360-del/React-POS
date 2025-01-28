@@ -17,16 +17,25 @@ export type Item = {
   categoryId: string;
   image: string;
   vendorId: string;
+
+  branchesIds: string;
+  images: Array<any>;
+  originalPrice: number;
+  productSpecialInstruction: any;
 };
 
 export type ModifierOption = {
   name: string;
   price: number;
   value?: string;
+  quantity?: number;
   isSelected?: boolean;
 };
 
+export type Indexable = Record<string, any>;
+
 export type Modifier = {
+  id: string;
   type: string;
   required: boolean;
   multiple: boolean;
@@ -56,6 +65,7 @@ export type Vendor = {
   logo: string;
   name: string;
   apiKey: string;
+  defaultCurrency: string;
 };
 
 export type customer = {
