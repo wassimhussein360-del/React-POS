@@ -1,7 +1,14 @@
 import { Dialog } from "@material-tailwind/react";
 import "./cartDialogs.css";
 import { useEffect, useState } from "react";
-import { useAddress, useAppDispatch, useCustomer, useVendor } from "@/reduxStore/hooks";
+import {
+  useAddress,
+  useAppDispatch,
+  useCart,
+  useCustomer,
+  useGeneral,
+  useVendor,
+} from "@/reduxStore/hooks";
 import FirestoreService from "@/servies/firestoreService";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
@@ -9,6 +16,10 @@ import "swiper/css";
 import "swiper/css/pagination";
 import AddressForm from "../forms/address";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
+import { Indexable } from "@/app/abstraction/types";
+import { $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
+import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
+import toast from "react-hot-toast";
 
 interface CashPayProps {
   open: boolean;
@@ -19,7 +30,9 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
   const dispatch = useAppDispatch();
   const customer = useCustomer();
   const address = useAddress();
+  const $cart = useCart();
   const vendor = useVendor();
+  const $general = useGeneral();
   const [addresses, setAddresses] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<{ [key: string]: any }>({});
   const [addNew, setAddNew] = useState<boolean>(false);
@@ -41,7 +54,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
   }, [customer]);
 
   useEffect(() => {
-    if (!Object.keys(selectedAddress).length) return;
+    if (!Object.keys(selectedAddress).length || !switchBranch()) return;
     setAddNew(false);
 
     const tryFind = addresses.find((add) => add.id == selectedAddress.id);
@@ -53,6 +66,55 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
       SetCartField({ fieldName: "address", value: selectedAddress, vendorId: vendor?.id as string })
     );
   }, [selectedAddress]);
+
+  const switchBranch = (): boolean => {
+    let { _outlet, _zone }: Indexable = { _outlet: null, _zone: null };
+    const outlets = $general.outlets;
+
+    _outlet =
+      outlets.find(
+        (olt) =>
+          (_zone = olt.zones.find((zone: Indexable) =>
+            zone.areas.some((area: string) => JSON.parse(area).area.en === selectedAddress.area)
+          ))
+      ) || null;
+
+    // if the selected address has'nt found in any branch
+    if (!_outlet || !_zone) {
+      toast.error("The Provided Address Does not belong to any branch !!");
+      setSelectedAddress({});
+      return false;
+    }
+
+    if ($general.branch.id !== _outlet?.id) {
+      const { oldKey, newKey } = {
+        oldKey: `${vendor?.id}_${$general.branch.id}`,
+        newKey: `${vendor?.id}_${_outlet.id}`,
+      };
+
+      // remove cart from local on current branch
+      const localCart = $getFromLocal("carts");
+      localCart[oldKey] = localCart[oldKey].filter((cart) => cart.key != $cart.key);
+
+      // Add the current cart to new outlet
+      if (!localCart[newKey]) localCart[newKey] = [];
+      localCart[newKey] = localCart[newKey].map((cart) => ({ ...cart, active: false }));
+      localCart[newKey].push($cart);
+
+      //save changes to local storage
+      $writeOnLocal("carts", localCart);
+      $writeOnLocal("branch", _outlet);
+
+      // change cart from global state
+      dispatch(SetGeneralField({ field: "branch", value: _outlet }));
+
+      toast.success("Switched to address belonging branch 👌");
+      handleOpen();
+    }
+    dispatch(SetGeneralField({ field: "zone", value: _zone }));
+
+    return true;
+  };
 
   const getBody = () => {
     return (

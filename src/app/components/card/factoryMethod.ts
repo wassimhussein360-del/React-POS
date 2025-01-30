@@ -4,11 +4,12 @@ import { useAppSelector, useCart, useCustomer, useGeneral, useVendor } from "@/r
 import { CartState } from "@/reduxStore/slices/cartSlice";
 import { GeneralState } from "@/reduxStore/slices/generalSlice";
 import { nanoid } from "nanoid";
+import toast from "react-hot-toast";
 
 export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
   // Cart Slice
 
-  const selections: Indexable = $cart.selections || {};
+  const selections: Indexable = { ...($cart.selections || {}) };
   const customer = $cart.customer;
   const cartItems = formatCartItems($cart.items);
 
@@ -22,8 +23,19 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
 
   const orderData: Indexable = {};
 
+  // selections.areas = outlet.areas;
+  selections.outlet = outlet;
+  selections.address = $cart.address;
+
   let id = orderData.id || nanoid(20);
-  let formattedOrder: any = { ...orderData, id, cartItems, selections, vendorId: vendor.id };
+  let formattedOrder: any = {
+    ...orderData,
+    id,
+    cartItems,
+    selections,
+    vendorId: vendor.id,
+    outlet,
+  };
   let productsDiscountedPrice = 0;
   let subTotal = 0;
   let totalQuantity = 0;
@@ -355,7 +367,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
 
           changesDetected = true;
         }
-        if (fItem && fItem.price !== bItem.originalPrice - bItem.modifiersPrice) {
+        if (fItem && fItem.price !== bItem.originalPrice - bItem.assignedModifiersPrice) {
           changes.push(
             `Item ${bItem.name?.en || bItem.name?.ar} price has changed from ${fItem.price} to ${
               bItem.price
@@ -371,8 +383,15 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
         message: "Cart has been updated due to changes.",
         changes: changes,
       };
-      changes.forEach((change) => {
-        toast.info(change);
+      changes.forEach((change: any) => {
+        toast(changes, {
+          icon: "👏",
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
       });
     }
     return cartChanges;
@@ -454,7 +473,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
         };
 
         totalQuantity += formattedProduct.quantity || 1;
-        formattedProduct.modifiersPrice = 0;
+        formattedProduct.assignedModifiersPrice = 0;
 
         const selectedModifiers = formattedProduct.selectedModifiers;
         let assignedModifiers = JSON.parse(JSON.stringify([...formattedProduct.assignedModifiers]));
@@ -484,7 +503,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
                   const singleModifierPrice =
                     parseFloat(selectedModifierItem.price || "0") *
                     (parseInt(selectedModifierItem.quantity, 10) || 1);
-                  formattedProduct.modifiersPrice += singleModifierPrice;
+                  formattedProduct.assignedModifiersPrice += singleModifierPrice;
                   formattedProduct.productModifiers = productModifiers || null;
                   return selectedModifierItem;
                 }
@@ -498,8 +517,8 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
         formattedProduct.assignedModifiers = assignedModifiers;
 
         // Adjust product price based on modifiers
-        formattedProduct.originalPrice += parseFloat(formattedProduct.modifiersPrice);
-        formattedProduct.price += parseFloat(formattedProduct.modifiersPrice);
+        formattedProduct.originalPrice += parseFloat(formattedProduct.assignedModifiersPrice);
+        formattedProduct.price += parseFloat(formattedProduct.assignedModifiersPrice);
         formattedProduct.discountedAmount = formattedProduct.originalPrice - formattedProduct.price;
 
         productsDiscountedPrice +=
@@ -537,8 +556,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
     cartActiveDiscount.deductedAmount = cartDiscountAmount || 0;
   }
   let deliveryFee = 0;
-  let deliveryZoneId =
-    formattedOrder.selections?.area?.deliveryZoneId || formattedOrder.selections?.area?.id || null;
+  let deliveryZoneId = $general.zone.id;
   formattedOrder.cartActiveDiscount = cartActiveDiscount || {};
   formattedOrder.outlet = formattedOrder.selections?.outlet;
   let shippingDiscount: any = null;
@@ -547,8 +565,11 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
   // if(vendor)
   if (deliveryZoneId && formattedOrder.selections?.orderType == "delivery") {
     formattedOrder.outlet = outlet;
-    const zone = outlet && outlet.zones && outlet.zones.find((z: any) => z.id == deliveryZoneId);
+    const zone = $general.zone;
     if (zone) {
+      console.log(1111111111);
+      console.log(zone);
+
       formattedOrder.zone = zone;
       if (
         zone.shippingDetails?.provider &&
@@ -631,7 +652,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
       location: formattedOrder?.outlet?.location || {},
     },
     customer,
-    selectedPeriod: formattedOrder?.selections?.selectedPeriod || "",
+    selectedPeriod: "ASAP",
     vendorId: formattedOrder.vendorId || "",
     currency: vendor?.defaultCurrency || "KWD",
     status: formattedOrder.status || "cart",
@@ -808,23 +829,23 @@ interface Order {
   shipping?: any;
 }
 
-export const formatCartItems = (items: Item[]) => {
-  return items.map((item) => {
+export const formatCartItems = (items: any[]) => {
+  items = items.map((item: Indexable) => {
     let selectedModifiers: Indexable = {};
+    if (item.assignedModifiers && item.assignedModifiers.length > 0) {
+      item.assignedModifiers.forEach((mod: Indexable) => {
+        let modDetails: Indexable = {};
+        mod.list.forEach((mdItem: Indexable) => {
+          if (mdItem.selected) {
+            modDetails[mdItem.name?.en || mdItem.nameEn || mdItem.name?.ar] = mdItem.quantity || 1;
+          }
+        });
 
-    (item.assignedModifiers || []).forEach((mod: Modifier) => {
-      let modDetails: Indexable = {};
-      mod.options.forEach((mdItem) => {
-        if (mdItem.isSelected) {
-          modDetails.name = mdItem.quantity || 1;
+        if (Object.keys(modDetails).length > 0) {
+          selectedModifiers[mod.id] = modDetails;
         }
       });
-
-      if (Object.keys(modDetails).length > 0) {
-        selectedModifiers[mod.id] = modDetails;
-      }
-    });
-
+    }
     return {
       id: item.id,
       name: item.name,
@@ -839,4 +860,5 @@ export const formatCartItems = (items: Item[]) => {
       selectedModifiers,
     };
   });
+  return items;
 };

@@ -1,4 +1,4 @@
-import { Item, Modifier, ModifierOption } from "@/app/abstraction/types";
+import { Indexable, Item, Modifier, ModifierOption } from "@/app/abstraction/types";
 import { useAppDispatch, useCartItems } from "@/reduxStore/hooks";
 import { AddItem, UpdateItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { Button, Dialog, Input } from "@material-tailwind/react";
@@ -16,7 +16,6 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
   const dispatch = useAppDispatch();
   const items = useCartItems();
   const [temporaryItem, setTemporaryItem] = useState<Item>();
-  const [alreadyAdded, setAlreadyAdded] = useState<boolean>(false);
 
   const [validators, setValidators] = useState<{ [key: number]: { invalid: boolean } }>({});
 
@@ -26,14 +25,11 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
   });
 
   useEffect(() => {
-    setTemporaryItem(JSON.parse(JSON.stringify(product)));
+    const parsedItem = JSON.parse(JSON.stringify(product));
+    setTemporaryItem({ ...parsedItem, quantity: parsedItem.quantity || 1 });
 
     if (open && items.length) {
       setItemDetails();
-
-      const [inCartItem] = items.filter((itm) => itm.id === product?.id);
-
-      setAlreadyAdded(!!inCartItem);
     }
   }, [open, product, items]);
 
@@ -43,9 +39,10 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
     if (matchings.length) {
       const totals = {
         quantity: matchings.reduce((sum, prd) => sum + prd.quantity, 0),
-        stock: matchings[0].stock,
+        stock: matchings[0].stockQuantity,
       };
-      if (matchings.length) setItemsTotals(totals);
+
+      setItemsTotals(totals);
     } else {
       setItemsTotals({
         quantity: 0,
@@ -65,7 +62,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
   };
 
   const saveToCart = () => {
-    if (temporaryItem?.modifiers.length) {
+    if (temporaryItem?.assignedModifiers.length) {
       if (validateItem()) {
         dispatch(UpdateItem(temporaryItem));
         handleOpen();
@@ -85,18 +82,21 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
   const validateItem = (): boolean => {
     let isValid = true;
 
-    const newValidators = temporaryItem?.modifiers.reduce((acc, md: Modifier, index: number) => {
-      if (!md.required) return acc;
+    const newValidators = temporaryItem?.assignedModifiers.reduce(
+      (acc, md: Modifier, index: number) => {
+        if (!md.required) return acc;
 
-      const selectionCount = md.options.filter((op) => op.isSelected).length;
-      const { min = 0, max = 0 } = md;
+        const selectionCount = md.list.filter((op) => op.selected).length;
+        const { minSelection = 0, maxSelection = 0 } = md;
 
-      const hasError = md.multiple ? selectionCount < min : selectionCount === 0;
+        const hasError = md.multiple ? selectionCount < minSelection : selectionCount === 0;
 
-      if (hasError) isValid = false;
+        if (hasError) isValid = false;
 
-      return { ...acc, [index]: { invalid: hasError } };
-    }, {});
+        return { ...acc, [index]: { invalid: hasError } };
+      },
+      {}
+    );
 
     setValidators(newValidators);
     return isValid;
@@ -107,27 +107,27 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
   };
 
   const handleOptionSelection = (modifierIndex: number, optionIndex: number) => {
-    const newValue = !temporaryItem?.modifiers[modifierIndex]?.options[optionIndex].isSelected;
+    const newValue = !temporaryItem?.assignedModifiers[modifierIndex]?.list[optionIndex].selected;
 
-    if (temporaryItem?.modifiers[modifierIndex].multiple) {
-      const countSelections = temporaryItem.modifiers[modifierIndex]?.options.filter(
-        (opt: ModifierOption) => opt.isSelected
+    if (temporaryItem?.assignedModifiers[modifierIndex].multiple) {
+      const countSelections = temporaryItem.assignedModifiers[modifierIndex]?.list.filter(
+        (opt: ModifierOption) => opt.selected
       ).length;
-      const max = temporaryItem.modifiers[modifierIndex].max as number;
+      const max = temporaryItem.assignedModifiers[modifierIndex].maxSelection as number;
       if (max && countSelections >= max && newValue) return;
     }
 
     setTemporaryItem((prev: any) => {
-      let updatedMod = prev.modifiers as Modifier[];
+      let updatedMod = prev.assignedModifiers as Modifier[];
 
       if (!updatedMod[modifierIndex].multiple) {
-        updatedMod[modifierIndex].options = updatedMod[modifierIndex].options.map((opt) => ({
+        updatedMod[modifierIndex].list = updatedMod[modifierIndex].list.map((opt) => ({
           ...opt,
-          isSelected: false,
+          selected: false,
         }));
       }
 
-      updatedMod[modifierIndex].options[optionIndex].isSelected = newValue;
+      updatedMod[modifierIndex].list[optionIndex].selected = newValue;
 
       return {
         ...prev,
@@ -145,34 +145,36 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
     >
       <article
         className={`flex  justify-center text-center gap-2 bg-white shadow-xl shadow-gray-800 rounded-xl py-8 px-12 ${
-          product.modifiers.length ? "" : "flex-col"
+          product.assignedModifiers.length ? "" : "flex-col"
         }`}
       >
         <section className="flex flex-col items-center">
           <img
-            src={product.image}
+            src={product.images[0].url}
             className="min-w-60  max-w-60 aspect-square object-cover rounded-xl"
           />
           <section className="flex justify-between  mt-2 w-56">
             <p className="text-xs text-primary font-semibold">
               {itemsTotals.quantity
-                ? itemsTotals.stock - (temporaryItem?.quantity || 0)
-                : product.stock - (temporaryItem?.quantity || 0)}{" "}
+                ? itemsTotals.stock + (product.quantity || 0) - (temporaryItem?.quantity || 0)
+                : product.stockQuantity - (temporaryItem?.quantity || 0)}{" "}
               Pcs
             </p>
             <p className="text-xs text-gray-800">KD {product.price.toFixed(2)}</p>
           </section>
           <hr className="w-56 my-2 border-gray-300" />
           <aside className="  w-full text-justify">
-            <p className="text-xs text-gray-800">{product.category}</p>
-            <h4 className="text-gray-900 font-semibold  text-xs    max-w-60">{product.name}</h4>
+            <p className="text-xs text-gray-800">
+              {product.categories.map((cat: Indexable) => cat.name.en).join(", ")}
+            </p>
+            <h4 className="text-gray-900 font-semibold  text-xs    max-w-60">{product.name.en}</h4>
           </aside>
           <hr className="w-56 my-2 border-gray-300" />
           <aside className="  flex gap-5 items-center">
             <button
               onClick={() =>
                 (temporaryItem?.quantity || 0) > 1
-                  ? updateQuantity((temporaryItem?.quantity || 2) - 1)
+                  ? updateQuantity(temporaryItem?.quantity - 1)
                   : {}
               }
               className="bg-secondary text-white rounded-full border-l border-gray-400 w-7 h-7  p-0 "
@@ -180,13 +182,13 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
               -
             </button>
             <button className="bg-white text-gray-900 w-5 h-5 p-0" disabled={true}>
-              {temporaryItem?.quantity || product.quantity}
+              {temporaryItem?.quantity}
             </button>
             <button
               onClick={() =>
-                (itemsTotals.stock || product.stock) +
-                  product.quantity -
-                  (temporaryItem?.quantity || 0) >=
+                (itemsTotals.stock || product.stockQuantity) +
+                  (product.quantity || 0) -
+                  temporaryItem?.quantity >=
                 1
                   ? updateQuantity((temporaryItem?.quantity || 0) + 1)
                   : null
@@ -201,32 +203,32 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
         <div className="border border-gray-400 mx-7"></div>
 
         <div className=" min-w-60 flex flex-col justify-between">
-          {!!product?.modifiers.length && (
+          {!!product?.assignedModifiers.length && (
             <aside>
-              {product?.modifiers.length &&
-                (product?.modifiers || []).map((modifier: Modifier, modifierIndex) => {
-                  return (
-                    <article key={modifierIndex} className="">
-                      <section className="flex justify-between items-center  mb-2 text-sm font-semibold text-secondary w-fill">
-                        <p className="flex items-center gap-1">
-                          {modifier.name + " "}
-                          <span
-                            className={`text-[0.6rem] p-0 ${
-                              validators[modifierIndex]?.invalid
-                                ? "text-danger  "
-                                : "text-gray-400 "
-                            }`}
-                          >
-                            &#9679; {modifier.required ? "Required" : "Optional"}
-                          </span>
-                        </p>
-                        <p className=" text-xs">
-                          {modifier.multiple ? `Max  ${modifier.max}` : ""}
-                        </p>
-                      </section>
-                      <section className="w-full">
-                        {modifier.type == "normal" ? (
-                          (modifier?.options || []).map(
+              {product?.assignedModifiers.length &&
+                (product?.assignedModifiers || []).map(
+                  (modifier: Modifier, modifierIndex: number) => {
+                    return (
+                      <article key={modifierIndex} className="">
+                        <section className="flex justify-between items-center  mb-2 text-sm font-semibold text-secondary w-fill">
+                          <p className="flex items-center gap-1">
+                            {modifier.name.en + " "}
+                            <span
+                              className={`text-[0.6rem] p-0 ${
+                                validators[modifierIndex]?.invalid
+                                  ? "text-danger  "
+                                  : "text-gray-400 "
+                              }`}
+                            >
+                              &#9679; {modifier.required ? "Required" : "Optional"}
+                            </span>
+                          </p>
+                          <p className=" text-xs">
+                            {modifier.multiple ? `Max  ${modifier.maxSelection}` : ""}
+                          </p>
+                        </section>
+                        <section className="w-full">
+                          {(modifier?.list || []).map(
                             (option: ModifierOption, optionIndex: number) => {
                               return (
                                 <section
@@ -237,82 +239,86 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                                   <div>
                                     <div className="inline-flex items-center">
                                       {/* Check Box */}
-                                      <input
-                                        type={modifier.multiple ? "checkbox" : "radio"}
-                                        onChange={() => {}}
-                                        checked={
-                                          !!temporaryItem?.modifiers[modifierIndex]?.options[
-                                            optionIndex
-                                          ]?.isSelected
-                                        }
-                                        className="accent-secondary  cursor-pointer me-2 h-4 w-4"
-                                      />
+                                      {modifier.type == "normal" ? (
+                                        <input
+                                          type={modifier.multiple ? "checkbox" : "radio"}
+                                          onChange={() => {}}
+                                          checked={
+                                            !!temporaryItem?.assignedModifiers[modifierIndex]?.list[
+                                              optionIndex
+                                            ]?.selected
+                                          }
+                                          className="accent-secondary  cursor-pointer me-2 h-4 w-4"
+                                        />
+                                      ) : (
+                                        <span
+                                          className={` border-2  me-2 ${
+                                            temporaryItem?.assignedModifiers[modifierIndex]?.list[
+                                              optionIndex
+                                            ].selected
+                                              ? "border-secondary shadow-xl  animate-bounce"
+                                              : "border-gray-400"
+                                          }   rounded min-w-5 min-h-5 cursor-pointer`}
+                                          style={{ backgroundColor: option.color }}
+                                          onClick={() =>
+                                            handleOptionSelection(modifierIndex, optionIndex)
+                                          }
+                                        ></span>
+                                      )}
                                       {/* End Check Box */}
 
                                       <p
                                         className={`text-xs ${
-                                          temporaryItem?.modifiers[modifierIndex]?.options[
+                                          temporaryItem?.assignedModifiers[modifierIndex]?.list[
                                             optionIndex
-                                          ]?.isSelected
+                                          ]?.selected
                                             ? "text-gray-900 font-semibold"
                                             : "text-gray-500"
                                         } `}
                                       >
-                                        {option.name}
+                                        {option.nameEn || option.name.en}
                                       </p>
                                     </div>
                                   </div>
                                   <div
                                     className={`text-xs flex ${
-                                      temporaryItem?.modifiers[modifierIndex]?.options[optionIndex]
-                                        ?.isSelected
+                                      temporaryItem?.assignedModifiers[modifierIndex]?.list[
+                                        optionIndex
+                                      ]?.selected
                                         ? "text-gray-900 font-semibold"
                                         : "text-gray-500"
                                     } `}
                                   >
-                                    +KD{" "}
-                                    <nav className="w-10 text-end">{option.price.toFixed(2)}</nav>
+                                    {option.price ? (
+                                      <>
+                                        +KD
+                                        <nav className="w-10 text-end">
+                                          {option.price.toFixed(2)}
+                                        </nav>
+                                      </>
+                                    ) : (
+                                      "Free"
+                                    )}
                                   </div>
                                 </section>
                               );
                             }
-                          )
-                        ) : (
-                          <section className="flex gap-4">
-                            {modifier.options.map((option: ModifierOption, colorOptionIndex) => {
-                              return (
-                                <span
-                                  key={colorOptionIndex}
-                                  className={` border-2 ${
-                                    temporaryItem?.modifiers[modifierIndex]?.options[
-                                      colorOptionIndex
-                                    ].isSelected
-                                      ? "border-secondary shadow-xl  animate-bounce"
-                                      : "border-gray-400"
-                                  }   rounded min-w-6 min-h-6 cursor-pointer`}
-                                  style={{ backgroundColor: option.value }}
-                                  onClick={() =>
-                                    handleOptionSelection(modifierIndex, colorOptionIndex)
-                                  }
-                                ></span>
-                              );
-                            })}
-                          </section>
-                        )}
-                      </section>
-                      <hr className="w-56 my-4 border-gray-300" />
-                    </article>
-                  );
-                })}
+                          )}
+                        </section>
+                        <hr className="w-56 my-4 border-gray-300" />
+                      </article>
+                    );
+                  }
+                )}
             </aside>
           )}
 
           <aside className="flex justify-center gap-2">
-            {(!product.modifiers.length || product.key) && (
+            {(!product.assignedModifiers.length || product.key) && (
               <Button
                 size="sm"
                 className={`normal-case flex  bg-secondary ${
-                  !temporaryItem?.modifiers.length ? "min-w-40" : "w-1/2"
+                  !temporaryItem?.assignedModifiers.length ? "min-w-40" : "w-1/2"
                 } justify-center`}
                 placeholder={undefined}
                 onClick={() => saveToCart()}
@@ -320,11 +326,11 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                 Save
               </Button>
             )}
-            {!!product.modifiers.length && !product.key && (
+            {!!product.assignedModifiers.length && !product.key && (
               <Button
                 size="sm"
                 className={`normal-case flex  bg-secondary ${
-                  !temporaryItem?.modifiers.length ? "min-w-40" : "w-1/2"
+                  !temporaryItem?.assignedModifiers.length ? "min-w-40" : "w-1/2"
                 } justify-center`}
                 placeholder={undefined}
                 onClick={() => addToCart()}

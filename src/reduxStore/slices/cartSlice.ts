@@ -1,4 +1,4 @@
-import { Discount, Indexable, Item } from "@/app/abstraction/types";
+import { Indexable, Item } from "@/app/abstraction/types";
 import { $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
@@ -10,7 +10,13 @@ export interface CartState {
   active: boolean;
   customer?: any;
   address?: any;
-  selections: Indexable;
+  selections: {
+    paymentMethod?: string;
+    couponCode?: string;
+    orderType?: "delivery" | "pickup";
+
+    origin?: any;
+  };
   [key: string]: any;
 }
 
@@ -35,7 +41,9 @@ const cartSlice = createSlice({
       state.items.push({ ...action.payload });
 
       state.items = state.items.map((itm) =>
-        itm.id == action.payload.id ? { ...itm, stock: itm.stock - action.payload.quantity } : itm
+        itm.id == action.payload.id
+          ? { ...itm, stockQuantity: itm.stockQuantity - action.payload.quantity }
+          : itm
       );
 
       // ? Save to local storage
@@ -62,11 +70,13 @@ const cartSlice = createSlice({
         if (item) {
           incOrDecQun = item.quantity - action.payload.quantity;
           item.quantity = action.payload.quantity;
-          item.modifiers = action.payload.modifiers;
+          item.assignedModifiers = action.payload.assignedModifiers;
         }
 
         state.items = state.items.map((itm) =>
-          itm.id == action.payload.id ? { ...itm, stock: itm.stock + incOrDecQun } : itm
+          itm.id == action.payload.id
+            ? { ...itm, stockQuantity: itm.stockQuantity + incOrDecQun }
+            : itm
         );
 
         // ? Save to local storage
@@ -81,9 +91,11 @@ const cartSlice = createSlice({
       const itemToRemove = state.items.find((item) => (hasKey ? item.key === key : item.id === id));
 
       if (itemToRemove) {
-        // Update stock for the matching item
+        // Update stockQuantity for the matching item
         state.items = state.items.map((item) =>
-          item.id === id ? { ...item, stock: item.stock + itemToRemove.quantity } : item
+          item.id === id
+            ? { ...item, stockQuantity: item.stockQuantity + itemToRemove.quantity }
+            : item
         );
 
         // Remove the item from the list
@@ -108,17 +120,8 @@ const cartSlice = createSlice({
       if (item) item.quantity = quantity;
 
       state.items = state.items.map((itm) =>
-        itm.id == id ? { ...itm, stock: itm.stock + incOrDecQun } : itm
+        itm.id == id ? { ...itm, stockQuantity: itm.stockQuantity + incOrDecQun } : itm
       );
-
-      // ? Save to local storage
-      setCartToLocal(item?.vendorId as string, state);
-    },
-    AddDiscount: (state, action: PayloadAction<{ id: string; discount: Discount }>) => {
-      const item = state.items.find((item) => item.id === action.payload.id);
-      if (item) {
-        item.discount = action.payload.discount;
-      }
 
       // ? Save to local storage
       setCartToLocal(item?.vendorId as string, state);
@@ -186,7 +189,6 @@ export const {
   AddItem,
   RemoveItem,
   UpdateQuantity,
-  AddDiscount,
   SetCartField,
   UpdateItem,
   ResetCart,

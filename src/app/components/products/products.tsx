@@ -34,27 +34,31 @@ const Products: React.FC<ProductProps> = ({ products }) => {
 
 export default Products;
 
-export const formatProducts = (products: any[], vendorId: string, outletId: string): Item[] => {
+export const formatProducts = (products: any[], outletId: string): Item[] => {
   const formattedProducts = products
     .filter((product) => product.stockQuantity > 0 && product.branchesIds.includes(outletId))
     .map((product) => {
-      return {
-        ...product,
-        modifiers:
-          product.assignedModifiers
-            .filter((assignedMd: any) => assignedMd.active && assignedMd.list.length > 0)
-            .map((md: any) => {
-              if (!md.active) return;
+      // Deep clone the product
+      const clonedProduct = JSON.parse(JSON.stringify(product));
 
+      // Process modifiers separately and assign back
+      const updatedModifiers = clonedProduct.assignedModifiers
+        .filter((assignedMd: any) => assignedMd.active && assignedMd.list.length > 0)
+        .map((md: any) => ({
+          ...md,
+          list: md.list
+            .filter((filterOption: any) => filterOption.active)
+            .map((opt: any) => {
               return {
-                ...md,
-                list: md.list
-                  .filter((filterOption: any) => filterOption.active)
-                  .map((opt: any) => {
-                    if (opt.active) return opt;
-                  }),
+                ...opt,
+                price: parseFloat(opt.price), // Ensure new price is assigned
               };
-            }) || [],
+            }),
+        }));
+
+      return {
+        ...clonedProduct,
+        assignedModifiers: updatedModifiers, // Assign updated modifiers back
       };
     });
 

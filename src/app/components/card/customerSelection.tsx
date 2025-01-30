@@ -45,7 +45,7 @@ const CustomerAndProductSelection = () => {
 
   function handleProductSelect(_product: Item) {
     setProduct(_product);
-    if (_product.modifiers.length) setOpenDetails(true);
+    if (_product.assignedModifiers.length) setOpenDetails(true);
     else {
       const foundItem = cartItems.find((itm) => itm.id == _product.id);
       if (foundItem) {
@@ -62,7 +62,7 @@ const CustomerAndProductSelection = () => {
 
     algoliaSearch(vendor.id, "products", productSearch)
       .then((productRes) => {
-        const formattedProducts = formatProducts(productRes, vendor.id, $general.branch.id);
+        const formattedProducts = formatProducts(productRes, $general.branch.id);
         setProducts(formattedProducts);
       })
       .catch((error) => {
@@ -258,9 +258,13 @@ const CustomerAndProductSelection = () => {
                 }}
               >
                 <div className="flex items-center gap-2">
-                  <img src={pr.image} alt={pr.image} className="w-8 h-8   rounded-full " />
+                  <img
+                    src={pr.images[0].url}
+                    alt={pr.name.en}
+                    className="w-8 h-8   rounded-full "
+                  />
                   <div>
-                    <p className="text-sm"> {pr.name}</p>
+                    <p className="text-sm"> {pr.name.en}</p>
                     <p className="text-xs">
                       {" "}
                       <span className=" text-warning">KD {pr.price.toFixed(2)} </span>

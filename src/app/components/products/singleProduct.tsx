@@ -1,4 +1,4 @@
-import { Item } from "@/app/abstraction/types";
+import { Indexable, Item } from "@/app/abstraction/types";
 import { useAppDispatch, useCartItems } from "@/reduxStore/hooks";
 import { AddItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { Badge } from "@material-tailwind/react";
@@ -26,9 +26,10 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
     if (matchings.length) {
       const totals = {
         quantity: matchings.reduce((sum, prd) => sum + prd.quantity, 0),
-        stock: matchings[0].stock,
+        stock: matchings[0].stockQuantity,
       };
-      if (matchings.length) setItemsTotals(totals);
+
+      setItemsTotals(totals);
     } else {
       setItemsTotals({
         quantity: 0,
@@ -57,26 +58,31 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
         } ${className}`}
         onClick={() =>
           !(itemsTotals.quantity && itemsTotals.stock <= 0)
-            ? !product.modifiers.length
+            ? !product.assignedModifiers.length
               ? dispatch(
                   itemsTotals.quantity > 0
                     ? UpdateQuantity({ id: product.id, quantity: itemsTotals.quantity + 1 })
-                    : AddItem(product)
+                    : AddItem({ ...product, quantity: 1 })
                 )
               : setOpenDetails(true)
             : undefined
         }
       >
         <section className="flex flex-col items-center">
-          <img src={product.image} className=" w-[90%] aspect-square object-cover rounded-xl" />
+          <img
+            src={product.images[0].url}
+            className=" w-[90%] aspect-square object-cover rounded-xl"
+          />
           <aside className="pt-4  w-full">
-            <p className="text-xs text-gray-800">{product.category}</p>
-            <h4 className="text-gray-900 font-semibold  text-xs truncate">{product.name}</h4>
+            <p className="text-xs text-gray-800">
+              {product.categories.map((cat: Indexable) => cat.name.en).join(", ")}
+            </p>
+            <h4 className="text-gray-900 font-semibold  text-xs truncate">{product.name.en}</h4>
           </aside>
         </section>
         <section className="flex justify-between">
           <p className="text-xs text-primary font-semibold">
-            {itemsTotals.quantity ? itemsTotals.stock : product.stock} Pcs
+            {itemsTotals.quantity ? itemsTotals.stock : product.stockQuantity} Pcs
           </p>
           <p className="text-xs text-gray-800">KD {product.price.toFixed(2)}</p>
         </section>

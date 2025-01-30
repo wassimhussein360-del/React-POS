@@ -11,10 +11,6 @@ const CardTotals: React.FC<CartTotalsType> = ({}) => {
   const $general = useGeneral();
 
   useEffect(() => {
-    console.log({ 100: $general.order });
-
-    console.log({ 11: $general.order.cart });
-
     if ($general.order.cart) setCart($general.order.cart);
   }, [$general.order]);
 

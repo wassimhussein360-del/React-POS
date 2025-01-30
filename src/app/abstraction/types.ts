@@ -39,7 +39,7 @@ export type ModifierOption = {
   price: number;
   value?: string;
   quantity?: number;
-  isSelected?: boolean;
+  selected?: boolean;
 };
 
 export type Indexable = Record<string, any>;
@@ -49,10 +49,10 @@ export type Modifier = {
   type: string;
   required: boolean;
   multiple: boolean;
-  name: string;
-  min?: number;
-  max?: number;
-  options: ModifierOption[];
+  name: { en: string; ar: string };
+  minSelection?: number;
+  maxSelection?: number;
+  list: ModifierOption[];
 };
 
 export type Category = {

@@ -19,7 +19,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "../../../../firebaseConfig";
 import { SetVendor } from "@/reduxStore/slices/userSlice";
-import { Indexable, Vendor } from "@/app/abstraction/types";
+import { Vendor } from "@/app/abstraction/types";
 import { ActivateCart, SetCartField, VoidCart } from "@/reduxStore/slices/cartSlice";
 import FirestoreService from "@/servies/firestoreService";
 import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
@@ -53,8 +53,14 @@ export default function Header() {
             ? storedOutlet
             : _outlets[0];
 
-        setOutlets(() => _outlets);
+        dispatch(
+          SetGeneralField({
+            field: "outlets",
+            value: _outlets,
+          })
+        );
 
+        setOutlets(() => _outlets);
         onOutletSelect(selectedOutlet.id, selectedOutlet);
       });
     }
@@ -75,8 +81,9 @@ export default function Header() {
   }, [$general.branch]);
 
   useEffect(() => {
-    if (!$vendor || !outlets || !$cart.items.length) return;
+    if (!$vendor || !outlets) return;
     const refactoredOrder = refactorOrder($cart, $general);
+    console.log(refactoredOrder.order);
 
     dispatch(
       SetGeneralField({
@@ -84,8 +91,6 @@ export default function Header() {
         value: refactoredOrder.order,
       })
     );
-
-    console.log({ refactoredOrder });
   }, [$cart]);
 
   const signOut = () => {

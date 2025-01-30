@@ -6,6 +6,8 @@ export interface GeneralState {
   products: Array<Item>;
   discounts: Array<any>;
   order: Indexable;
+  outlets: Array<any>;
+  zone: Indexable;
   [key: string]: any;
 }
 
@@ -14,6 +16,8 @@ const initialState: GeneralState = {
   products: [],
   discounts: [],
   order: {},
+  outlets: [],
+  zone: {},
 };
 
 const generalSlice = createSlice({
