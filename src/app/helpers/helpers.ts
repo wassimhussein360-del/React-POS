@@ -22,8 +22,16 @@ export function $getSingularOrPlural(text: string, quantity: number): string {
 }
 
 export function $toTitleCase(text: any): string {
-  if (!text && typeof text !== "string") return text;
-  return text
+  if (!text || typeof text !== "string") return text;
+
+  // Preprocess the string to handle camelCase, snake_case, kebab-case, etc.
+  const processedText = text
+    .replace(/([A-Z])/g, " $1") // Add space before capital letters (camelCase)
+    .replace(/[_-]/g, " ") // Replace underscores and hyphens with spaces
+    .trim(); // Remove leading/trailing spaces
+
+  // Split into words, capitalize each word, and join back
+  return processedText
     .split(" ")
     .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");

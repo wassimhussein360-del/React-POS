@@ -3,7 +3,7 @@ import { $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
 
-interface CartState {
+export interface CartState {
   key: string | null;
   items: Item[];
   holdingName: string;
@@ -234,7 +234,7 @@ function setCartToLocal(vendorId: string, cart: CartState) {
 }
 
 function deleteCartFromLocal(vendorId: string, cartKey: string) {
-  let getLocalCarts = $getFromLocal("carts");
+  let getLocalCarts = $getFromLocal("carts") || {};
   const findCartIndex = (getLocalCarts[vendorId] || []).findIndex(
     (cart: CartState) => cart.key == cartKey
   );

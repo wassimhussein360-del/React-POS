@@ -1,27 +1,37 @@
-export type Discount = {
-  unit: "kwd" | "%";
-  value: number;
-};
-
 export type Item = {
-  id: string;
-  key?: number;
-  name: string;
-  barcode: string;
-  price: number;
-  quantity: number;
-  stock: number;
-  discount?: Discount;
-  modifiers: any[];
-  category: string;
-  categoryId: string;
-  image: string;
-  vendorId: string;
+  [key: string]: any;
+  // id: string;
+  // key?: number;
+  // name: { en: string; ar: string }; // Supports multiple languages
+  // barcode: string;
+  // price: number;
+  // quantity: number;
+  // stock: number;
+  // modifiers: any[]; // Consider defining a type for modifiers
+  // category: { name: string; id: string }; // Matches combinedProduct structure
+  // categoryId: string;
+  // image: string;
+  // vendorId: string;
 
-  branchesIds: string;
-  images: Array<any>;
-  originalPrice: number;
-  productSpecialInstruction: any;
+  // handleStock?: string;
+  // discountedPrice: number;
+  // branchesIds: string;
+  // images: Array<any>; // Define a type for images if needed
+  // originalPrice: number;
+  // productSpecialInstruction: string;
+  // description: { en: string; ar: string }; // Supports multiple languages
+  // tags: string[];
+  // isStockManagement?: boolean;
+  // assignedModifiers?: any[];
+  // selectedModifiers?: any[];
+  // stockQuantity: number;
+  // activeDiscount?: any; // Define a type for discounts if possible
+  // weight: number;
+  // length: number;
+  // height: number;
+  // width: number;
+  // sku: string | null;
+  // stockHandle: string;
 };
 
 export type ModifierOption = {

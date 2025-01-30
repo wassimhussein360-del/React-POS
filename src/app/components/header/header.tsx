@@ -23,6 +23,7 @@ import { Indexable, Vendor } from "@/app/abstraction/types";
 import { ActivateCart, SetCartField, VoidCart } from "@/reduxStore/slices/cartSlice";
 import FirestoreService from "@/servies/firestoreService";
 import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
+import { refactorOrder } from "../card/factoryMethod";
 
 export default function Header() {
   const dispatch = useAppDispatch();
@@ -31,6 +32,7 @@ export default function Header() {
 
   const $vendor = useVendor();
   const $general = useGeneral();
+  const $cart = useCart();
   const navigator = useRouter();
 
   const [vendor, setVendor] = React.useState<any>();
@@ -71,6 +73,20 @@ export default function Header() {
       dispatch(VoidCart({ vendorId: "" }));
     }
   }, [$general.branch]);
+
+  useEffect(() => {
+    if (!$vendor || !outlets || !$cart.items.length) return;
+    const refactoredOrder = refactorOrder($cart, $general);
+
+    dispatch(
+      SetGeneralField({
+        field: "order",
+        value: refactoredOrder.order,
+      })
+    );
+
+    console.log({ refactoredOrder });
+  }, [$cart]);
 
   const signOut = () => {
     localStorage.clear();

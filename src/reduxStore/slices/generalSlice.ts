@@ -1,10 +1,11 @@
 import { Indexable, Item } from "@/app/abstraction/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface GeneralState {
+export interface GeneralState {
   branch: Indexable;
   products: Array<Item>;
   discounts: Array<any>;
+  order: Indexable;
   [key: string]: any;
 }
 
@@ -12,6 +13,7 @@ const initialState: GeneralState = {
   branch: {},
   products: [],
   discounts: [],
+  order: {},
 };
 
 const generalSlice = createSlice({

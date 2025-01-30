@@ -1,7 +1,6 @@
 import { CancelIcon } from "@/assets/icons";
 import { useEffect, useState } from "react";
-import DiscountDialog from "./dialogs/discountDialog";
-import { Discount, Item } from "@/app/abstraction/types";
+import { Item } from "@/app/abstraction/types";
 import { AddDiscount, RemoveItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import ProductDetails from "../products/productDetails";
@@ -14,10 +13,7 @@ interface SingleItemProps {
 
 const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
   const dispatch = useAppDispatch();
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(!open);
   const [isVisible, setIsVisible] = useState(false);
-  const [discount, setDiscount] = useState<Discount | null>(null);
   const [openDetails, setOpenDetails] = useState(false);
 
   useEffect(() => {
@@ -32,30 +28,12 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
     dispatch(RemoveItem({ id: item.id, key: item.key }));
   };
 
-  const addDiscount = (id: string, discount: Discount) => {
-    dispatch(AddDiscount({ id, discount }));
-  };
-
-  useEffect(() => {
-    if (discount) {
-      addDiscount(item.id, discount);
-    }
-    setOpen(false);
-  }, [discount]);
-
   return (
     <div
       className={` border border-gray-400 rounded-xl p-2 flex justify-between items-center
           duration-500 
         ${isVisible ? "translate-x-0 opacity-100 delay-0" : "translate-x-10 opacity-0"} `}
     >
-      <DiscountDialog
-        open={open}
-        handleOpen={handleOpen}
-        setDiscount={setDiscount}
-        discount={discount}
-        originalPrice={item.price}
-      />
       <ProductDetails
         open={openDetails}
         handleOpen={() => setOpenDetails(!openDetails)}
@@ -77,22 +55,11 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
             <p className=" me-1 text-gray-800">KD</p>
 
             <p
-              className={` me-1  ${
-                discount?.value ? "line-through text-gray-600" : "text-gray-800"
-              }`}
+              className={` me-1 
+                text-gray-800
+              `}
             >
               {item.price}
-            </p>
-            {discount && discount.value > 0 && (
-              <p className="me-1 font-semibold text-primary">
-                {" "}
-                {applyDiscount(item.price, item.discount)?.toFixed(2)}
-              </p>
-            )}
-            <p className={`text-xs underline text-danger cursor-pointer`} onClick={handleOpen}>
-              {item.discount?.value
-                ? `${item.discount.value} ${item.discount.unit}`
-                : "+ Add Discount"}
             </p>
           </aside>
         </section>
@@ -126,13 +93,3 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
 };
 
 export default SingleItem;
-
-export const applyDiscount = (price: number, discount: Discount | null | undefined): number => {
-  if (discount)
-    if (discount?.unit === "%") {
-      return price * (1 - discount.value / 100);
-    } else {
-      return price - discount.value;
-    }
-  return price;
-};

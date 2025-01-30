@@ -27,6 +27,7 @@ const CartInfo = ({ className }: { className: string }) => {
             {["Delivery", "Pickup"].map((orderType) => {
               return (
                 <Button
+                  key={orderType}
                   className={`p-0 px-2 normal-case  border-none shadow ${
                     cart.selections?.orderType == orderType.toLowerCase()
                       ? "bg-primary"

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import SingleItem from "./SingleItem";
 import { CancelIcon } from "@/assets/icons";
-import { useCartItems, useAppDispatch } from "@/reduxStore/hooks";
+import { useCartItems, useAppDispatch, useGeneral } from "@/reduxStore/hooks";
 import { RemoveItem } from "@/reduxStore/slices/cartSlice";
 
 interface CartItemsProps {}
@@ -9,6 +9,7 @@ interface CartItemsProps {}
 const CartItems: React.FC<CartItemsProps> = ({}) => {
   const items = useCartItems();
   const dispatch = useAppDispatch();
+  const $general = useGeneral();
 
   const clearAllItems = () => {
     items.forEach((item) => dispatch(RemoveItem({ id: item.id })));
@@ -21,7 +22,7 @@ const CartItems: React.FC<CartItemsProps> = ({}) => {
           <span className="flex items-center p-0">
             <h6 className="text-sm">Products Added</h6>
             <p className="bg-primary text-white ms-1 rounded flex items-center justify-center w-4 h-4 text-xs">
-              {items.length}
+              {$general.order?.cart?.cartItems?.length || 0}
             </p>
           </span>
           <nav

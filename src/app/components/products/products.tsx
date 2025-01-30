@@ -39,55 +39,22 @@ export const formatProducts = (products: any[], vendorId: string, outletId: stri
     .filter((product) => product.stockQuantity > 0 && product.branchesIds.includes(outletId))
     .map((product) => {
       return {
-        id: product.id,
-        vendorId: vendorId,
-        name: product.name.en,
-        price: product.price,
-        quantity: 1,
-        barcode: product.id,
-        stock: product.stockQuantity,
+        ...product,
         modifiers:
           product.assignedModifiers
             .filter((assignedMd: any) => assignedMd.active && assignedMd.list.length > 0)
             .map((md: any) => {
               if (!md.active) return;
 
-              const modifier: Modifier = {
-                id: md.id,
-                type: md.type,
-                required: md.required,
-                multiple: md.multiple,
-
-                name: md.name?.en || md.nameEn,
-
-                options: md.list
+              return {
+                ...md,
+                list: md.list
                   .filter((filterOption: any) => filterOption.active)
                   .map((opt: any) => {
-                    if (!opt.active) return;
-
-                    return {
-                      name: opt.name?.en || opt.nameEn,
-                      price: parseFloat(opt.price || "0"),
-                      value: opt.color || undefined,
-                    };
+                    if (opt.active) return opt;
                   }),
               };
-
-              if (modifier.multiple) {
-                modifier.min = parseInt(md.minSelection) || 0;
-                modifier.max = parseInt(md.maxSelection) || 0;
-              }
-
-              return modifier;
             }) || [],
-
-        category: product.categories.map((cat: any) => cat.name.en).join(", "),
-        categoryId: product.categories.map((cat: any) => cat.id).join(", "),
-        image: product.images[0].url,
-        branchesIds: product.branchesIds || [],
-        images: product.images.map((img: any) => img.url),
-        originalPrice: product.originalPrice || 0,
-        productSpecialInstruction: product.productSpecialInstruction || "",
       };
     });
 
