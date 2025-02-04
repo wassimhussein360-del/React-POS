@@ -4,6 +4,8 @@ import { Item } from "@/app/abstraction/types";
 import { AddDiscount, RemoveItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import ProductDetails from "../products/productDetails";
+import { $currency, $toTitleCase } from "@/app/helpers/helpers";
+import SelectedModifiersSummary from "./modifiersSummary";
 
 interface SingleItemProps {
   item: Item;
@@ -49,18 +51,21 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
 
         <section className="text-xs flex flex-col justify-between">
           <aside>
-            <p className="text-xs font-semibold truncate max-w-32">{item.name.en}</p>
+            <p className="text-sm font-semibold truncate max-w-32">{$toTitleCase(item.name.en)}</p>
           </aside>
-          <aside className="flex items-center">
-            <p className=" me-1 text-gray-800">KD</p>
+          {!!item.assignedModifiers.length && (
+            <SelectedModifiersSummary assignedModifiers={item.assignedModifiers || []} />
+          )}
 
+          <aside className="flex items-end gap-1 text-xs">
             <p
-              className={` me-1 
-                text-gray-800
-              `}
+              className={` 
+                text-gray-800 leading-normal
+                `}
             >
-              {item.price}
+              {item.price.toFixed(2)}
             </p>
+            <p className=" text-gray-800 flex  text-[7px]">{$currency()}</p>
           </aside>
         </section>
       </aside>

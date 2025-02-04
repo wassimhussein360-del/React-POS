@@ -67,6 +67,12 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
     );
   }, [selectedAddress]);
 
+  useEffect(() => {
+    if (!$cart.address) {
+      setSelectedAddress({});
+    }
+  }, [$cart.address]);
+
   const switchBranch = (): boolean => {
     let { _outlet, _zone }: Indexable = { _outlet: null, _zone: null };
     const outlets = $general.outlets;

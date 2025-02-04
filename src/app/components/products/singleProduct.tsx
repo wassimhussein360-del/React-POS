@@ -4,6 +4,7 @@ import { AddItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { Badge } from "@material-tailwind/react";
 import React, { use, useEffect, useState } from "react";
 import ProductDetails from "./productDetails";
+import { $currency } from "@/app/helpers/helpers";
 
 interface SingleProductProps {
   product: Item;
@@ -84,7 +85,9 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
           <p className="text-xs text-primary font-semibold">
             {itemsTotals.quantity ? itemsTotals.stock : product.stockQuantity} Pcs
           </p>
-          <p className="text-xs text-gray-800">KD {product.price.toFixed(2)}</p>
+          <p className="text-xs text-gray-800">
+            {$currency()} {product.price.toFixed(2)}
+          </p>
         </section>
       </figure>
     </Badge>

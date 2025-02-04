@@ -3,3 +3,4 @@ import { functions } from "../../firebaseConfig";
 
 export const createCustomerAddress = httpsCallable(functions, "createCustomerAddress");
 export const createCustomer = httpsCallable(functions, "createOrGetCustomer");
+export const updateOrderStatus = httpsCallable(functions, "updateOrderStatus");

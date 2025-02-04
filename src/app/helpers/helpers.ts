@@ -85,3 +85,186 @@ export function $loader(show: boolean) {
     }
   }
 }
+
+export function $currency() {
+  return $getFromLocal("vendor")?.defaultCurrency || "KD";
+}
+
+export function $deepEqual(obj1: any, obj2: any): boolean {
+  // Primitive types and reference equality check
+  if (obj1 === obj2) return true;
+
+  // Handle null/undefined cases
+  if (typeof obj1 !== "object" || obj1 === null || typeof obj2 !== "object" || obj2 === null) {
+    return false;
+  }
+
+  // Special case handling for Dates
+  if (obj1 instanceof Date && obj2 instanceof Date) {
+    return obj1.getTime() === obj2.getTime();
+  }
+
+  // Special case handling for RegExp
+  if (obj1 instanceof RegExp && obj2 instanceof RegExp) {
+    return obj1.source === obj2.source && obj1.flags === obj2.flags;
+  }
+
+  // Array comparison
+  if (Array.isArray(obj1) && Array.isArray(obj2)) {
+    if (obj1.length !== obj2.length) return false;
+    return obj1.every((item, index) => $deepEqual(item, obj2[index]));
+  }
+
+  // Object comparison
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) return false;
+
+  return keys1.every((key) => {
+    // Check if key exists in both objects
+    if (!obj2.hasOwnProperty(key)) return false;
+
+    // Recursive deep comparison for nested properties
+    return $deepEqual(obj1[key], obj2[key]);
+  });
+}
+
+/**
+ * Format a date using customizable patterns
+ * @param date - Date object to format
+ * @param format - Format string with tokens:
+ * YYYY: 4-digit year
+ * YY: 2-digit year
+ * MMMM: Full month name
+ * MMM: Short month name
+ * MM: 2-digit month
+ * M: Month number
+ * DD: 2-digit day
+ * D: Day number
+ * dddd: Full weekday
+ * ddd: Short weekday
+ * HH: 24-hour format
+ * hh: 12-hour format
+ * mm: Minutes
+ * ss: Seconds
+ * A: AM/PM (uppercase)
+ * a: am/pm (lowercase)
+ * @returns Formatted date string
+ */
+export function $formatDate(date: Date, format: string): string {
+  date = new Date(date);
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const getOrdinal = (n: number) => {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+  return format.replace(/(YYYY|YY|MMMM|MMM|MM|M|DD|D|dddd|ddd|HH|hh|mm|ss|A|a|Do)/g, (match) => {
+    switch (match) {
+      case "YYYY":
+        return date.getFullYear().toString();
+      case "YY":
+        return date.getFullYear().toString().slice(-2);
+      case "MMMM":
+        return monthNames[date.getMonth()];
+      case "MMM":
+        return monthNames[date.getMonth()].slice(0, 3);
+      case "MM":
+        return pad(date.getMonth() + 1);
+      case "M":
+        return (date.getMonth() + 1).toString();
+      case "DD":
+        return pad(date.getDate());
+      case "D":
+        return date.getDate().toString();
+      case "dddd":
+        return dayNames[date.getDay()];
+      case "ddd":
+        return dayNames[date.getDay()].slice(0, 3);
+      case "HH":
+        return pad(date.getHours());
+      case "hh":
+        return pad(date.getHours() % 12 || 12);
+      case "mm":
+        return pad(date.getMinutes());
+      case "ss":
+        return pad(date.getSeconds());
+      case "A":
+        return date.getHours() >= 12 ? "PM" : "AM";
+      case "a":
+        return date.getHours() >= 12 ? "pm" : "am";
+      case "Do":
+        return getOrdinal(date.getDate());
+      default:
+        return match;
+    }
+  });
+}
+
+export function $getSeverity(status: any): string {
+  if (typeof status !== "string") return "black";
+  const stu = status.toLowerCase();
+
+  if (["pending"].includes(stu)) return "warning";
+  if (["preparing"].includes(stu)) return "secondary";
+  if (["delivering"].includes(stu)) return "info";
+  if (["completed"].includes(stu)) return "success";
+
+  return "black";
+}
+
+export function $pluralToSingular(word: string, count: number): string {
+  // Handle common pluralization rules and exceptions
+  const irregularPlurals: { [key: string]: string } = {
+    children: "child",
+    "Statuses have": "Status has",
+  };
+
+  // Check for irregular plurals first
+  if (irregularPlurals[word.toLowerCase()]) {
+    return count === 1 ? irregularPlurals[word.toLowerCase()] : word;
+  }
+
+  // Handle common plural patterns
+  const pluralPatterns = [
+    { pattern: /(quiz)zes$/i, replace: "$1" },
+    { pattern: /(matr)ices$/i, replace: "$1ix" },
+    { pattern: /(vert|ind)ices$/i, replace: "$1ex" },
+    { pattern: /(alias|status)es$/i, replace: "$1" },
+    { pattern: /(ss)$/i, replace: "$1" }, // words ending with ss (e.g., dress)
+    { pattern: /(s)es$/i, replace: "$1" },
+    { pattern: /(z)zes$/i, replace: "$1" },
+    { pattern: /([^aeiou])ies$/i, replace: "$1y" },
+    { pattern: /(s)$/i, replace: "" }, // general case for words ending with s
+  ];
+
+  // Apply patterns
+  for (const { pattern, replace } of pluralPatterns) {
+    if (pattern.test(word)) {
+      return count === 1 ? word.replace(pattern, replace) : word;
+    }
+  }
+
+  // Return original word if no patterns matched
+  return word;
+}

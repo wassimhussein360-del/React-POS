@@ -1,9 +1,10 @@
 import { Chevron } from "@/assets/icons";
-import React, { useEffect } from "react";
+import React from "react";
 import SingleProduct from "./singleProduct";
-import { Item, Modifier } from "@/app/abstraction/types";
-import FirestoreService from "@/servies/firestoreService";
+import { Item } from "@/app/abstraction/types";
 import ProductSkeleton from "./productSkeletone";
+
+import "./products.css";
 
 interface ProductProps {
   products: Item[];
@@ -14,12 +15,12 @@ const Products: React.FC<ProductProps> = ({ products }) => {
     <article>
       <section className="flex justify-between items-center mb-4">
         <h4 className="font-semibold ">Products</h4>
-        <aside className="flex gap-4 ">
+        {/* <aside className="flex gap-4 ">
           <Chevron className="  rotate-90 w-4 h-4 cursor-pointer" />
           <Chevron className=" -rotate-90 w-4 h-4 cursor-pointer" />
-        </aside>
+        </aside> */}
       </section>
-      <section className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6  gap-5  grid-flow-row grid-rows-2 custom-grid">
+      <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6  gap-5 max-h-[420px]  custom-grid">
         {products.length
           ? products.map((pr, i) => {
               return <SingleProduct key={i} product={pr} />;

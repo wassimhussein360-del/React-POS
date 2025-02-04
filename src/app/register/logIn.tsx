@@ -112,18 +112,19 @@ export default function LogIn() {
       });
   };
 
-  const logInWithUsernameAndPassword = (email: string, password: string) => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((result) => {
-        const user = result.user;
+  const logInWithUsernameAndPassword = async (email: string, password: string) => {
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
 
-        toast.success("Login successful!");
-        router.push("/");
-      })
-      .catch((error) => {
-        toast.error("Login failed! Please check your credentials.");
-        console.error("Error:", error.message);
-      });
+      const user = result.user;
+
+      toast.success("Login successful!");
+      router.push("/");
+    } catch (error) {
+      console.log(3);
+      toast.error("Login failed! Please check your credentials.");
+      console.error("Error:", error.message);
+    }
   };
 
   return (
@@ -141,7 +142,7 @@ export default function LogIn() {
 
       <br />
 
-      <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96" onSubmit={handleSubmit}>
+      <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
         <div className="mb-1 flex flex-col gap-6">
           {/* Social Log in */}
 
@@ -250,7 +251,6 @@ export default function LogIn() {
         <br />
 
         <Button
-          type="submit"
           className="mt-6  bg-secondary flex items-center justify-center gap-3 text-primary"
           disabled={submitCounter > 1 || !email || !password}
           onClick={() => logInWithUsernameAndPassword(email, password)}

@@ -13,7 +13,7 @@ import { Button, Menu, MenuHandler, MenuList, MenuItem, Spinner } from "@materia
 import { useEffect, useState } from "react";
 import React from "react";
 import { formatProducts } from "../products/products";
-import { $getColorFromString, $getImgAlter } from "@/app/helpers/helpers";
+import { $currency, $getColorFromString, $getImgAlter } from "@/app/helpers/helpers";
 import ProductDetails from "../products/productDetails";
 import { AddItem, SetCartField, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import NewCustomerDialog from "./dialogs/newCustomer";
@@ -147,7 +147,7 @@ const CustomerAndProductSelection = () => {
               {customerLoading && <Spinner className="w-4 h-4" />}
             </Button>
           </MenuHandler>
-          <MenuList className="max-h-[20rem]">
+          <MenuList className="max-h-[20rem] z-[9999]">
             <MenuItem className="hover:bg-none p-0">
               <input
                 type="text"
@@ -233,7 +233,7 @@ const CustomerAndProductSelection = () => {
             {productLoading && <Spinner className="w-4 h-4" />}
           </Button>
         </MenuHandler>
-        <MenuList className="max-h-[20rem]">
+        <MenuList className="max-h-[20rem] z-[9999]">
           <MenuItem className="hover:bg-none p-0">
             <input
               type="text"
@@ -267,7 +267,9 @@ const CustomerAndProductSelection = () => {
                     <p className="text-sm"> {pr.name.en}</p>
                     <p className="text-xs">
                       {" "}
-                      <span className=" text-warning">KD {pr.price.toFixed(2)} </span>
+                      <span className=" text-warning">
+                        {$currency()} {pr.price.toFixed(2)}{" "}
+                      </span>
                     </p>
                   </div>
                 </div>

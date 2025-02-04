@@ -1,5 +1,5 @@
 import { Indexable, Item } from "@/app/abstraction/types";
-import { $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
+import { $deepEqual, $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
 
@@ -14,7 +14,7 @@ export interface CartState {
     paymentMethod?: string;
     couponCode?: string;
     orderType?: "delivery" | "pickup";
-
+    specialInstructions?: string;
     origin?: any;
   };
   [key: string]: any;
@@ -25,7 +25,7 @@ const initialState: CartState = {
   key: null,
   holdingName: "",
   active: false,
-  selections: {},
+  selections: { orderType: "delivery" },
 };
 
 const cartSlice = createSlice({
@@ -37,12 +37,27 @@ const cartSlice = createSlice({
         state.key = nanoid(10);
         state.active = true;
       }
+      let key: any = null;
+      if (action.payload.key) {
+        state.items
+          .filter((itm) => itm.id == action.payload.id)
+          .map((itm) => {
+            if ($deepEqual(itm.assignedModifiers, action.payload.assignedModifiers)) {
+              key = itm.key;
+            }
+          });
+      }
 
-      state.items.push({ ...action.payload });
+      if (!key) state.items.push({ ...action.payload });
 
       state.items = state.items.map((itm) =>
         itm.id == action.payload.id
-          ? { ...itm, stockQuantity: itm.stockQuantity - action.payload.quantity }
+          ? {
+              ...itm,
+              stockQuantity: itm.stockQuantity - action.payload.quantity,
+              quantity:
+                key && itm.key === key ? itm.quantity + action.payload.quantity : itm.quantity,
+            }
           : itm
       );
 
@@ -64,24 +79,23 @@ const cartSlice = createSlice({
       setCartToLocal(action.payload.vendorId, state);
     },
     UpdateItem: (state, action: PayloadAction<Item>) => {
-      if (action.payload.key) {
-        let incOrDecQun = 0;
-        const item = state.items.find((item) => item.key === action.payload.key);
-        if (item) {
-          incOrDecQun = item.quantity - action.payload.quantity;
-          item.quantity = action.payload.quantity;
-          item.assignedModifiers = action.payload.assignedModifiers;
-        }
+      const vendorId = $getFromLocal("vendor").id;
+      let itemToUpdate = action.payload;
 
-        state.items = state.items.map((itm) =>
-          itm.id == action.payload.id
-            ? { ...itm, stockQuantity: itm.stockQuantity + incOrDecQun }
-            : itm
-        );
+      const itemIndex = state.items.findIndex((item) =>
+        itemToUpdate.key ? item.key === action.payload.key : item.id === itemToUpdate.id
+      );
 
-        // ? Save to local storage
-        setCartToLocal(item?.vendorId as string, state);
-      }
+      const incOrDecQun = state.items[itemIndex].quantity - itemToUpdate.quantity;
+      state.items[itemIndex] = itemToUpdate;
+
+      state.items = state.items.map((itm) =>
+        itm.id == action.payload.id
+          ? { ...itm, stockQuantity: itm.stockQuantity + incOrDecQun }
+          : itm
+      );
+
+      setCartToLocal(vendorId, state);
     },
     RemoveItem: (state, action) => {
       const { id, key } = action.payload;

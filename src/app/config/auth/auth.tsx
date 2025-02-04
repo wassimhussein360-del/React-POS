@@ -17,25 +17,43 @@ const AuthService = () => {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
+      console.log({ user });
+
       if (user) {
         FirestoreService.getDocument("users", user.uid)
           .then((authUser) => {
+            console.log({ authUser });
+            console.log({ 6699: authUser });
+
             if (authUser) {
               const formattedUser = formatUser(authUser);
-              dispatch(SetUser(formattedUser));
-              if (formattedUser.isAdmin) {
-                FirestoreService.getCollection("vendors").then((vendors) => {
-                  const formattedVendors = formatVendors(vendors);
 
-                  const localVendor = $getFromLocal("vendor");
-                  const vendorToSave = localVendor || formattedVendors[2];
-
-                  if (!localVendor) $writeOnLocal("vendor", vendorToSave);
-                  dispatch(SetVendor(vendorToSave));
-                  dispatch(SetLoader(false));
-                  dispatch(SetVendors(formattedVendors));
-                });
+              let condition = {};
+              if (!formattedUser.isAdmin) {
+                condition = {
+                  whereConditions: [{ field: "id", operator: "in", value: authUser.vendorIds }],
+                };
               }
+
+              FirestoreService.getCollection("vendors", condition).then((vendors) => {
+                const formattedVendors = formatVendors(vendors);
+
+                const localVendor = $getFromLocal("vendor");
+                const vendorToSave = localVendor || formattedVendors[0];
+
+                dispatch(
+                  SetUser({
+                    ...formattedUser,
+                    permissions: vendorToSave.users.find((u: any) => u.id == formattedUser.id)
+                      .permissions,
+                  })
+                );
+
+                if (!localVendor) $writeOnLocal("vendor", vendorToSave);
+                dispatch(SetVendor(vendorToSave));
+                dispatch(SetLoader(false));
+                dispatch(SetVendors(formattedVendors));
+              });
             }
           })
           .catch((error) => {
@@ -58,20 +76,33 @@ function formatUser(user: any): User {
     name: `${user.firstName} ${user.lastName}`,
     email: user.email,
     isAdmin: user.admin,
+    role: user.role,
+    image: user.image || "https://www.webiconio.com/_upload/255/image_255.svg",
   };
 }
 
 function formatVendors(vendors: any[]): Vendor[] {
-  console.log(vendors);
-
   return vendors.map((vendor) => {
+    console.log({ 10: vendor });
+
+    const payments = { ...vendor.payments };
+    Object.keys(payments).forEach((key) => {
+      if (!payments[key].active) {
+        delete payments[key];
+        return;
+      }
+      if (payments[key].methods?.length) {
+        payments[key].methods = payments[key].methods.filter((m) => m.active);
+      }
+    });
     return {
       id: vendor.id,
       name: vendor.name.en,
       logo: $getImgSrc(vendor.id, vendor.logo[0], "w=500"),
       apiKey: vendor.apikey,
       defaultCurrency: vendor.defaultCurrency || "KWD",
-      payments: vendor.payments,
+      payments,
+      users: vendor.users || [],
     };
   });
 }

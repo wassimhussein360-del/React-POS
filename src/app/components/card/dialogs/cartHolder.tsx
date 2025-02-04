@@ -25,7 +25,7 @@ const CartHolder: React.FC<DiscountDialogProps> = ({ open, handleOpen }) => {
           setHoldingName("");
           handleOpen();
           resolve(true);
-        }, $generateRandomNumber(500, 3000)); // Simulate a 5-second delay
+        }, $generateRandomNumber(100, 1000)); // Simulate a 5-second delay
       });
     };
 

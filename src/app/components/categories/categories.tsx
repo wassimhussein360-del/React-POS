@@ -69,13 +69,13 @@ const Categories: React.FC<{
           <h4 className="font-semibold">Categories</h4>
           <p className="text-sm text-gray-500">Select From Below Categories</p>
         </aside>
-        <aside className="flex gap-4">
+        {/* <aside className="flex gap-4">
           <Chevron className="  rotate-90 w-4 h-4 cursor-pointer" />
           <Chevron className=" -rotate-90 w-4 h-4 cursor-pointer" />
-        </aside>
+        </aside> */}
       </section>
 
-      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6   gap-5 ">
+      <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6   gap-5 ">
         {categories.length ? (
           <>
             <SingleCategoryCard
@@ -128,13 +128,13 @@ function formatCategories(categories: any[], allProducts: Item[]): Category[] {
     .filter((cat) => cat.active)
     .filter((cat) => {
       const relatedProducts = allProducts.filter((pr) => {
-        return pr.categoryId.includes(cat.id);
+        return pr.categoriesIds.includes(cat.id);
       });
 
       return relatedProducts.length > 0;
     })
     .map((cat) => {
-      const relatedProducts = allProducts.filter((pr) => pr.categoryId.includes(cat.id));
+      const relatedProducts = allProducts.filter((pr) => pr.categoriesIds.includes(cat.id));
 
       return {
         id: cat.id,

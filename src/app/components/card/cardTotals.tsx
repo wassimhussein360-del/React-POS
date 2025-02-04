@@ -1,4 +1,4 @@
-import { $toTitleCase } from "@/app/helpers/helpers";
+import { $currency, $toTitleCase } from "@/app/helpers/helpers";
 import { useGeneral } from "@/reduxStore/hooks";
 import { useEffect, useState } from "react";
 import { Indexable } from "@/app/abstraction/types";
@@ -27,13 +27,14 @@ const CardTotals: React.FC<CartTotalsType> = ({}) => {
       ].map((value) => {
         return value ? (
           <section
+            key={value}
             className={`flex justify-between text-gray-${
               cart[value] || 0 ? "800 font-semibold" : "400"
             }`}
           >
             <p>{$toTitleCase(value)}</p>
             <div className="flex justify-between w-20">
-              KD <div>{(cart[value] || 0).toFixed(2)}</div>
+              {$currency()} <div>{(cart[value] || 0).toFixed(2)}</div>
             </div>
           </section>
         ) : (

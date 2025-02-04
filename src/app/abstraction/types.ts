@@ -40,6 +40,7 @@ export type ModifierOption = {
   value?: string;
   quantity?: number;
   selected?: boolean;
+  withQuantity?: boolean;
 };
 
 export type Indexable = Record<string, any>;
@@ -68,6 +69,9 @@ export type User = {
   name: string;
   email: string;
   isAdmin: string;
+  image: string;
+  role: string;
+  permissions?: any;
 };
 
 export type Vendor = {
@@ -76,6 +80,8 @@ export type Vendor = {
   name: string;
   apiKey: string;
   defaultCurrency: string;
+  payments: Indexable;
+  users: any[];
 };
 
 export type customer = {

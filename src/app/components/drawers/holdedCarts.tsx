@@ -53,7 +53,13 @@ const HoldingCartsDrawer = () => {
         </Button>
       </div>
 
-      <Drawer placement="right" open={openRight} onClose={closeDrawerRight} className="p-4">
+      <Drawer
+        placement="right"
+        open={openRight}
+        onClose={closeDrawerRight}
+        className="p-4"
+        overlayProps={{ className: "fixed z-[9999]" }}
+      >
         <div className="mb-6 flex items-center justify-between">
           <Typography variant="h5" color="blue-gray">
             Holden Carts

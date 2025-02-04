@@ -8,6 +8,7 @@ export interface GeneralState {
   order: Indexable;
   outlets: Array<any>;
   zone: Indexable;
+  cartDrawer?: boolean;
   [key: string]: any;
 }
 

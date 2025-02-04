@@ -1,34 +1,24 @@
-const customer = {
-  vendorId: "yMpxt6wCqNyzrQoYDOFH",
-  phone: "96170232661",
-  name: "Hussein Hussein",
+//* 1. add cart special instruction
+//* 2. add item special instruction
+//* 3. handle quantity of modifier option
+//* 5. Optional display selected modifiers in cart items
 
-  // ? email: "hussein.hussein@menasa.net",
-  // ? createdAt: 1702479402984,
-  // ? id: "9Kejog2qpefVGgsXNH3sDNHi0ft2",
-  // ? image: "https://lh3.googleusercontent.com/a/ACg8ocKrC1VkhkFZ67a-1gbnPZZY9wxffTRsuANn5ujcyqIo=s96-c",
+// make you first order
 
-  // ! updatedAt: 1731574727925,
-  // ! providerId: "google.com",
-  // ! uid: "9Kejog2qpefVGgsXNH3sDNHi0ft2",
-};
+// TODO show original vs price style
 
-//   !
-const area = {
-  provider: "icarry",
-  areas: [],
-  country: "Saudi Arabia",
-  minimumOrder: "5",
-  id: "749",
-  countries: ["Saudi Arabia", "Qatar"],
-  operation: "International",
-  estimatedDeliveryTime: 10,
-  deliveryFee: 10,
-  province: "",
-  pricingType: "provider",
-  name: {
-    en: "Saudi Arabia",
-    ar: "Saudi Arabia",
-  },
-  outletId: "outlet_998284988886650-118",
-};
+//TODO 3/1/25
+//* combine items that have same modifiers on addition
+// get observable products
+
+/**
+ *
+ * 1. when products updated check if an item disappear then delete the items that does not found in products
+ * 2. check stock if stock decreased then get  products with same id iterate through them reduce quantity then delete it if need then go to next matching if the ordered quantity still > stock
+ * 3. iterate through all items to set them to updated products, make sure to keep productSpecialIns, selected modifies and quantities are the same
+ * 4. advanced: handle selection type changes and withQuantity fields
+ *
+ *
+ *
+ *
+ */

@@ -33,6 +33,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
     id,
     cartItems,
     selections,
+    specialInstructions: selections.specialInstructions,
     vendorId: vendor.id,
     outlet,
   };
@@ -567,9 +568,6 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
     formattedOrder.outlet = outlet;
     const zone = $general.zone;
     if (zone) {
-      console.log(1111111111);
-      console.log(zone);
-
       formattedOrder.zone = zone;
       if (
         zone.shippingDetails?.provider &&

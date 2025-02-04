@@ -6,14 +6,34 @@ import PaymentMethods from "./paymentMethods";
 import CartItems from "./cartItems";
 import { useAppDispatch, useCart, useVendor } from "@/reduxStore/hooks";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
-import React from "react";
+import React, { useEffect } from "react";
 import CustomerAndProductSelection from "./customerSelection";
 import { Vendor } from "@/app/abstraction/types";
+import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 
 const CartInfo = ({ className }: { className: string }) => {
   const dispatch = useAppDispatch();
   const vendor = useVendor() as Vendor;
   const cart = useCart();
+
+  useEffect(() => {
+    if (cart.selections?.orderType != "pickup") return;
+
+    dispatch(
+      SetCartField({
+        fieldName: "address",
+        value: undefined,
+        vendorId: vendor.id,
+      })
+    );
+
+    dispatch(
+      SetGeneralField({
+        field: "zone",
+        value: {},
+      })
+    );
+  }, [cart.selections?.orderType]);
 
   return (
     <section
@@ -70,17 +90,21 @@ const CartInfo = ({ className }: { className: string }) => {
         <CartItems />
 
         <Textarea
-          label="Message"
+          label="Special Instructions"
+          value={cart.selections?.specialInstructions}
           onChange={(e) =>
             dispatch(
               SetCartField({
-                fieldName: "message",
-                value: e.target.value,
-                vendorId: vendor?.id as string,
+                fieldName: "selections",
+                value: {
+                  ...cart.selections,
+                  specialInstructions: e.target.value,
+                },
+                vendorId: vendor.id,
               })
             )
           }
-          className="rounded-xl  max-h-[100px] bg-[#F6F6F6]"
+          className=" max-h-[70px]  bg-[#F6F6F6] min-h-0 "
         />
         <hr />
       </section>

@@ -1,15 +1,34 @@
 import { CardIcon, HoldIcon, TrashIcon } from "@/assets/icons";
-import { useAppDispatch, useCartItems, useVendor } from "@/reduxStore/hooks";
+import { useAppDispatch, useCart, useCartItems, useGeneral, useVendor } from "@/reduxStore/hooks";
 import { Button } from "@material-tailwind/react";
 import { useState } from "react";
 import CartHolder from "./dialogs/cartHolder";
 import { VoidCart } from "@/reduxStore/slices/cartSlice";
+import toast from "react-hot-toast";
 
 const ActionsBtns = () => {
   const cartItems = useCartItems();
   const vendor = useVendor();
   const dispatch = useAppDispatch();
+  const $general = useGeneral();
+  const $cart = useCart();
   const [openCartHolder, setOpenCartHolder] = useState(false);
+
+  const validateCart = (): boolean =>
+    ![
+      [!$general.order.customer, "Please select a customer."],
+      [!$general.order.cart.cartItems.length, "Your cart is empty. Add items to proceed."],
+      [$general.order.paymentMethod.id === "Unset", "Please select a payment method."],
+      [!$cart.selections?.orderType, "Please choose an order type."],
+      [
+        $cart.selections?.orderType === "delivery" && !$general.order.address.deliveryZoneId,
+        "Please select an address.",
+      ],
+    ].some(([cond, msg]) => cond && (toast.error(msg), true));
+
+  const makeOrder = () => {
+    if (!validateCart()) return;
+  };
 
   return (
     <section className="flex gap-3 flex-col">
@@ -17,8 +36,9 @@ const ActionsBtns = () => {
       <Button
         className="normal-case justify-center rounded flex gap-1 bg-secondary "
         placeholder={undefined}
+        onClick={() => makeOrder()}
       >
-        Grand Total: KD 32.00
+        Make Order
       </Button>
       <aside className="flex gap-3">
         <Button

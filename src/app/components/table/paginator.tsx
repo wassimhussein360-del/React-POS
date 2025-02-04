@@ -45,7 +45,7 @@ const Paginator: React.FC<PaginatorProps> = ({
   };
 
   return (
-    <div className="flex justify-between w-full">
+    <div className="flex justify-between w-full flex-col sm:flex-row gap-2">
       {/* Previous Button */}
       <Button
         variant="outlined"
@@ -57,7 +57,7 @@ const Paginator: React.FC<PaginatorProps> = ({
       </Button>
 
       {/* Page Numbers */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center gap-2 w-full ">
         {currentPage > 3 && (
           <IconButton variant="text" size="sm" onClick={() => handlePageChange(1)}>
             1
