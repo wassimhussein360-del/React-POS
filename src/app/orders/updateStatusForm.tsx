@@ -32,11 +32,8 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
       userId: orders[index].customer.id,
     };
 
-    console.log(payload);
-
     updateOrderStatus(payload)
       .then((res: any) => {
-        console.log(res);
         if (res.data.success)
           toast.success(`Order with ref #${orders[index].orderRef} has been updated to ${status}`);
         else

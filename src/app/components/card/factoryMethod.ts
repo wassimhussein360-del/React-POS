@@ -27,7 +27,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
   selections.outlet = outlet;
   selections.address = $cart.address;
 
-  let id = orderData.id || nanoid(20);
+  let id = "";
   let formattedOrder: any = {
     ...orderData,
     id,
@@ -664,7 +664,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
     specialInstructions: formattedOrder.specialInstructions || "",
     paymentUrl: formattedOrder.paymentUrl || "",
     createdAt: new Date().getTime(),
-    orderRef: formattedOrder.orderRef || createOrderRef(id),
+    orderRef: "",
     couponsUsed: couponsUsed.map((c: any) => c.id),
     timeline: [],
     cartActiveDiscount: formattedOrder.cartActiveDiscount,

@@ -84,7 +84,6 @@ export default function Header() {
   useEffect(() => {
     if (!$vendor || !outlets) return;
     const refactoredOrder = refactorOrder($cart, $general);
-    console.log(refactoredOrder);
 
     dispatch(
       SetGeneralField({
@@ -264,7 +263,7 @@ export default function Header() {
             }}
           >
             <Badge
-              content={$general.order?.cart?.cartItems?.length || 0}
+              content={$cart.items.length}
               className="max-w-[20px] min-w-[20px] max-h-[20px] min-h-[20px]"
             >
               <Bag />

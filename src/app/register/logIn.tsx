@@ -121,7 +121,6 @@ export default function LogIn() {
       toast.success("Login successful!");
       router.push("/");
     } catch (error) {
-      console.log(3);
       toast.error("Login failed! Please check your credentials.");
       console.error("Error:", error.message);
     }

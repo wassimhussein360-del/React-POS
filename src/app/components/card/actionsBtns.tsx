@@ -5,6 +5,8 @@ import { useState } from "react";
 import CartHolder from "./dialogs/cartHolder";
 import { VoidCart } from "@/reduxStore/slices/cartSlice";
 import toast from "react-hot-toast";
+import { createOrder } from "@/servies/fire-functions";
+import { $loader } from "@/app/helpers/helpers";
 
 const ActionsBtns = () => {
   const cartItems = useCartItems();
@@ -28,6 +30,49 @@ const ActionsBtns = () => {
 
   const makeOrder = () => {
     if (!validateCart()) return;
+    const o = $general.order;
+    const payload = {
+      id: o.id,
+      orderRef: o.orderRef,
+      customer: o.customer,
+      vendorId: vendor?.id,
+      cartItems: o.cart.cartItems,
+      save_card: false, // !
+      selections: {
+        orderType: o.orderType,
+        selectedPeriod: o.selectedPeriod,
+        selectedOrderTime: o.selectedOrderTime,
+        couponCode: o.couponCode,
+
+        channel: "Other", //!
+        outlet: o.outlet,
+        origin: o.origin,
+        address: o.address,
+      },
+
+      area: {}, //!
+
+      paymentMethod: o.paymentMethod.id,
+      orderNotes: o.specialInstructions, //!
+    };
+
+    console.log(payload);
+    $loader(true);
+    createOrder(payload)
+      .then((res: any) => {
+        if (res.data.success) {
+          toast.success(res.data.message);
+        } else {
+          throw new Error(res.data.message || "Error while creating order");
+        }
+      })
+      .catch((err) => {
+        toast.success(err.message);
+        console.error(err);
+      })
+      .finally(() => {
+        $loader(false);
+      });
   };
 
   return (

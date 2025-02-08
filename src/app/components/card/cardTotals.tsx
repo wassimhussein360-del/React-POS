@@ -25,7 +25,7 @@ const CardTotals: React.FC<CartTotalsType> = ({}) => {
         "subTotal",
         "total",
       ].map((value) => {
-        return value ? (
+        return value && cart[value] ? (
           <section
             key={value}
             className={`flex justify-between text-gray-${

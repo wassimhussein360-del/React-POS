@@ -92,7 +92,7 @@ const HoldingCartsDrawer = () => {
                   {cart.items.map((item: any, index: number) => {
                     return (
                       <img
-                        src={item.image}
+                        src={item.images[0].url}
                         className="w-10 h-10 rounded shadow border-2 border-gray-400"
                       ></img>
                     );

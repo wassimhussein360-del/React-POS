@@ -72,11 +72,11 @@ const PaymentMethods = ({ totalBill }: any) => {
               key={index}
               className={`rounded border border-gray-400 flex items-center justify-center flex-col h-20 w-20 
               ${
-                $cart.selections?.paymentMethod == key
+                $cart.selections?.paymentMethod == paymentsMap[key].cartValue
                   ? "bg-secondary text-primary"
                   : "cursor-pointer font-thin"
               }`}
-              onClick={() => setPaymentMethod(key)}
+              onClick={() => setPaymentMethod(paymentsMap[key].cartValue)}
             >
               <h6 className="font-sourGummy ">{paymentsMap[key].name}</h6>
               <i className={`bi bi-${paymentsMap[key].icon}`}></i>
@@ -123,8 +123,8 @@ const PaymentMethods = ({ totalBill }: any) => {
 export default PaymentMethods;
 
 const paymentsMap: any = {
-  cash: { name: "Cash", icon: "wallet2" },
+  cash: { name: "Cash", cartValue: "Cash", icon: "wallet2" },
   onlinePaymentMethod: { name: "Scan", icon: "qr-code-scan" },
-  payByLink: { name: "Link", icon: "link-45deg" },
-  posCard: { name: "Card", icon: "credit-card-2-front" },
+  payByLink: { name: "Link", cartValue: "Pay by link", icon: "link-45deg" },
+  posCard: { name: "Card", cartValue: "POS Card", icon: "credit-card-2-front" },
 };

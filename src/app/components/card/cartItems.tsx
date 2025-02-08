@@ -22,7 +22,7 @@ const CartItems: React.FC<CartItemsProps> = ({}) => {
           <span className="flex items-center p-0">
             <h6 className="text-sm">Products Added</h6>
             <p className="bg-primary text-white ms-1 rounded flex items-center justify-center w-4 h-4 text-xs">
-              {$general.order?.cart?.cartItems?.length || 0}
+              {items.length}
             </p>
           </span>
           <nav

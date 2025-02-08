@@ -55,7 +55,6 @@ const OrdersTable = () => {
     if (!selectedOrders.some((ord) => ord.id == clickedOrder.id) && selectedOrders.length === 0) {
       pressTimerRef.current = setTimeout(() => {
         setSelectedOrders([...selectedOrders, clickedOrder]);
-        console.log("Long press detected!"); // Perform your action here
       }, 600); // Adjust time for long press (600ms)
     } else {
       selectedOrders.some((ord) => ord.id == clickedOrder.id)
@@ -83,8 +82,6 @@ const OrdersTable = () => {
       sortBy: [`${sorSetting.by.toUpperCase()}_${sorSetting.dir.toUpperCase()}`],
     })
       .then((ordersRep) => {
-        console.log(ordersRep.orders.docs);
-
         setOrders(ordersRep.orders.docs);
         setTotalItems(ordersRep.orders.totalDocs);
       })

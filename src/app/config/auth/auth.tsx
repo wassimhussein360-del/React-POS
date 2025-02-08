@@ -17,14 +17,9 @@ const AuthService = () => {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      console.log({ user });
-
       if (user) {
         FirestoreService.getDocument("users", user.uid)
           .then((authUser) => {
-            console.log({ authUser });
-            console.log({ 6699: authUser });
-
             if (authUser) {
               const formattedUser = formatUser(authUser);
 
@@ -83,8 +78,6 @@ function formatUser(user: any): User {
 
 function formatVendors(vendors: any[]): Vendor[] {
   return vendors.map((vendor) => {
-    console.log({ 10: vendor });
-
     const payments = { ...vendor.payments };
     Object.keys(payments).forEach((key) => {
       if (!payments[key].active) {
