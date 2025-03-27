@@ -39,8 +39,9 @@ const AuthService = () => {
                 dispatch(
                   SetUser({
                     ...formattedUser,
-                    permissions: vendorToSave.users.find((u: any) => u.id == formattedUser.id)
-                      .permissions,
+                    permissions: formattedUser.isAdmin
+                      ? undefined
+                      : vendorToSave.users.find((u: any) => u.id == formattedUser.id).permissions,
                   })
                 );
 

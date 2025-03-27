@@ -660,7 +660,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
     },
     paid: formattedOrder.paid || false,
     channel: formattedOrder.channel || "Website",
-    origin: formattedOrder?.selections?.origin || "http://localhost:3000",
+    origin: "POS",
     specialInstructions: formattedOrder.specialInstructions || "",
     paymentUrl: formattedOrder.paymentUrl || "",
     createdAt: new Date().getTime(),

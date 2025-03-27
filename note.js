@@ -1,24 +1,17 @@
-//* 1. add cart special instruction
-//* 2. add item special instruction
-//* 3. handle quantity of modifier option
-//* 5. Optional display selected modifiers in cart items
+// 1. Remove reset icon
+//* 2. update url payments display
+// 3. Remove Exchange rate
+// 4. add trash icon to holden carts
+// 5. remove seconds from holden cart name
+//* 6. check transaction id if needed
+//* 7. change the display of address
+//* 8. add label to create address home, work ...
+//* 9. change the layout of the login page
+//* 10. add an input for barcode reader
+//* 11. when automatically switching to another branch check if the selected products included in the branch switched to
+//* 12. choose shipping and provider
+//* 13. check why 38 aud products does not exist on pos
+//* 14. make the condition of fetched orders on the new key added
+//* 15. when retrieving a url for payment listen for response if success or declined
 
-// make you first order
-
-// TODO show original vs price style
-
-//TODO 3/1/25
-//* combine items that have same modifiers on addition
-// get observable products
-
-/**
- *
- * 1. when products updated check if an item disappear then delete the items that does not found in products
- * 2. check stock if stock decreased then get  products with same id iterate through them reduce quantity then delete it if need then go to next matching if the ordered quantity still > stock
- * 3. iterate through all items to set them to updated products, make sure to keep productSpecialIns, selected modifies and quantities are the same
- * 4. advanced: handle selection type changes and withQuantity fields
- *
- *
- *
- *
- */
+// Progress  4 / 15

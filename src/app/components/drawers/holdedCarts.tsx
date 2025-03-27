@@ -1,18 +1,23 @@
 import { $getFromLocal } from "@/app/helpers/helpers";
+import { TrashIcon } from "@/assets/icons";
 import { useAppDispatch, useCart, useGeneral, useVendor } from "@/reduxStore/hooks";
-import { HoldCart } from "@/reduxStore/slices/cartSlice";
+import { HoldCart, RemoveHoldenCart } from "@/reduxStore/slices/cartSlice";
 import { Button, Drawer, IconButton, Typography } from "@material-tailwind/react";
 import React, { useEffect } from "react";
 
 const HoldingCartsDrawer = () => {
   const dispatch = useAppDispatch();
   const [openRight, setOpenRight] = React.useState(false);
-  const [holdenCarts, setHoldenCars] = React.useState([]);
+  const [holdenCarts, setHoldenCarts] = React.useState([]);
   const cart = useCart();
   const vendor = useVendor();
   const $general = useGeneral();
 
   useEffect(() => {
+    initializeData();
+  }, [cart, vendor, $general.branch]);
+
+  const initializeData = () => {
     if (!vendor && !$general.branch?.id) return;
 
     const allVendorsCarts = $getFromLocal("carts");
@@ -22,12 +27,12 @@ const HoldingCartsDrawer = () => {
       const currentVendorCarts = allVendorsCarts[cartKey] || [];
       const holdingCarts = currentVendorCarts.filter((cart: any) => cart.holdingName);
       if (holdingCarts.length) {
-        setHoldenCars(holdingCarts);
+        setHoldenCarts(holdingCarts);
       } else {
-        setHoldenCars([]);
+        setHoldenCarts([]);
       }
     }
-  }, [cart, vendor, $general.branch]);
+  };
 
   const openDrawerRight = () => setOpenRight(true);
   const closeDrawerRight = () => setOpenRight(false);
@@ -35,10 +40,19 @@ const HoldingCartsDrawer = () => {
   const handleCartSelection = (cartKey: string) => {
     // This will be the holding nam eof the existing cart
     const currentDate = new Date();
-    const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString()}`;
+    const formattedDate = `${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString(
+      [],
+      { hour: "2-digit", minute: "2-digit" }
+    )}`;
 
     dispatch(HoldCart({ holdingName: formattedDate, vendorId: vendor?.id as string, cartKey }));
 
+    closeDrawerRight();
+  };
+
+  const removeHoldenCart = (cartKey: string) => {
+    dispatch(RemoveHoldenCart({ cartKey }));
+    initializeData();
     closeDrawerRight();
   };
 
@@ -85,13 +99,25 @@ const HoldingCartsDrawer = () => {
                 className="border border-gray-200 p-4 rounded-lg shadow bg-light-primary cursor-pointer hover:border-primary  bg-gray-100 text-secondary hover:text-primary"
                 onClick={() => handleCartSelection(cart.key)}
               >
-                <Typography variant="h5" className="text-md mb-3 font-sourGummy">
-                  {cart.holdingName}
-                </Typography>
-                <aside className="flex gap-2">
+                <aside className="flex justify-between items-center mb-3">
+                  <Typography variant="h5" className="text-md  font-sourGummy">
+                    {cart.holdingName}
+                  </Typography>
+                  <span
+                    className="p-2 pe-0 text-gray-400 hover:text-danger "
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevents section click from triggering
+                      removeHoldenCart(cart.key);
+                    }}
+                  >
+                    <TrashIcon className="size-5 "></TrashIcon>
+                  </span>
+                </aside>
+                <aside className="flex flex-wrap gap-2">
                   {cart.items.map((item: any, index: number) => {
                     return (
                       <img
+                        key={index}
                         src={item.images[0].url}
                         className="w-10 h-10 rounded shadow border-2 border-gray-400"
                       ></img>

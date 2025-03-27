@@ -20,7 +20,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { auth } from "../../../../firebaseConfig";
 import { SetVendor } from "@/reduxStore/slices/userSlice";
 import { Item, Vendor } from "@/app/abstraction/types";
-import { ActivateCart, SetCartField, VoidCart } from "@/reduxStore/slices/cartSlice";
+import { ActivateCart, VoidCart } from "@/reduxStore/slices/cartSlice";
 import FirestoreService from "@/servies/firestoreService";
 import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 import { refactorOrder } from "../card/factoryMethod";
@@ -77,7 +77,7 @@ export default function Header() {
     if (foundCart) {
       dispatch(ActivateCart({ cart: foundCart }));
     } else {
-      dispatch(VoidCart({ vendorId: "" }));
+      dispatch(VoidCart());
     }
   }, [$general.branch]);
 

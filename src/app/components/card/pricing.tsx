@@ -59,7 +59,7 @@ const PricingDetails = () => {
             })}
         </Select>
       </div>
-      {/* <div className="pricing-select w-1/2">
+      <div className="pricing-select w-1/2">
         <Select
           label="Shipping"
           size="md"
@@ -68,7 +68,7 @@ const PricingDetails = () => {
         >
           <Option className="text-xs">Option 1</Option>
         </Select>
-      </div> */}
+      </div>
     </section>
   );
 };

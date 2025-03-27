@@ -20,7 +20,6 @@ const CardTotals: React.FC<CartTotalsType> = ({}) => {
         "cartDiscountAmount",
         "customDiscount",
         "deliveryFee",
-        "exchangeRate",
         "productsDiscount",
         "subTotal",
         "total",

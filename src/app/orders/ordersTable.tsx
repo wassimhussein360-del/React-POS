@@ -78,7 +78,10 @@ const OrdersTable = () => {
       limit: itemsPerPage,
       page: currentPage,
       interval: "allTime",
-      query: filters,
+      query: {
+        origin: "POS",
+        ...filters,
+      },
       sortBy: [`${sorSetting.by.toUpperCase()}_${sorSetting.dir.toUpperCase()}`],
     })
       .then((ordersRep) => {

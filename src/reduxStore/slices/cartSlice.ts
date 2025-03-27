@@ -186,7 +186,12 @@ const cartSlice = createSlice({
         });
       }
     },
-    VoidCart: (state, action: PayloadAction<{ vendorId: string }>) => {
+    RemoveHoldenCart(state, action: PayloadAction<{ cartKey: string }>) {
+      const vendorOutletKey = `${$getFromLocal("vendor").id}_${$getFromLocal("branch").id}`;
+
+      deleteCartFromLocal(vendorOutletKey, action.payload.cartKey);
+    },
+    VoidCart: (state) => {
       const key = state.key as string;
       state.items = [];
       Object.keys(state).forEach((key) => {
@@ -208,6 +213,7 @@ export const {
   SetCartField,
   UpdateItem,
   ResetCart,
+  RemoveHoldenCart,
   HoldCart,
   VoidCart,
   ActivateCart,
@@ -253,9 +259,11 @@ function setCartToLocal(vendorId: string, cart: CartState) {
 
 function deleteCartFromLocal(vendorId: string, cartKey: string) {
   let getLocalCarts = $getFromLocal("carts") || {};
+
   const findCartIndex = (getLocalCarts[vendorId] || []).findIndex(
     (cart: CartState) => cart.key == cartKey
   );
+
   if (findCartIndex !== -1) {
     getLocalCarts[vendorId].splice(findCartIndex, 1);
   }

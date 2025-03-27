@@ -7,6 +7,7 @@ import { VoidCart } from "@/reduxStore/slices/cartSlice";
 import toast from "react-hot-toast";
 import { createOrder } from "@/servies/fire-functions";
 import { $loader } from "@/app/helpers/helpers";
+import QRCodePayment from "./dialogs/qrcodePayment";
 
 const ActionsBtns = () => {
   const cartItems = useCartItems();
@@ -15,6 +16,9 @@ const ActionsBtns = () => {
   const $general = useGeneral();
   const $cart = useCart();
   const [openCartHolder, setOpenCartHolder] = useState(false);
+
+  const [openQrCode, setOpenQrCode] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState("");
 
   const validateCart = (): boolean =>
     ![
@@ -56,18 +60,23 @@ const ActionsBtns = () => {
       orderNotes: o.specialInstructions, //!
     };
 
-    console.log(payload);
     $loader(true);
     createOrder(payload)
       .then((res: any) => {
         if (res.data.success) {
           toast.success(res.data.message);
+          const url = res.data.order.paymentUrl;
+          if (url) {
+            setPaymentUrl(url);
+            setOpenQrCode(true);
+          }
+          dispatch(VoidCart());
         } else {
           throw new Error(res.data.message || "Error while creating order");
         }
       })
       .catch((err) => {
-        toast.success(err.message);
+        toast.error(err.message);
         console.error(err);
       })
       .finally(() => {
@@ -78,6 +87,11 @@ const ActionsBtns = () => {
   return (
     <section className="flex gap-3 flex-col">
       <CartHolder open={openCartHolder} handleOpen={() => setOpenCartHolder(!openCartHolder)} />
+      <QRCodePayment
+        open={openQrCode}
+        handleOpen={() => setOpenQrCode(!openQrCode)}
+        url={paymentUrl}
+      />
       <Button
         className="normal-case justify-center rounded flex gap-1 bg-secondary "
         placeholder={undefined}
@@ -87,12 +101,12 @@ const ActionsBtns = () => {
       </Button>
       <aside className="flex gap-3">
         <Button
-          className="normal-case flex justify-center rounded gap-1 w-1/2 bg-danger "
+          className="normal-case flex justify-center items-center rounded gap-1 w-1/2 bg-danger "
           placeholder={undefined}
           disabled={cartItems.length == 0}
-          onClick={() => dispatch(VoidCart({ vendorId: vendor?.id as string }))}
+          onClick={() => dispatch(VoidCart())}
         >
-          <TrashIcon />
+          <TrashIcon className="size-3" />
           Void
         </Button>
 

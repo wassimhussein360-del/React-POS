@@ -1,4 +1,4 @@
-import { AppleIcon, BellIcon, CreditCardPay, MoneyIcon } from "@/assets/icons";
+import { AppleIcon, BellIcon, MoneyIcon } from "@/assets/icons";
 import QRCodePayment from "./dialogs/qrcodePayment";
 import { useEffect, useState } from "react";
 import CashPayDialog from "./dialogs/cashPay";
@@ -9,6 +9,8 @@ import {
   MenuHandler,
   MenuItem,
   MenuList,
+  Radio,
+  Typography,
 } from "@material-tailwind/react";
 import { useAppDispatch, useCart, useVendor } from "@/reduxStore/hooks";
 import { Vendor } from "@/app/abstraction/types";
@@ -47,13 +49,30 @@ const PaymentMethods = ({ totalBill }: any) => {
     return payment == "Credit Card" ? (
       <p className={`${className}`}>Credit</p>
     ) : payment == "Apple Pay" ? (
-      <p className={`${className}`}>Apple</p>
+      <p className={`${className}`}>Credit</p>
     ) : payment == "Knet" ? (
       <p className={`${className}`}>Knet</p>
     ) : (
       <i className={`bi bi-qr-code-scan`}></i>
     );
   };
+
+  function Icon() {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="h-full w-full scale-105"
+      >
+        <path
+          fillRule="evenodd"
+          d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+          clipRule="evenodd"
+        />
+      </svg>
+    );
+  }
 
   return (
     <section className="py-6">
@@ -87,7 +106,7 @@ const PaymentMethods = ({ totalBill }: any) => {
                 <div
                   className={`rounded border border-gray-400 flex items-center justify-center flex-col h-20 w-20 cursor-pointer 
             ${
-              value.methods.map((m) => m.id).includes($cart.selections?.paymentMethod)
+              value.methods.map((m: any) => m.id).includes($cart.selections?.paymentMethod)
                 ? "bg-secondary text-primary"
                 : " font-thin"
             }`}
@@ -98,18 +117,23 @@ const PaymentMethods = ({ totalBill }: any) => {
               </MenuHandler>
               <MenuList placeholder="" className="z-[9999]">
                 {value.methods.map((m: any) => (
-                  <MenuItem
-                    key={m.id}
-                    onClick={() => setPaymentMethod(m.id)}
-                    className={`${
-                      $cart.selections?.paymentMethod == m.id
-                        ? "bg-primary text-secondary hover:bg-primary hover:cursor-default"
-                        : ""
-                    }`}
-                    placeholder=""
-                  >
-                    <div className="flex gap-2 items-center">{getIcon(m.id)}</div>
-                  </MenuItem>
+                  <div className="flex justify-between gap-5">
+                    <Radio
+                      key={m.id}
+                      onClick={() => setPaymentMethod(m.id)}
+                      name="type"
+                      ripple={false}
+                      icon={<Icon />}
+                      className="border-gray-900/10 bg-gray-900/5 p-0 transition-all hover:before:opacity-0"
+                      checked={$cart.selections?.paymentMethod == m.id}
+                      label={
+                        <Typography color="blue-gray" className="font-normal text-blue-gray-400">
+                          {m.id}
+                        </Typography>
+                      }
+                    />
+                    {/* {getIcon(m.id)} */}
+                  </div>
                 ))}
               </MenuList>
             </Menu>

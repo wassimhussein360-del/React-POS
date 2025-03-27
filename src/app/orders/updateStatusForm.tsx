@@ -63,14 +63,17 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
         <hr className="my-6" />
 
         <section className="grid md:grid-cols-2 gap-4">
-          {["pending", "preparing", "delivering", "completed"].map((stu) => (
+          {["pending", "preparing", "delivering", "completed"].map((stu, index) => (
             <Button
+              key={index}
               size="lg"
               className={`normal-case outline outline-transparent border  bg-${$getSeverity(
                 stu
               )}-light w-[150px] ${
                 stu == status
-                  ? `bg-${$getSeverity(stu)} shadow-lg  border-white outline-${$getSeverity(stu)}  `
+                  ? `bg-${$getSeverity(stu)} shadow-lg   border-white outline-${$getSeverity(
+                      stu
+                    )}  `
                   : `text-${$getSeverity(stu)}`
               }`}
               placeholder={undefined}
@@ -80,29 +83,6 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
               {$toTitleCase(stu)}
             </Button>
           ))}
-        </section>
-
-        <hr className="my-6" />
-
-        <section className="flex gap-5 items-center">
-          <Typography
-            variant="h4"
-            color="blue-gray"
-            className="mb-1  text-center font-sourGummy text-secondary   rounded-full"
-          >
-            Paid
-          </Typography>
-          <Switch
-            ripple={false}
-            onChange={(e) => setPaid(e.target.checked)}
-            className="h-full w-full checked:bg-[#2ec946]"
-            containerProps={{
-              className: "w-11 h-6",
-            }}
-            circleProps={{
-              className: "before:hidden left-0.5 border-none",
-            }}
-          />
         </section>
 
         <hr className="my-6" />
