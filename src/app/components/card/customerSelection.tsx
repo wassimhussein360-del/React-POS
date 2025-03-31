@@ -1,5 +1,5 @@
 import { Item, Vendor } from "@/app/abstraction/types";
-import { Plus } from "@/assets/icons";
+import { BarcodeIcon, Plus, SearchIcon } from "@/assets/icons";
 import {
   useAddress,
   useAppDispatch,
@@ -9,8 +9,16 @@ import {
   useVendor,
 } from "@/reduxStore/hooks";
 import { algoliaSearch } from "@/servies/algoliaSearch";
-import { Button, Menu, MenuHandler, MenuList, MenuItem, Spinner } from "@material-tailwind/react";
-import { useEffect, useState } from "react";
+import {
+  Button,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+  Spinner,
+  Input,
+} from "@material-tailwind/react";
+import { useEffect, useRef, useState } from "react";
 import React from "react";
 import { formatProducts } from "../products/products";
 import { $currency, $getColorFromString, $getImgAlter } from "@/app/helpers/helpers";
@@ -18,6 +26,7 @@ import ProductDetails from "../products/productDetails";
 import { AddItem, SetCartField, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import NewCustomerDialog from "./dialogs/newCustomer";
 import AddressesDialog from "./dialogs/addressesDialo";
+import toast from "react-hot-toast";
 
 const CustomerAndProductSelection = () => {
   const [customerSearch, setCustomerSearch] = useState<string>("");
@@ -33,6 +42,17 @@ const CustomerAndProductSelection = () => {
 
   const [openDetails, setOpenDetails] = useState(false);
 
+  const [states, setStates] = useState({
+    isScanner: false,
+    showProducts: false,
+  });
+  const getValue = (field: keyof typeof states) => {
+    return states[field];
+  };
+  const setValue = (field: keyof typeof states, newValue: any) => {
+    setStates((prev) => ({ ...prev, [field]: newValue }));
+  };
+
   const [productSearch, setProductSearch] = useState<string>("");
   const [products, setProducts] = useState<Item[]>([]);
 
@@ -44,9 +64,17 @@ const CustomerAndProductSelection = () => {
   const $general = useGeneral();
 
   function handleProductSelect(_product: Item) {
+    console.log({ _product });
+
     setProduct(_product);
-    if (_product.assignedModifiers.length) setOpenDetails(true);
-    else {
+
+    setTimeout(() => {
+      setValue("showProducts", false); // ✅ Ensure menu closes after selection
+    }, 0);
+
+    if (_product.assignedModifiers.length) {
+      setOpenDetails(true);
+    } else {
       const foundItem = cartItems.find((itm) => itm.id == _product.id);
       if (foundItem) {
         dispatch(UpdateQuantity({ id: _product.id, quantity: foundItem.quantity + 1 }));
@@ -64,6 +92,18 @@ const CustomerAndProductSelection = () => {
       .then((productRes) => {
         const formattedProducts = formatProducts(productRes, $general.branch.id);
         setProducts(formattedProducts);
+        setValue("showProducts", formattedProducts.length > 0);
+
+        if (getValue("isScanner")) {
+          if (formattedProducts.length > 0) {
+            handleProductSelect(formattedProducts[0]);
+          } else {
+            toast.error("Item Not Found !!");
+          }
+
+          focusInput();
+          setProductSearch("");
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -99,11 +139,13 @@ const CustomerAndProductSelection = () => {
   }, [selectedCustomer]);
 
   useEffect(() => {
+    console.log(products);
+
     if (newCustomer) {
       setSelectedCustomerName(newCustomer.name);
       dispatch(SetCartField({ fieldName: "customer", value: newCustomer, vendorId: vendor.id }));
     }
-  }, [newCustomer]);
+  }, [newCustomer, states]);
 
   useEffect(() => {
     const cus = cart.customer;
@@ -111,6 +153,26 @@ const CustomerAndProductSelection = () => {
 
     setSelectedCustomerName(name);
   }, [cart]);
+
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Function to focus on the input
+  const focusInput = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sectionRef.current && !sectionRef.current.contains(event.target as Node)) {
+        setValue("showProducts", false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <section>
@@ -223,61 +285,74 @@ const CustomerAndProductSelection = () => {
       </div>
 
       {/* Product Selection */}
-      <Menu>
-        <MenuHandler>
-          <Button
-            className={`w-full text-start   normal-case bg-transparent hover:shadow-none flex justify-between items-center   border border-gray-500 shadow-none rounded-xl
-                ${"text-gray-400"}`}
+
+      <div className="flex">
+        <section
+          ref={sectionRef}
+          className="relative w-full"
+          onClick={() => setValue("showProducts", products.length > 0)}
+        >
+          <aside
+            className="flex justify-between w-full bg-transparent ps-6 pe-3 text-xs items-center 
+      border border-gray-500 shadow-none rounded-xl hover:border-gray-900 h-full"
           >
-            {"Search Products"}
-            {productLoading && <Spinner className="w-4 h-4" />}
-          </Button>
-        </MenuHandler>
-        <MenuList className="max-h-[20rem] z-[9999]">
-          <MenuItem className="hover:bg-none p-0">
             <input
               type="text"
-              placeholder="Search..."
-              className="w-full p-2 border border-gray-300 rounded hover:outline-none focus:border-gray-500"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              onChange={(e) => {
-                const value = e.target.value;
-                setProductSearch(value);
-              }}
+              ref={inputRef}
+              value={productSearch}
+              placeholder={getValue("isScanner") ? "Scan Products" : "Search Products"}
+              className="w-fit focus:border-0 focus:outline-none"
+              onChange={(e) => setProductSearch(e.target.value)}
             />
-          </MenuItem>
-          <br />
+            {productLoading && <Spinner className="w-4 h-4" />}
+          </aside>
 
-          {products.map((pr: Item, i: number) => {
-            return (
-              <MenuItem
+          <aside
+            className={`${
+              getValue("showProducts") && !getValue("isScanner")
+                ? "absolute bg-white z-10 p-3 mt-1 w-full border border-gray-500 shadow-lg rounded-xl"
+                : "hidden"
+            }`}
+          >
+            {products.map((pr: Item, i: number) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-100"
                 onClick={() => {
                   handleProductSelect(pr);
                 }}
               >
-                <div className="flex items-center gap-2">
-                  <img
-                    src={pr.images[0].url}
-                    alt={pr.name.en}
-                    className="w-8 h-8   rounded-full "
-                  />
-                  <div>
-                    <p className="text-sm"> {pr.name.en}</p>
-                    <p className="text-xs">
-                      {" "}
-                      <span className=" text-warning">
-                        {$currency()} {pr.price.toFixed(2)}{" "}
-                      </span>
-                    </p>
-                  </div>
+                <img src={pr.images[0].url} alt={pr.name.en} className="w-8 h-8 rounded-full" />
+                <div>
+                  <p className="text-sm">{pr.name.en}</p>
+                  <p className="text-xs">
+                    <span className="text-warning">
+                      {$currency()} {pr.price.toFixed(2)}
+                    </span>
+                  </p>
                 </div>
-              </MenuItem>
-            );
-          })}
-        </MenuList>
-      </Menu>
+              </div>
+            ))}
+          </aside>
+        </section>
+
+        <Button
+          className="ms-2 bg-transparent border border-gray-400 flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
+          size="sm"
+          placeholder={undefined}
+          onClick={() => {
+            setValue("isScanner", !getValue("isScanner"));
+            setProductSearch("");
+          }}
+        >
+          {getValue("isScanner") ? (
+            <SearchIcon color="black"></SearchIcon>
+          ) : (
+            <BarcodeIcon className="w-5 h-5"></BarcodeIcon>
+          )}
+        </Button>
+      </div>
+
       {/* End Product Selection */}
     </section>
   );

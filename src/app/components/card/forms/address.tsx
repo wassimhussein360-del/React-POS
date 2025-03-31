@@ -15,11 +15,13 @@ import { useForm } from "react-hook-form";
 import "../cart.css";
 import { createCustomerAddress } from "@/servies/fire-functions";
 import toast from "react-hot-toast";
+import { $toTitleCase } from "@/app/helpers/helpers";
 
 interface AddressFormInputs {
   street: string;
   building: string;
   floor: string;
+  label: string;
   specialInstruction: string;
 }
 
@@ -27,8 +29,18 @@ const AddressForm: React.FC<any> = ({ setSelectedAddress }: { setSelectedAddress
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm<AddressFormInputs>();
+  } = useForm<AddressFormInputs>({
+    defaultValues: {
+      street: "",
+      building: "",
+      floor: "",
+      specialInstruction: "",
+      label: "home",
+    },
+  });
 
   const vendor = useVendor();
   const customer = useCustomer();
@@ -159,8 +171,8 @@ const AddressForm: React.FC<any> = ({ setSelectedAddress }: { setSelectedAddress
   };
 
   return (
-    <div className="flex justify-between  flex-col ">
-      <div className="w-full py-4 ">
+    <div className="flex justify-between  flex-col px-8">
+      <div className="w-full pt-4 ">
         <Stepper activeStep={activeStep}>
           {[1, 2, 3, 4].map((step, index) => {
             return (
@@ -186,7 +198,7 @@ const AddressForm: React.FC<any> = ({ setSelectedAddress }: { setSelectedAddress
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className=" max-w-[350px]  min-w-[350px] shadow-lg min-h-[300px]  rounded-lg p-4 border   text-xs border-gray-200 mt-5 mb-10 text-secondary"
+        className=" max-w-[350px]  min-w-[350px] shadow-lg min-h-[300px]  rounded-lg p-4 border   text-xs border-gray-200 mt-5 mb-1 text-secondary"
       >
         <section className={`${activeStep >= 3 ? "hidden" : ""}`}>
           <div className="flex items-center  gap-2 mb-4">
@@ -275,7 +287,26 @@ const AddressForm: React.FC<any> = ({ setSelectedAddress }: { setSelectedAddress
                 <Input label="Floor" {...register("floor", { required: false })} />
               </div>
 
+              {/* Add here */}
               <Textarea label="Special Instruction" {...register("specialInstruction")} />
+
+              {/* Address Type Selection Buttons */}
+              <div className="flex gap-2 mb-5 w-full">
+                {["home", "apartment", "office"].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    className={`px-4 py-2 w-1/3 rounded-md border ${
+                      watch("label") === type
+                        ? "bg-black  text-white "
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                    }`}
+                    onClick={() => setValue("label", type)}
+                  >
+                    {$toTitleCase(type)}
+                  </button>
+                ))}
+              </div>
             </aside>
           </aside>
 

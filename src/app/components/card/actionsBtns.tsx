@@ -63,6 +63,8 @@ const ActionsBtns = () => {
     $loader(true);
     createOrder(payload)
       .then((res: any) => {
+        console.log(res);
+
         if (res.data.success) {
           toast.success(res.data.message);
           const url = res.data.order.paymentUrl;

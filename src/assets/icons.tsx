@@ -1,14 +1,27 @@
-export const SearchIcon = () => {
+export const SearchIcon = ({
+  className = "",
+  color = "#A3A3A3",
+}: {
+  className?: string;
+  color?: string;
+}) => {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         d="M11 20C15.9706 20 20 15.9706 20 11C20 6.02944 15.9706 2 11 2C6.02944 2 2 6.02944 2 11C2 15.9706 6.02944 20 11 20Z"
-        stroke="#A3A3A3"
+        stroke={color}
         strokeWidth="1.5"
       />
       <path
         d="M21.8121 20.9749C21.7494 21.0696 21.6361 21.1829 21.4095 21.4095C21.1829 21.6361 21.0696 21.7494 20.9749 21.8121C20.4203 22.1794 19.67 21.9901 19.356 21.4037C19.3024 21.3036 19.2564 21.1501 19.1644 20.8431C19.0639 20.5077 19.0137 20.3399 19.0039 20.2219C18.9467 19.5269 19.5269 18.9467 20.2219 19.0039C20.3399 19.0137 20.5076 19.0639 20.8431 19.1644C21.1501 19.2564 21.3036 19.3024 21.4037 19.356C21.9901 19.67 22.1794 20.4203 21.8121 20.9749Z"
-        stroke="#A3A3A3"
+        stroke={color}
         strokeWidth="1.5"
         strokeLinecap="round"
       />
@@ -333,9 +346,16 @@ export const MoneyIcon = () => {
   );
 };
 
-export const BarcodeIcon = () => {
+export const BarcodeIcon = ({ className = "" }: { className?: string }) => {
   return (
-    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 11 11"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <g clip-path="url(#clip0_5043_750)">
         <mask
           id="mask0_5043_750"
