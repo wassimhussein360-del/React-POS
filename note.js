@@ -6,7 +6,7 @@
 // 6. check transaction id if needed
 // 7. change the display of address
 // 8. add label to create address home, work ...
-//* 9. change the layout of the login page
+// 9. change the layout of the login page
 // 10. add an input for barcode reader
 //* 11. when automatically switching to another branch check if the selected products included in the branch switched to
 //* 12. choose shipping and provider
@@ -15,4 +15,4 @@
 //* 15. when retrieving a url for payment listen for response if success or declined
 //* 16. use sass loader
 
-// Progress  8 / 15
+// Progress  9 / 15

@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import { SetLoader } from "@/reduxStore/slices/userSlice";
 
-export default function LogIn() {
+const LogIn: React.FC<{ className?: string }> = ({ className }) => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -127,16 +127,12 @@ export default function LogIn() {
   };
 
   return (
-    <Card
-      color="transparent"
-      shadow={false}
-      className="rounded-xl   p-10  shadow-2xl backdrop-blur bg-white/20"
-    >
-      <Typography variant="h4" color="blue-gray" className="text-primary">
-        Log In
+    <Card color="transparent" shadow={false} className={className}>
+      <Typography variant="h4" className="text-gray-900   font-normal text-start">
+        Sign In
       </Typography>
-      <Typography className="mt-1 font-normal font-sourGummy text-secondary">
-        Nice to meet you! Enter your details to login
+      <Typography className="font-normal fs-sm text-gray-600  font-sourGummy ">
+        Your Social Logins
       </Typography>
 
       <br />
@@ -148,7 +144,7 @@ export default function LogIn() {
           <section className="flex gap-2">
             <Button
               size="sm"
-              className="flex items-center justify-center gap-3 w-full bg-transparent border border-white/30"
+              className="flex items-center justify-center gap-3 w-full bg-transparent shadow-none text-gray-700 border border-gray-500"
               onClick={() => logInWithGoogle()}
             >
               <img
@@ -162,7 +158,7 @@ export default function LogIn() {
             <Button
               size="sm"
               onClick={() => logInWithApple()}
-              className="flex items-center justify-center gap-3 w-full bg-transparent border border-white/30"
+              className="flex items-center justify-center gap-3 w-full bg-transparent shadow-none text-gray-700 border border-gray-500"
             >
               <img
                 src="https://cdn-icons-png.flaticon.com/512/0/747.png"
@@ -173,10 +169,10 @@ export default function LogIn() {
             </Button>
           </section>
 
-          <div className="flex items-center  gap-2">
-            <hr className="w-full " />
-            <p className="text-nowrap text-white/50">Or Continue With</p>
-            <hr className="w-full " />
+          <div className="flex items-center  gap-2 text-gray-500 ">
+            <hr className="w-full border-gray-700" />
+            <p className="text-nowrap text-sm">Or Continue With</p>
+            <hr className="w-full border-gray-700" />
           </div>
 
           {/* End Social Log in */}
@@ -267,4 +263,6 @@ export default function LogIn() {
       </form>
     </Card>
   );
-}
+};
+
+export default LogIn;

@@ -72,7 +72,6 @@ const CartInfo = ({ className }: { className: string }) => {
             })}
           </ButtonGroup>
         </aside>
-        {/* {cart.key && <p className="text-gray-700 text-xs">Transaction ID: {cart.key}</p>} */}
       </section>
       {/* end category info */}
 
