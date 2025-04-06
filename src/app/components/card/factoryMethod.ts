@@ -1,9 +1,7 @@
-import { Indexable, Item, Modifier, Vendor } from "@/app/abstraction/types";
+import { Indexable, Item } from "@/app/abstraction/types";
 import { $getFromLocal } from "@/app/helpers/helpers";
-import { useAppSelector, useCart, useCustomer, useGeneral, useVendor } from "@/reduxStore/hooks";
 import { CartState } from "@/reduxStore/slices/cartSlice";
 import { GeneralState } from "@/reduxStore/slices/generalSlice";
-import { nanoid } from "nanoid";
 import toast from "react-hot-toast";
 
 export const refactorOrder = ($cart: CartState, $general: GeneralState) => {

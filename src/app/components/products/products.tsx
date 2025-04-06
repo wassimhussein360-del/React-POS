@@ -37,7 +37,11 @@ export default Products;
 
 export const formatProducts = (products: any[], outletId: string): Item[] => {
   const formattedProducts = products
-    .filter((product) => product.stockQuantity > 0 && product.branchesIds.includes(outletId))
+    .filter(
+      (product) =>
+        (product.isStockManagement ? product.stockQuantity > 0 : true) &&
+        product.branchesIds.includes(outletId)
+    )
     .map((product) => {
       // Deep clone the product
       const clonedProduct = JSON.parse(JSON.stringify(product));

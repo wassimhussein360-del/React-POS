@@ -5,3 +5,4 @@ export const createCustomerAddress = httpsCallable(functions, "createCustomerAdd
 export const createCustomer = httpsCallable(functions, "createOrGetCustomer");
 export const updateOrderStatus = httpsCallable(functions, "updateOrderStatus");
 export const createOrder = httpsCallable(functions, "createOrder");
+export const getShippingRates = httpsCallable(functions, "getShippingRates");

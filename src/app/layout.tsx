@@ -6,7 +6,6 @@ import AuthService from "./config/auth/auth";
 import StoreProvider from "@/reduxStore/storeProvider";
 import Header from "./components/header/header";
 import PageLoader from "./components/pageLoader/pageLoader";
-import { useLoader } from "@/reduxStore/hooks";
 import Loader from "./components/pageLoader/loader";
 
 const geistSans = Geist({

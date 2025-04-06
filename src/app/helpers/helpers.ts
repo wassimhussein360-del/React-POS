@@ -1,3 +1,5 @@
+import { text } from "stream/consumers";
+
 export function $calculateDiscountAmount(discount: number, originalPrice: number): number {
   if (discount < 0 || discount > 100) {
     throw new Error("Discount must be between 0 and 100");
@@ -48,6 +50,9 @@ export function $getFromLocal(key: string): any {
 
 export function $getImgSrc(vendorId: string, imageName: String, xParams: string): any {
   return `https://static.menasa.io/${vendorId}/${imageName}?${xParams}&auto=compress`;
+}
+export function $translate(text: { en: string; ar: string }): string {
+  return text.en || text.ar;
 }
 
 export function $generateRandomNumber(min: number, max: number): number {

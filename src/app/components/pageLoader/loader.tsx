@@ -1,13 +1,13 @@
-import { Spinner } from "@material-tailwind/react";
 import React from "react";
+import logoLoader from "../../../assets/gifs/Menasa loader.gif";
+import Image from "next/image";
 
 const Loader: React.FC = () => {
   return (
     <article id="my-loader" className="hidden">
       <div className="bg-white flex-center bg-opacity-40  h-full top-0 w-full overflow-hidden z-[99999] fixed">
         <div className="relative">
-          <div className="h-24 w-24 rounded-full border-t-8 border-b-8 border-gray-100"></div>
-          <div className="absolute top-0 left-0 h-24 w-24 rounded-full border-t-8 border-b-8 border-primary animate-spin"></div>
+          <Image src={logoLoader} className="w-[6rem]" alt="Auth screens" />
         </div>{" "}
       </div>
     </article>

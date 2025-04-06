@@ -23,10 +23,10 @@ const CardTotals: React.FC<CartTotalsType> = ({}) => {
         "productsDiscount",
         "subTotal",
         "total",
-      ].map((value) => {
+      ].map((value, index) => {
         return value && cart[value] ? (
           <section
-            key={value}
+            key={index}
             className={`flex justify-between text-gray-${
               cart[value] || 0 ? "800 font-semibold" : "400"
             }`}
@@ -36,9 +36,7 @@ const CardTotals: React.FC<CartTotalsType> = ({}) => {
               {$currency()} <div>{(cart[value] || 0).toFixed(2)}</div>
             </div>
           </section>
-        ) : (
-          <></>
-        );
+        ) : null;
       })}
     </article>
   );

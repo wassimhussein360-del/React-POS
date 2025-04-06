@@ -6,19 +6,19 @@ import CartHolder from "./dialogs/cartHolder";
 import { VoidCart } from "@/reduxStore/slices/cartSlice";
 import toast from "react-hot-toast";
 import { createOrder } from "@/servies/fire-functions";
-import { $loader } from "@/app/helpers/helpers";
+import { $getFromLocal, $loader } from "@/app/helpers/helpers";
 import QRCodePayment from "./dialogs/qrcodePayment";
+import { get } from "http";
 
 const ActionsBtns = () => {
   const cartItems = useCartItems();
-  const vendor = useVendor();
   const dispatch = useAppDispatch();
   const $general = useGeneral();
   const $cart = useCart();
   const [openCartHolder, setOpenCartHolder] = useState(false);
 
-  const [openQrCode, setOpenQrCode] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState("");
+  const [openQrCode, setOpenQrCode] = useState(true);
+  const [paymentUrl, setPaymentUrl] = useState<any>(null);
 
   const validateCart = (): boolean =>
     ![
@@ -35,41 +35,17 @@ const ActionsBtns = () => {
   const makeOrder = () => {
     if (!validateCart()) return;
     const o = $general.order;
-    const payload = {
-      id: o.id,
-      orderRef: o.orderRef,
-      customer: o.customer,
-      vendorId: vendor?.id,
-      cartItems: o.cart.cartItems,
-      save_card: false, // !
-      selections: {
-        orderType: o.orderType,
-        selectedPeriod: o.selectedPeriod,
-        selectedOrderTime: o.selectedOrderTime,
-        couponCode: o.couponCode,
-
-        channel: "Other", //!
-        outlet: o.outlet,
-        origin: o.origin,
-        address: o.address,
-      },
-
-      area: {}, //!
-
-      paymentMethod: o.paymentMethod.id,
-      orderNotes: o.specialInstructions, //!
-    };
-
+    const payload = getOrderPayload(o);
     $loader(true);
+    console.log(payload);
+
     createOrder(payload)
       .then((res: any) => {
-        console.log(res);
-
         if (res.data.success) {
           toast.success(res.data.message);
           const url = res.data.order.paymentUrl;
           if (url) {
-            setPaymentUrl(url);
+            setPaymentUrl(res.data.order);
             setOpenQrCode(true);
           }
           dispatch(VoidCart());
@@ -89,11 +65,13 @@ const ActionsBtns = () => {
   return (
     <section className="flex gap-3 flex-col">
       <CartHolder open={openCartHolder} handleOpen={() => setOpenCartHolder(!openCartHolder)} />
-      <QRCodePayment
-        open={openQrCode}
-        handleOpen={() => setOpenQrCode(!openQrCode)}
-        url={paymentUrl}
-      />
+      {paymentUrl?.id || (
+        <QRCodePayment
+          open={openQrCode}
+          handleOpen={() => setOpenQrCode(!openQrCode)}
+          orderId={paymentUrl?.id}
+        />
+      )}
       <Button
         className="normal-case justify-center rounded flex gap-1 bg-secondary "
         placeholder={undefined}
@@ -127,3 +105,31 @@ const ActionsBtns = () => {
 };
 
 export default ActionsBtns;
+
+export const getOrderPayload = (o: any) => {
+  return {
+    id: o.id,
+    orderRef: o.orderRef,
+    source: "POS",
+    customer: o.customer,
+    vendorId: $getFromLocal("vendor").id,
+    cartItems: o.cart.cartItems,
+    save_card: false, // !
+    selections: {
+      orderType: o.orderType,
+      selectedPeriod: o.selectedPeriod,
+      selectedOrderTime: o.selectedOrderTime,
+      couponCode: o.couponCode,
+
+      channel: "Other", //!
+      outlet: o.outlet,
+      origin: window.location.href,
+      address: o.address,
+    },
+
+    area: {}, //!
+
+    paymentMethod: o.paymentMethod.id,
+    orderNotes: o.specialInstructions, //!
+  };
+};

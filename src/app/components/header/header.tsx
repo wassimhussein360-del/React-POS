@@ -14,7 +14,7 @@ import {
   useVendors,
 } from "@/reduxStore/hooks";
 import { use, useEffect, useState } from "react";
-import { $getFromLocal, $toTitleCase, $writeOnLocal } from "@/app/helpers/helpers";
+import { $getFromLocal, $toTitleCase, $translate, $writeOnLocal } from "@/app/helpers/helpers";
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { auth } from "../../../../firebaseConfig";
@@ -155,7 +155,7 @@ export default function Header() {
           {outlets.map((outlet: any, index) => (
             <Option key={index} value={outlet.id} className="flex gap-2">
               <img src={outlet.image} className=" w-5 h-5" alt="Small Logo" />
-              {outlet.name.en}
+              {$translate(outlet.name)}
             </Option>
           ))}
         </Select>
@@ -224,24 +224,23 @@ export default function Header() {
             </MenuList>
           </Menu>
 
-          <Menu
-            animate={{
-              mount: { y: 0 },
-              unmount: { y: 25 },
-            }}
-          >
+          <Menu>
             <MenuHandler>
-              <section className="lg:hidden flex items-center">
+              <button className="lg:hidden p-0">
+                {" "}
+                {/* Add button element here */}
                 <img
                   src={user.image}
                   className="object-cover rounded-full aspect-square min-w-6 min-h-6 max-w-6 max-h-6 cursor-pointer"
-                ></img>
-              </section>
+                />
+              </button>
             </MenuHandler>
-            <MenuList className="p-1">
+            <MenuList className="p-1 z-[9999] ">
+              {" "}
+              {/* Ensure proper z-index */}
               <MenuItem
                 onClick={() => signOut()}
-                className="flex items-center gap-2  text-danger hover:text-danger hover:bg-danger-light text-xs"
+                className="flex items-center gap-2 text-danger hover:bg-danger-light text-xs"
               >
                 <OutIcon className="w-4 h-4" />
                 Sign Out

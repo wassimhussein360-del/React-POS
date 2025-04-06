@@ -79,7 +79,7 @@ const OrdersTable = () => {
       page: currentPage,
       interval: "allTime",
       query: {
-        origin: "POS",
+        source: "POS",
         ...filters,
       },
       sortBy: [`${sorSetting.by.toUpperCase()}_${sorSetting.dir.toUpperCase()}`],

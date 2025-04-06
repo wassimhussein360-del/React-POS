@@ -15,6 +15,7 @@ import { useCart, useVendor } from "@/reduxStore/hooks";
 import { nanoid } from "nanoid";
 import { createCustomer } from "@/servies/fire-functions";
 import toast from "react-hot-toast";
+import { allCountries } from "country-telephone-data";
 
 interface CashPayProps {
   open: boolean;
@@ -24,6 +25,14 @@ interface CashPayProps {
 
 const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustomer }) => {
   const $vendor = useVendor();
+
+  const [selectedCountryCode, setselectedCountryCode] = useState("+965");
+  const COUNTRIES = allCountries.map((country) => {
+    return {
+      name: country.name,
+      code: `+${country.dialCode}`,
+    };
+  });
 
   const [form, setForm] = useState<{ name: string; number: string }>({
     name: "",
@@ -51,7 +60,10 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
   const validateForm = () => {
     return form.name && form.number;
   };
-  const [country, setCountry] = useState(0);
+
+  function setPhoneNumber(value: string) {
+    setFormValue("number", value);
+  }
 
   const handleSubmit = () => {
     if (validateForm()) {
@@ -68,7 +80,7 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
         id: id,
         name: form.name,
         vendorId: $vendor?.id,
-        phone: `${CODES[country]}${form.number}`,
+        phone: `${selectedCountryCode}${form.number}`,
         uid: id,
       };
       createCustomer(payload)
@@ -150,17 +162,21 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
                   color="blue-gray"
                   className="h-10 w-14 shrink-0 rounded-r-none border border-r-0 border-blue-gray-200 bg-transparent px-3"
                 >
-                  {CODES[country]}
+                  {selectedCountryCode}
                 </Button>
               </MenuHandler>
               <MenuList className="max-h-[20rem] max-w-[18rem] z-[9999]">
-                {COUNTRIES.map((country, index) => {
-                  return (
-                    <MenuItem key={country} value={country} onClick={() => setCountry(index)}>
-                      {country}
-                    </MenuItem>
-                  );
-                })}
+                {COUNTRIES.map((country, index) => (
+                  <MenuItem
+                    key={index}
+                    onClick={() => setselectedCountryCode(country.code)}
+                    className={`${
+                      selectedCountryCode == country.code ? "bg-gray-300 text-secondary" : ""
+                    }`}
+                  >
+                    {country.name} ({country.code})
+                  </MenuItem>
+                ))}
               </MenuList>
             </Menu>
             <Input
@@ -170,7 +186,9 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
               maxLength={12}
               value={form.number}
               placeholder="phone number"
-              onChange={(e) => setFormValue("number", e.target.value)}
+              onChange={(e) => {
+                setPhoneNumber(e.target.value);
+              }}
               className="appearance-none rounded-l-none !border-t-blue-gray-200 placeholder:text-blue-gray-300 placeholder:opacity-100 focus:!border-t-gray-900 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none focus:border"
               labelProps={{
                 className: "before:content-none after:content-none",
@@ -215,8 +233,5 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
     </Dialog>
   );
 };
-
-const COUNTRIES = ["Kuwait (+965)"];
-const CODES = ["+965"];
 
 export default NewCustomerDialog;

@@ -4,15 +4,18 @@
 // 4. add trash icon to holden carts
 // 5. remove seconds from holden cart name
 // 6. check transaction id if needed
-// 7. change the display of address
+// 7. change the display of addressf
 // 8. add label to create address home, work ...
 // 9. change the layout of the login page
 // 10. add an input for barcode reader
-//* 11. when automatically switching to another branch check if the selected products included in the branch switched to
+// 11. when automatically switching to another branch check if the selected products included in the branch switched to
 //* 12. choose shipping and provider
-//* 13. check why 38 aud products does not exist on pos
+// 13. check why 38 aud products does not exist on pos
 //* 14. make the condition of fetched orders on the new key added
 //* 15. when retrieving a url for payment listen for response if success or declined
-//* 16. use sass loader
+// 16. use sass loader
+// 17. user menu at the top of the page does nor ope on mobile screen
+// 18. handle vendors that has only arabic language like 38oud
+// 19. add phonenumber extentions
 
-// Progress  9 / 15
+// Progress  16 / 19

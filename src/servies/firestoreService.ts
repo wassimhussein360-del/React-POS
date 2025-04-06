@@ -1,12 +1,6 @@
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  CollectionReference,
-} from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { app } from "../../firebaseConfig";
+import { Observable } from "rxjs";
 
 const db = getFirestore(app);
 
@@ -79,7 +73,7 @@ class FirestoreService {
       }));
 
       return documents;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Query failed: ${error.message}`);
     }
   }
@@ -107,6 +101,41 @@ class FirestoreService {
     } else {
       throw new Error(`Document with ID ${documentId} not found in collection ${collectionName}`);
     }
+  }
+
+  static getObserveSubDocument(
+    collectionName: string,
+    documentId: string,
+    subcollectionName: string,
+    subdocumentId: string
+  ): Observable<DocumentData | null> {
+    return new Observable((observer) => {
+      try {
+        const docRef = doc(db, collectionName, documentId, subcollectionName, subdocumentId);
+
+        const unsubscribe = onSnapshot(
+          docRef,
+          (docSnap) => {
+            if (docSnap.exists()) {
+              observer.next({
+                id: docSnap.id,
+                ...docSnap.data(),
+              });
+            } else {
+              observer.next(null); // or observer.error(...) if preferred
+            }
+          },
+          (error) => {
+            observer.error(`Failed to observe document: ${error.message}`);
+          }
+        );
+
+        // Cleanup function
+        return () => unsubscribe();
+      } catch (error: any) {
+        observer.error(`Failed to observe document: ${error.message}`);
+      }
+    });
   }
 }
 export default FirestoreService;

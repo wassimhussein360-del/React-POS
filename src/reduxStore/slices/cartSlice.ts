@@ -38,6 +38,7 @@ const cartSlice = createSlice({
         state.active = true;
       }
       let key: any = null;
+
       if (action.payload.key) {
         state.items
           .filter((itm) => itm.id == action.payload.id)
@@ -48,7 +49,7 @@ const cartSlice = createSlice({
           });
       }
 
-      if (!key) state.items.push({ ...action.payload });
+      if (!key) state.items.push({ ...action.payload, quantity: 1 });
 
       state.items = state.items.map((itm) =>
         itm.id == action.payload.id

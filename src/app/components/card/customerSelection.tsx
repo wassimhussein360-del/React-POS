@@ -21,7 +21,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import React from "react";
 import { formatProducts } from "../products/products";
-import { $currency, $getColorFromString, $getImgAlter } from "@/app/helpers/helpers";
+import { $currency, $getColorFromString, $getImgAlter, $translate } from "@/app/helpers/helpers";
 import ProductDetails from "../products/productDetails";
 import { AddItem, SetCartField, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import NewCustomerDialog from "./dialogs/newCustomer";
@@ -64,8 +64,6 @@ const CustomerAndProductSelection = () => {
   const $general = useGeneral();
 
   function handleProductSelect(_product: Item) {
-    console.log({ _product });
-
     setProduct(_product);
 
     setTimeout(() => {
@@ -114,7 +112,7 @@ const CustomerAndProductSelection = () => {
   }, [productSearch]);
 
   useEffect(() => {
-    if (!vendor || customerSearch.length < 3) return;
+    if (!vendor || customerSearch.length < 1) return;
     setCustomerLoading(true);
 
     algoliaSearch(vendor.id, "customers", customerSearch)
@@ -139,8 +137,6 @@ const CustomerAndProductSelection = () => {
   }, [selectedCustomer]);
 
   useEffect(() => {
-    console.log(products);
-
     if (newCustomer) {
       setSelectedCustomerName(newCustomer.name);
       dispatch(SetCartField({ fieldName: "customer", value: newCustomer, vendorId: vendor.id }));
@@ -247,7 +243,13 @@ const CustomerAndProductSelection = () => {
                       </div>
                     )}
                     <div>
-                      <p className="text-sm text-secondary"> {cus.name}</p>
+                      <p className="text-sm text-secondary">
+                        {" "}
+                        {$translate({
+                          en: cus.name || cus.displayName || cus.an?.displayName,
+                          ar: cus.ar?.displayName,
+                        })}
+                      </p>
                       <p className="text-xs text-gray-400"> {cus.phone}</p>
                     </div>
                   </div>
@@ -324,7 +326,7 @@ const CustomerAndProductSelection = () => {
               >
                 <img src={pr.images[0].url} alt={pr.name.en} className="w-8 h-8 rounded-full" />
                 <div>
-                  <p className="text-sm">{pr.name.en}</p>
+                  <p className="text-sm">{$translate(pr.name)}</p>
                   <p className="text-xs">
                     <span className="text-warning">
                       {$currency()} {pr.price.toFixed(2)}

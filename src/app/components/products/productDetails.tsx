@@ -1,5 +1,5 @@
 import { Indexable, Item, Modifier, ModifierOption } from "@/app/abstraction/types";
-import { $currency } from "@/app/helpers/helpers";
+import { $currency, $translate } from "@/app/helpers/helpers";
 import { useAppDispatch, useCartItems } from "@/reduxStore/hooks";
 import { AddItem, UpdateItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { Button, Dialog, Input, Textarea } from "@material-tailwind/react";
@@ -169,12 +169,17 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
             className="min-w-60  max-w-60 aspect-square object-cover rounded-xl"
           />
           <section className="flex justify-between  mt-2 w-56">
-            <p className="text-xs text-primary font-semibold">
-              {itemsTotals.quantity
-                ? itemsTotals.stock + (product.quantity || 0) - (temporaryItem?.quantity || 0)
-                : product.stockQuantity - (temporaryItem?.quantity || 0)}{" "}
-              Pcs
-            </p>
+            {product.isStockManagement ? (
+              <p className="text-xs text-primary font-semibold">
+                {itemsTotals.quantity
+                  ? itemsTotals.stock + (product.quantity || 0) - (temporaryItem?.quantity || 0)
+                  : product.stockQuantity - (temporaryItem?.quantity || 0)}{" "}
+                Pcs
+              </p>
+            ) : (
+              <p></p>
+            )}
+
             <p className="text-xs text-gray-800">
               {$currency()} {product.price.toFixed(2)}
             </p>
@@ -182,9 +187,11 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
           <hr className="w-56 my-2 border-gray-300" />
           <aside className="  w-full text-justify">
             <p className="text-xs text-gray-800">
-              {product.categories.map((cat: Indexable) => cat.name.en).join(", ")}
+              {product.categories.map((cat: Indexable) => $translate(cat.name)).join(", ")}
             </p>
-            <h4 className="text-gray-900 font-semibold  text-xs    max-w-60">{product.name.en}</h4>
+            <h4 className="text-gray-900 font-semibold  text-xs    max-w-60">
+              {$translate(product.name)}
+            </h4>
           </aside>
           <hr className="w-56 my-2 border-gray-300" />
           <aside className="  flex gap-5 items-center">
@@ -206,7 +213,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                 (itemsTotals.stock || product.stockQuantity) +
                   (product.quantity || 0) -
                   temporaryItem?.quantity >=
-                1
+                  1 || !product.isStockManagement
                   ? updateQuantity((temporaryItem?.quantity || 0) + 1)
                   : null
               }
@@ -230,7 +237,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                         <article key={modifierIndex} className="">
                           <section className="flex justify-between items-center flex-wrap  mb-2 text-sm font-semibold text-secondary w-fill">
                             <p className="flex items-center gap-1">
-                              {modifier.name.en + " "}
+                              {$translate(modifier.name) + " "}
                               <span
                                 className={`text-[0.6rem] p-0 ${
                                   validators[modifierIndex]?.invalid
@@ -303,7 +310,10 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                                         {/* End Check Box */}
 
                                         <p className={`text-xs  `}>
-                                          {option.nameEn || option.name.en}
+                                          {$translate({
+                                            en: option?.nameEn || option.name?.en,
+                                            ar: option?.nameAr || option.name?.ar,
+                                          })}
                                         </p>
                                       </div>
                                     </div>

@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { User, Vendor } from "@/app/abstraction/types";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import { SetLoader, SetUser, SetVendor, SetVendors } from "@/reduxStore/slices/userSlice";
-import { $getFromLocal, $getImgSrc, $writeOnLocal } from "@/app/helpers/helpers";
+import { $getFromLocal, $getImgSrc, $translate, $writeOnLocal } from "@/app/helpers/helpers";
 import { useRouter } from "next/navigation";
 
 const AuthService = () => {
@@ -91,7 +91,7 @@ function formatVendors(vendors: any[]): Vendor[] {
     });
     return {
       id: vendor.id,
-      name: vendor.name.en,
+      name: $translate(vendor.name),
       logo: $getImgSrc(vendor.id, vendor.logo[0], "w=500"),
       apiKey: vendor.apikey,
       defaultCurrency: vendor.defaultCurrency || "KWD",

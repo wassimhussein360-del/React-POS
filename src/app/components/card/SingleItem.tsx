@@ -4,7 +4,7 @@ import { Item } from "@/app/abstraction/types";
 import { AddDiscount, RemoveItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import ProductDetails from "../products/productDetails";
-import { $currency, $toTitleCase } from "@/app/helpers/helpers";
+import { $currency, $toTitleCase, $translate } from "@/app/helpers/helpers";
 import SelectedModifiersSummary from "./modifiersSummary";
 
 interface SingleItemProps {
@@ -51,7 +51,9 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
 
         <section className="text-xs flex flex-col justify-between">
           <aside>
-            <p className="text-sm font-semibold truncate max-w-32">{$toTitleCase(item.name.en)}</p>
+            <p className="text-sm font-semibold truncate max-w-32">
+              {$toTitleCase($translate(item.name))}
+            </p>
           </aside>
           {!!item.assignedModifiers.length && (
             <SelectedModifiersSummary assignedModifiers={item.assignedModifiers || []} />
@@ -84,7 +86,11 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
             {item.quantity}
           </button>
           <button
-            onClick={() => (item.stockQuantity <= 0 ? null : updateQuantity(item.quantity + 1))}
+            onClick={() =>
+              item.stockQuantity <= 0 && item.isStockManagement
+                ? null
+                : updateQuantity(item.quantity + 1)
+            }
             className="bg-white text-gray-900 rounded-e border-l border-gray-400 w-5 h-5 p-0"
           >
             +

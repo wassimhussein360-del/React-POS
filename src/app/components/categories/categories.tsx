@@ -11,6 +11,7 @@ import { Spinner } from "@material-tailwind/react";
 import { useDispatch } from "react-redux";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
 import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
+import { $translate } from "@/app/helpers/helpers";
 
 const Categories: React.FC<{
   products: Item[];
@@ -138,7 +139,7 @@ function formatCategories(categories: any[], allProducts: Item[]): Category[] {
 
       return {
         id: cat.id,
-        name: cat.name.en,
+        name: $translate(cat.name),
         image: cat.images?.length ? cat.images[0].url : "",
         quantity: relatedProducts.length,
         products: relatedProducts,

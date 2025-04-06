@@ -4,7 +4,7 @@ import { AddItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { Badge } from "@material-tailwind/react";
 import React, { use, useEffect, useState } from "react";
 import ProductDetails from "./productDetails";
-import { $currency } from "@/app/helpers/helpers";
+import { $currency, $translate } from "@/app/helpers/helpers";
 
 interface SingleProductProps {
   product: Item;
@@ -55,10 +55,12 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
             ? "rounded-xl border-secondary shadow-xl border-2"
             : "border-gray-300"
         } ${
-          itemsTotals.quantity && itemsTotals.stock <= 0 ? "opacity-50" : "cursor-pointer"
+          itemsTotals.quantity && itemsTotals.stock <= 0 && product.isStockManagement
+            ? "opacity-50"
+            : "cursor-pointer"
         } ${className}`}
         onClick={() =>
-          !(itemsTotals.quantity && itemsTotals.stock <= 0)
+          !(itemsTotals.quantity && itemsTotals.stock <= 0) || !product.isStockManagement
             ? !product.assignedModifiers.length
               ? dispatch(
                   itemsTotals.quantity > 0
@@ -76,15 +78,21 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
           />
           <aside className="pt-4  w-full">
             <p className="text-xs text-gray-800">
-              {product.categories.map((cat: Indexable) => cat.name.en).join(", ")}
+              {product.categories.map((cat: Indexable) => $translate(cat.name)).join(", ")}
             </p>
-            <h4 className="text-gray-900 font-semibold  text-xs truncate">{product.name.en}</h4>
+            <h4 className="text-gray-900 font-semibold  text-xs truncate">
+              {$translate(product.name)}
+            </h4>
           </aside>
         </section>
         <section className="flex justify-between">
-          <p className="text-xs text-primary font-semibold">
-            {itemsTotals.quantity ? itemsTotals.stock : product.stockQuantity} Pcs
-          </p>
+          {!product.isStockManagement ? (
+            <p></p>
+          ) : (
+            <p className={`text-xs text-primary font-semibold`}>
+              {itemsTotals.quantity ? itemsTotals.stock : product.stockQuantity} Pcs
+            </p>
+          )}
           <p className="text-xs text-gray-800">
             {$currency()} {product.price.toFixed(2)}
           </p>

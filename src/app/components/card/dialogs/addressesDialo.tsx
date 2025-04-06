@@ -10,8 +10,6 @@ import {
   useVendor,
 } from "@/reduxStore/hooks";
 import FirestoreService from "@/servies/firestoreService";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import AddressForm from "../forms/address";
@@ -21,6 +19,7 @@ import { $getFromLocal, $toTitleCase, $writeOnLocal } from "@/app/helpers/helper
 import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 import toast from "react-hot-toast";
 import { Chevron } from "@/assets/icons";
+import { getShippingRates } from "@/servies/fire-functions";
 
 interface CashPayProps {
   open: boolean;
@@ -56,19 +55,39 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
   }, [customer]);
 
   useEffect(() => {
-    console.log(selectedAddress);
+    const updateAddress = async () => {
+      let { _outlet, _zone }: Indexable = { _outlet: null, _zone: null };
+      const outlets = $general.outlets;
 
-    if (!Object.keys(selectedAddress).length || !switchBranch()) return;
-    setAddNew(false);
+      _outlet =
+        outlets.find(
+          (olt) =>
+            (_zone = olt.zones.find((zone: Indexable) =>
+              zone.areas.some((area: string) => JSON.parse(area).area.en === selectedAddress.area)
+            ))
+        ) || null;
 
-    const tryFind = addresses.find((add) => add.id == selectedAddress.id);
-    if (!tryFind) {
-      addresses.unshift(selectedAddress);
-    }
+      console.log({ _zone });
 
-    dispatch(
-      SetCartField({ fieldName: "address", value: selectedAddress, vendorId: vendor?.id as string })
-    );
+      if (!Object.keys(selectedAddress).length || !(await switchBranch(_outlet, _zone))) return;
+      setAddNew(false);
+
+      const tryFind = addresses.find((add) => add.id === selectedAddress.id);
+      if (!tryFind) {
+        addresses.unshift(selectedAddress);
+      }
+
+      dispatch(
+        SetCartField({
+          fieldName: "address",
+          value: selectedAddress,
+          vendorId: vendor?.id as string,
+        })
+      );
+    };
+
+    updateAddress();
+    getShippings();
   }, [selectedAddress]);
 
   useEffect(() => {
@@ -77,26 +96,32 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
     }
   }, [$cart.address]);
 
-  const switchBranch = (): boolean => {
-    let { _outlet, _zone }: Indexable = { _outlet: null, _zone: null };
-    const outlets = $general.outlets;
-
-    _outlet =
-      outlets.find(
-        (olt) =>
-          (_zone = olt.zones.find((zone: Indexable) =>
-            zone.areas.some((area: string) => JSON.parse(area).area.en === selectedAddress.area)
-          ))
-      ) || null;
-
+  const switchBranch = async (_outlet: any, _zone: any): Promise<boolean> => {
     // if the selected address has'nt found in any branch
     if (!_outlet || !_zone) {
-      toast.error("The Provided Address Does not belong to any branch !!");
+      toast.error("The Provided Address Does not belong to any branch !!", { duration: 10_000 });
       setSelectedAddress({});
       return false;
     }
 
     if ($general.branch.id !== _outlet?.id) {
+      // check if the selected products belong to the selected branch
+      const newBranchProductsIds = await fetchBranchProductsIds(_outlet?.id);
+      const items = $cart.items.map((item) => item.productId);
+
+      // Check if at least one item does NOT belong to newBranchProductsIds
+      const hasInvalidItem = items.some((productId) => !newBranchProductsIds.includes(productId));
+
+      if (hasInvalidItem) {
+        toast.error(
+          "Unable to switch branch: some products aren't available at the selected address's branch.",
+          { duration: 10_000 }
+        );
+        setSelectedAddress({});
+        return false;
+      }
+      // End
+
       const { oldKey, newKey } = {
         oldKey: `${vendor?.id}_${$general.branch.id}`,
         newKey: `${vendor?.id}_${_outlet.id}`,
@@ -124,6 +149,26 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
     dispatch(SetGeneralField({ field: "zone", value: _zone }));
 
     return true;
+  };
+  const getShippings = () => {
+    getShippingRates({
+      order: $general.order,
+    })
+      .then((res) => {})
+      .catch((err) => console.error(err));
+  };
+
+  const fetchBranchProductsIds = (branchId: string): Promise<string[]> => {
+    return FirestoreService.getSubcollection("vendors", vendor?.id as string, "products")
+      .then((fetchedProducts) =>
+        fetchedProducts
+          .filter((product: any) => product.branchesIds.includes(branchId))
+          .map((product: any) => product.id)
+      )
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+        return []; // Return an empty array on error
+      });
   };
 
   const getBody = () => {

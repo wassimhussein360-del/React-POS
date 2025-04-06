@@ -1,27 +1,13 @@
-import { AppleIcon, BellIcon, MoneyIcon } from "@/assets/icons";
-import QRCodePayment from "./dialogs/qrcodePayment";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CashPayDialog from "./dialogs/cashPay";
-import {
-  Button,
-  ButtonGroup,
-  Menu,
-  MenuHandler,
-  MenuItem,
-  MenuList,
-  Radio,
-  Typography,
-} from "@material-tailwind/react";
+import { Menu, MenuHandler, MenuList, Radio, Typography } from "@material-tailwind/react";
 import { useAppDispatch, useCart, useVendor } from "@/reduxStore/hooks";
 import { Vendor } from "@/app/abstraction/types";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
 
 const PaymentMethods = ({ totalBill }: any) => {
   const dispatch = useAppDispatch();
-  const [openQrCode, setOpenQrCode] = useState(false);
-  const handleQrCodeDialog = () => {
-    setOpenQrCode(!openQrCode);
-  };
+
   const $vendor = useVendor() as Vendor;
   const $cart = useCart();
 
@@ -76,11 +62,6 @@ const PaymentMethods = ({ totalBill }: any) => {
 
   return (
     <section className="py-6">
-      <QRCodePayment
-        open={openQrCode}
-        handleOpen={handleQrCodeDialog}
-        url="https://www.youtube.com/watch?v=nvr4lPoKqzI"
-      />
       <CashPayDialog open={openCashDialog} handleOpen={handleCashPayDialog} totalBill={totalBill} />
       <h6 className="mb-5 text-sm">Payment method</h6>
 
@@ -106,7 +87,7 @@ const PaymentMethods = ({ totalBill }: any) => {
                 <div
                   className={`rounded border border-gray-400 flex items-center justify-center flex-col h-20 w-20 cursor-pointer 
             ${
-              value.methods.map((m: any) => m.id).includes($cart.selections?.paymentMethod)
+              value.methods.some((m: any) => m.id == $cart.selections?.paymentMethod)
                 ? "bg-secondary text-primary"
                 : " font-thin"
             }`}
@@ -116,10 +97,9 @@ const PaymentMethods = ({ totalBill }: any) => {
                 </div>
               </MenuHandler>
               <MenuList placeholder="" className="z-[9999]">
-                {value.methods.map((m: any) => (
-                  <div className="flex justify-between gap-5">
+                {value.methods.map((m: any, j: number) => (
+                  <div className="flex justify-between gap-5" key={j}>
                     <Radio
-                      key={m.id}
                       onClick={() => setPaymentMethod(m.id)}
                       name="type"
                       ripple={false}
