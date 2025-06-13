@@ -38,7 +38,7 @@ const CartHolder: React.FC<DiscountDialogProps> = ({ open, handleOpen }) => {
   const getBody = () => {
     return (
       <div className="mx-auto  w-full max-w-xs">
-        <Typography className="mb-4 font-normal text-blue-gray-500 text-sm" placeholder={undefined}>
+        <Typography className="mb-4 font-normal text-blue-gray-500 text-sm">
           Please enter a holding name to hold the cart.
         </Typography>
 
@@ -49,7 +49,6 @@ const CartHolder: React.FC<DiscountDialogProps> = ({ open, handleOpen }) => {
               size="md"
               className=" text-xs"
               value={holdingName}
-              crossOrigin={undefined}
               onChange={(e) => setHoldingName(e.target.value)}
             />
           </div>
@@ -57,7 +56,6 @@ const CartHolder: React.FC<DiscountDialogProps> = ({ open, handleOpen }) => {
         <br />
         <Button
           className="normal-case flex justify-center rounded items-center gap-1 w-full bg-warning "
-          placeholder={undefined}
           disabled={holdingName == ""}
           onClick={() => holdCart()}
         >
@@ -72,7 +70,6 @@ const CartHolder: React.FC<DiscountDialogProps> = ({ open, handleOpen }) => {
       open={open}
       handler={handleOpen}
       className="flex justify-center  bg-primary shadow-transparent !min-w-0 !w-[350px]"
-      placeholder={undefined}
     >
       <article className="flex flex-col justify-center text-center gap-2 bg-white shadow-xl shadow-gray-800 rounded-xl py-10 px-12">
         {getBody()}

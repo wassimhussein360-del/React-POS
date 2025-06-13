@@ -11,11 +11,11 @@
 // 11. when automatically switching to another branch check if the selected products included in the branch switched to
 //* 12. choose shipping and provider
 // 13. check why 38 aud products does not exist on pos
-//* 14. make the condition of fetched orders on the new key added
-//* 15. when retrieving a url for payment listen for response if success or declined
+// 14. make the condition of fetched orders on the new key added
+// 15. when retrieving a url for payment listen for response if success or declined
 // 16. use sass loader
 // 17. user menu at the top of the page does nor ope on mobile screen
 // 18. handle vendors that has only arabic language like 38oud
 // 19. add phonenumber extentions
 
-// Progress  16 / 19
+// Progress  18 / 19

@@ -99,7 +99,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
     let isValid = true;
 
     const newValidators = temporaryItem?.assignedModifiers.reduce(
-      (acc, md: Modifier, index: number) => {
+      (acc: any, md: Modifier, index: number) => {
         if (!md.required) return acc;
 
         const selectionCount = md.list.filter((op) => op.selected).length;
@@ -157,7 +157,6 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
       open={open}
       handler={handleOpen}
       className="flex justify-center  bg-transparent w-[90vw]  shadow-transparent"
-      placeholder={undefined}
     >
       <article
         className={`flex  justify-center text-center gap-2 md:max-w-[650px] md:min-w-[650px] bg-white shadow-xl 
@@ -256,7 +255,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                           </section>
                           <section className="w-full">
                             {(modifier?.list || []).map(
-                              (option: ModifierOption, optionIndex: number) => {
+                              (option: ModifierOption | any, optionIndex: number) => {
                                 return (
                                   <section
                                     key={optionIndex}
@@ -382,7 +381,6 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                 className={`normal-case flex  bg-secondary ${
                   !temporaryItem?.assignedModifiers.length ? "min-w-40" : "w-1/2"
                 } justify-center`}
-                placeholder={undefined}
                 onClick={() => saveToCart()}
               >
                 Save
@@ -394,7 +392,6 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                 className={`normal-case flex  bg-secondary ${
                   !temporaryItem?.assignedModifiers.length ? "min-w-40" : "w-1/2"
                 } justify-center`}
-                placeholder={undefined}
                 onClick={() => addToCart()}
               >
                 Add

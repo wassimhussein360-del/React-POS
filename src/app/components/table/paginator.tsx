@@ -17,7 +17,7 @@ const Paginator: React.FC<PaginatorProps> = ({
   const totalPages = Math.ceil(dataSize / itemsPerPage);
 
   // Function to handle page change
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: any) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }

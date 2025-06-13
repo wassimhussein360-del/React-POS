@@ -54,6 +54,7 @@ const ORDERS_QUERY = gql`
         total
         orderRef
         id
+        source
 
         paid
         extraFees {

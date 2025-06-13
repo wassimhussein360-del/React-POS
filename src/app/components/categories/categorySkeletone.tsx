@@ -3,15 +3,11 @@ import { Card, CardBody, CardHeader } from "@material-tailwind/react";
 
 export default function CategorySkeleton() {
   return (
-    <Card
-      className=" animate-pulse flex items-center flex-col  justify-center border aspect-square border-gray-300 rounded-xl"
-      placeholder={undefined}
-    >
+    <Card className=" animate-pulse flex items-center flex-col  justify-center border aspect-square border-gray-300 rounded-xl">
       <CardHeader
         shadow={false}
         floated={false}
         className="h-1/2 w-1/2 rounded-xl object-cover bg-gray-300 flex items-center justify-center"
-        placeholder={undefined}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -28,21 +24,11 @@ export default function CategorySkeleton() {
           />
         </svg>
       </CardHeader>
-      <CardBody placeholder={undefined} className="p-0 w-full pt-3 flex  flex-col items-center">
-        <Typography
-          as="div"
-          variant="h1"
-          className="mb-1 h-3 w-16 rounded-full bg-gray-300"
-          placeholder={undefined}
-        >
+      <CardBody className="p-0 w-full pt-3 flex  flex-col items-center">
+        <Typography as="div" variant="h1" className="mb-1 h-3 w-16 rounded-full bg-gray-300">
           &nbsp;
         </Typography>
-        <Typography
-          as="div"
-          variant="h1"
-          className="mb-1 h-2 w-14 rounded-full bg-gray-300"
-          placeholder={undefined}
-        >
+        <Typography as="div" variant="h1" className="mb-1 h-2 w-14 rounded-full bg-gray-300">
           &nbsp;
         </Typography>
       </CardBody>

@@ -204,7 +204,6 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
         <br />
         <Button
           className="normal-case  bg-secondary w-full flex-center gap-3"
-          placeholder={undefined}
           disabled={isLoading}
           onClick={() => handleSubmit()}
         >
@@ -225,7 +224,6 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
       open={open}
       handler={handleOpen}
       className="flex justify-center  bg-transparent shadow-transparent  "
-      placeholder={undefined}
     >
       <article className=" bg-white shadow-xl shadow-gray-800 rounded-xl py-8 px-12">
         {getBody()}

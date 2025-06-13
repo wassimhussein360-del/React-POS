@@ -16,6 +16,7 @@ export interface CartState {
     orderType?: "delivery" | "pickup";
     specialInstructions?: string;
     origin?: any;
+    shippingMethod?: any;
   };
   [key: string]: any;
 }
@@ -65,10 +66,8 @@ const cartSlice = createSlice({
       // ? Save to local storage
       setCartToLocal($getFromLocal("vendor").id, state);
     },
-    SetCartField: (
-      state,
-      action: PayloadAction<{ fieldName: string; value: any; vendorId: string }>
-    ) => {
+    SetCartField: (state, action: PayloadAction<{ fieldName: string; value: any }>) => {
+      const vendorId = $getFromLocal("vendor").id;
       if (!state.key) {
         state.key = nanoid(10);
         state.active = true;
@@ -77,7 +76,7 @@ const cartSlice = createSlice({
       state[action.payload.fieldName] = action.payload.value;
 
       // ? Save to local storage
-      setCartToLocal($getFromLocal("vendor").id, state);
+      setCartToLocal(vendorId, state);
     },
     UpdateItem: (state, action: PayloadAction<Item>) => {
       let itemToUpdate = action.payload;
@@ -274,7 +273,13 @@ function deleteCartFromLocal(vendorId: string, cartKey: string) {
 export function getHoldenCart(vendorId: string, cartKey: string) {
   let getLocalCarts = $getFromLocal("carts");
 
-  let cartToReturn: CartState = { key: "", items: [], holdingName: "", active: true };
+  let cartToReturn: CartState = {
+    key: "",
+    items: [],
+    holdingName: "",
+    active: true,
+    selections: { orderType: "delivery" },
+  };
   getLocalCarts[vendorId] = getLocalCarts[vendorId].map((_cart: CartState) => {
     if (_cart.key === cartKey) {
       const foundCart = { ..._cart, holdingName: "" };

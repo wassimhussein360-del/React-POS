@@ -25,7 +25,6 @@ const PaymentMethods = ({ totalBill }: any) => {
           ...$cart.selections,
           paymentMethod: paymentId,
         },
-        vendorId: $vendor.id,
       })
     );
   };
@@ -96,7 +95,7 @@ const PaymentMethods = ({ totalBill }: any) => {
                   {getIcon($cart.selections?.paymentMethod || "", " fill-primary")}
                 </div>
               </MenuHandler>
-              <MenuList placeholder="" className="z-[9999]">
+              <MenuList className="z-[9999]">
                 {value.methods.map((m: any, j: number) => (
                   <div className="flex justify-between gap-5" key={j}>
                     <Radio

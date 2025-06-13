@@ -101,7 +101,7 @@ const OrdersTable = () => {
     if (search.length < 3 && search) return;
     setIsSearching(true);
 
-    algoliaSearch(vendor.id, "orders", search)
+    algoliaSearch((vendor as { id: string }).id, "orders", search)
       .then((hits) => {
         const ids = hits.map((hit) => hit.id);
         if (ids.length) addFilter("id", ids);
@@ -124,12 +124,19 @@ const OrdersTable = () => {
     setFilters(updatedFilters);
   };
 
+  const handleStatusUpdated = () => {
+    setSelectedOrders([]);
+    fetchData();
+    setOpenForm(false);
+  };
+
   return (
     <>
       <UpdateStatusForm
         open={openForm}
         handleOpen={() => setOpenForm(!openForm)}
         orders={selectedOrders}
+        onStatusUpdated={handleStatusUpdated}
       />
       <Card className="container shadow-[0px_0px_20px_rgba(0,0,0,0.1)]">
         <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -198,7 +205,7 @@ const OrdersTable = () => {
                       onClick={() =>
                         head.sortable
                           ? setSortSetting({
-                              by: head.sortBy,
+                              by: head.sortBy ?? "",
                               dir:
                                 sorSetting.by == head.sortBy && sorSetting.dir == "asc"
                                   ? "desc"
@@ -319,7 +326,7 @@ const OrdersTable = () => {
                             className="w-min normal-case rounded-full"
                             variant="ghost"
                             value={$toTitleCase(orderType)}
-                            color={getColor(paymentMethod)}
+                            color={getColor(paymentMethod) as any}
                           />
                           {paymentMethod != "Unset" && (
                             <Chip
@@ -327,7 +334,7 @@ const OrdersTable = () => {
                               className="w-min rounded-full "
                               variant="gradient"
                               value={paymentMethod}
-                              color={getColor(paymentMethod)}
+                              color={getColor(paymentMethod) as any}
                             />
                           )}
                         </div>
@@ -352,7 +359,7 @@ const OrdersTable = () => {
                             className=" rounded-full "
                             variant="ghost"
                             value={statusesMap[status.toLowerCase()]}
-                            color={getColor(status.toLowerCase())}
+                            color={getColor(status.toLowerCase()) as any}
                           />
                         </div>
                       </td>

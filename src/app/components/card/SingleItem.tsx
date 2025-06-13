@@ -1,7 +1,7 @@
 import { CancelIcon } from "@/assets/icons";
 import { useEffect, useState } from "react";
 import { Item } from "@/app/abstraction/types";
-import { AddDiscount, RemoveItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
+import { RemoveItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import ProductDetails from "../products/productDetails";
 import { $currency, $toTitleCase, $translate } from "@/app/helpers/helpers";

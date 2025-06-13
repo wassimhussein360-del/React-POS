@@ -13,7 +13,7 @@ const SelectedModifiersSummary: React.FC<Props> = ({ assignedModifiers }) => {
         const selectedOptions = modifier.list
           .filter((option: ModifierOption) => option.selected)
           .map(
-            (option: ModifierOption) =>
+            (option: ModifierOption | any) =>
               `${option.name?.en || option.nameEn}${
                 option.withQuantity ? ` (x${option.quantity || 1})` : ""
               }`

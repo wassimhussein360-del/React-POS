@@ -7,7 +7,7 @@ const Loader: React.FC = () => {
     <article id="my-loader" className="hidden">
       <div className="bg-white flex-center bg-opacity-40  h-full top-0 w-full overflow-hidden z-[99999] fixed">
         <div className="relative">
-          <Image src={logoLoader} className="w-[6rem]" alt="Auth screens" />
+          <Image src={logoLoader} className="w-[4rem]" alt="Auth screens" />
         </div>{" "}
       </div>
     </article>

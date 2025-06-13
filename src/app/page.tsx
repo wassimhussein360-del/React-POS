@@ -8,17 +8,13 @@ import "./style.css";
 import Products from "./components/products/products";
 
 import { Item } from "./abstraction/types";
-import { useCartItems, useGeneral, useLoader, useUser, useVendor } from "@/reduxStore/hooks";
+import { useGeneral, useLoader, useUser, useVendor } from "@/reduxStore/hooks";
 import { Drawer } from "@material-tailwind/react";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [openCart, setOpenCart] = useState(false);
-  const cartItems = useCartItems();
   const [allProducts, setAllProducts] = useState<Item[]>([]);
   const [categorizedProducts, setCategorizedProducts] = useState<Item[]>([]);
-
-  const navigator = useRouter();
 
   const vendor = useVendor();
   const user = useUser();
@@ -27,6 +23,8 @@ export default function Home() {
   const handleDrawer = () => setOpenCart(!openCart);
 
   useEffect(() => {
+    // dispatch(SetLoader(false));
+
     setOpenCart(!!$general.cartDrawer);
   }, [$general.cartDrawer]);
 

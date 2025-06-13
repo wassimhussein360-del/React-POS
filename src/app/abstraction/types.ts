@@ -79,6 +79,7 @@ export type Vendor = {
   logo: string;
   name: string;
   apiKey: string;
+  domains: string[];
   defaultCurrency: string;
   payments: Indexable;
   users: any[];

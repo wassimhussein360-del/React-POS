@@ -20,6 +20,7 @@ import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 import toast from "react-hot-toast";
 import { Chevron } from "@/assets/icons";
 import { getShippingRates } from "@/servies/fire-functions";
+import { getOrderPayload } from "../actionsBtns";
 
 interface CashPayProps {
   open: boolean;
@@ -67,8 +68,6 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
             ))
         ) || null;
 
-      console.log({ _zone });
-
       if (!Object.keys(selectedAddress).length || !(await switchBranch(_outlet, _zone))) return;
       setAddNew(false);
 
@@ -81,20 +80,20 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
         SetCartField({
           fieldName: "address",
           value: selectedAddress,
-          vendorId: vendor?.id as string,
         })
       );
     };
 
     updateAddress();
-    getShippings();
   }, [selectedAddress]);
 
   useEffect(() => {
     if (!$cart.address) {
       setSelectedAddress({});
+    } else {
+      getShippings();
     }
-  }, [$cart.address]);
+  }, [$cart.address, $general.zone]);
 
   const switchBranch = async (_outlet: any, _zone: any): Promise<boolean> => {
     // if the selected address has'nt found in any branch
@@ -107,7 +106,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
     if ($general.branch.id !== _outlet?.id) {
       // check if the selected products belong to the selected branch
       const newBranchProductsIds = await fetchBranchProductsIds(_outlet?.id);
-      const items = $cart.items.map((item) => item.productId);
+      const items = $cart.items.map((item) => item.id);
 
       // Check if at least one item does NOT belong to newBranchProductsIds
       const hasInvalidItem = items.some((productId) => !newBranchProductsIds.includes(productId));
@@ -129,11 +128,16 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
 
       // remove cart from local on current branch
       const localCart = $getFromLocal("carts");
-      localCart[oldKey] = localCart[oldKey].filter((cart) => cart.key != $cart.key);
+      localCart[oldKey] = localCart[oldKey].filter(
+        (cart: { key: string }) => cart.key != $cart.key
+      );
 
       // Add the current cart to new outlet
       if (!localCart[newKey]) localCart[newKey] = [];
-      localCart[newKey] = localCart[newKey].map((cart) => ({ ...cart, active: false }));
+      localCart[newKey] = localCart[newKey].map((cart: { key: string }) => ({
+        ...cart,
+        active: false,
+      }));
       localCart[newKey].push($cart);
 
       //save changes to local storage
@@ -151,10 +155,25 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
     return true;
   };
   const getShippings = () => {
-    getShippingRates({
-      order: $general.order,
-    })
-      .then((res) => {})
+    const order = getOrderPayload($general.order, $cart.address);
+    const snapshot = JSON.parse(JSON.stringify(order.selections));
+
+    const ord: any = { ...order, ...snapshot };
+    delete ord.selections;
+
+    const payload = { order: ord, vendorId: vendor?.id };
+
+    if (!payload.order.address.deliveryZoneId) return;
+
+    getShippingRates(payload)
+      .then((shippingRatesResponse) => {
+        dispatch(
+          SetGeneralField({
+            field: "shippingMethods",
+            value: shippingRatesResponse.data,
+          })
+        );
+      })
       .catch((err) => console.error(err));
   };
 
@@ -257,7 +276,6 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
       open={open}
       handler={handleOpen}
       className="flex justify-center  bg-transparent shadow-transparent  "
-      placeholder={undefined}
     >
       <article className=" bg-white shadow-xl shadow-gray-800 rounded-xl py-6 ">
         <div className="flex-center gap-3 text-2xl ">

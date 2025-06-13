@@ -10,16 +10,8 @@ import {
 } from "firebase/auth";
 import { auth } from "../../../firebaseConfig";
 import { useRouter } from "next/navigation";
-import { useAppDispatch } from "@/reduxStore/hooks";
-import { SetLoader } from "@/reduxStore/slices/userSlice";
 
 const LogIn: React.FC<{ className?: string }> = ({ className }) => {
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(SetLoader(false));
-  }, []);
-
   const router = useRouter();
 
   // State for form inputs
@@ -76,7 +68,7 @@ const LogIn: React.FC<{ className?: string }> = ({ className }) => {
 
     if (!isValidEmail && !isValidPassword) {
       setSubmitCounter(2);
-      toast.success("Successfully toasted!");
+
       // Add further logic for login, e.g., API call
     }
   };
@@ -87,9 +79,6 @@ const LogIn: React.FC<{ className?: string }> = ({ className }) => {
     signInWithPopup(auth, googleProvider)
       .then((result) => {
         const user = result.user;
-
-        toast.success("Google Sign-In successful!");
-        router.push("/");
       })
       .catch((error) => {
         toast.error("Google Sign-In failed!");
@@ -102,9 +91,6 @@ const LogIn: React.FC<{ className?: string }> = ({ className }) => {
     signInWithPopup(auth, appleProvider)
       .then((result) => {
         const user = result.user;
-
-        toast.success("Apple Sign-In successful!");
-        router.push("/");
       })
       .catch((error) => {
         toast.error("Apple Sign-In failed!");
@@ -117,10 +103,7 @@ const LogIn: React.FC<{ className?: string }> = ({ className }) => {
       const result = await signInWithEmailAndPassword(auth, email, password);
 
       const user = result.user;
-
-      toast.success("Login successful!");
-      router.push("/");
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Login failed! Please check your credentials.");
       console.error("Error:", error.message);
     }

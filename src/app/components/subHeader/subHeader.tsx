@@ -1,14 +1,11 @@
-import { OppositeArrows, OrdersCards, Return } from "@/assets/icons";
+import { OrdersCards } from "@/assets/icons";
 import { Button } from "@material-tailwind/react";
 import HoldingCartsDrawer from "../drawers/holdedCarts";
 import { useRouter } from "next/navigation";
-import { useAppDispatch, useUser, useVendor } from "@/reduxStore/hooks";
-import { Vendor } from "@/app/abstraction/types";
+import { useUser } from "@/reduxStore/hooks";
 
 const SubHeader = () => {
   const navigator = useRouter();
-  const dispatch = useAppDispatch();
-  const vendor = useVendor() as Vendor;
   const $user = useUser();
 
   return (
@@ -17,7 +14,6 @@ const SubHeader = () => {
         {($user?.isAdmin || $user?.permissions?.Orders.view) && (
           <Button
             className="normal-case flex gap-1 bg-secondary"
-            placeholder={undefined}
             onClick={() => navigator.push("/orders")}
           >
             <OrdersCards />

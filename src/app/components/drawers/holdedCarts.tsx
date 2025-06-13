@@ -96,13 +96,22 @@ const HoldingCartsDrawer = () => {
           {holdenCarts.map((cart: any, index: number) => {
             return (
               <section
+                key={index}
                 className="border border-gray-200 p-4 rounded-lg shadow bg-light-primary cursor-pointer hover:border-primary  bg-gray-100 text-secondary hover:text-primary"
                 onClick={() => handleCartSelection(cart.key)}
               >
                 <aside className="flex justify-between items-center mb-3">
-                  <Typography variant="h5" className="text-md  font-sourGummy">
-                    {cart.holdingName}
-                  </Typography>
+                  <div className="flex gap-2">
+                    <Typography variant="h5" className="text-md  font-sourGummy">
+                      {cart.holdingName}
+                    </Typography>
+                    {cart.paymentUrl && (
+                      <Typography variant="h5" color="green" className="text-md   font-sourGummy">
+                        ● Created
+                      </Typography>
+                    )}
+                  </div>
+
                   <span
                     className="p-2 pe-0 text-gray-400 hover:text-danger "
                     onClick={(e) => {

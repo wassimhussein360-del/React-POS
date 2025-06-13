@@ -63,7 +63,11 @@ const AddressForm: React.FC<any> = ({ setSelectedAddress }: { setSelectedAddress
 
     FirestoreService.getSubcollection("vendors", vendor.id, "outlets").then((res) => {
       setCountries(() => {
-        return Array.from(new Set(res.flatMap(({ zones }) => zones.map((zone) => zone.country))));
+        return Array.from(
+          new Set(
+            res.flatMap(({ zones }: any) => zones.map((zone: { country: any }) => zone.country))
+          )
+        );
       });
 
       setOutlets(res);
@@ -83,9 +87,9 @@ const AddressForm: React.FC<any> = ({ setSelectedAddress }: { setSelectedAddress
           outlets
             .flatMap(({ zones }) =>
               zones
-                .filter((zone) => zone.country === selectedCountry) // Filter zones by selectedCountry
-                .flatMap((zone) =>
-                  zone.areas.map((area) => {
+                .filter((zone: any) => zone.country === selectedCountry) // Filter zones by selectedCountry
+                .flatMap((zone: any) =>
+                  zone.areas.map((area: any) => {
                     try {
                       return JSON.parse(area).province; // Parse area and extract province
                     } catch {
@@ -112,11 +116,11 @@ const AddressForm: React.FC<any> = ({ setSelectedAddress }: { setSelectedAddress
         new Set(
           outlets.flatMap(({ zones }) =>
             zones
-              .filter((zone) => zone.country === selectedCountry) // Filter by selectedCountry
+              .filter((zone: { country: any }) => zone.country === selectedCountry) // Filter by selectedCountry
               .flatMap(
-                (zone) =>
+                (zone: any) =>
                   zone.areas
-                    .map((area) => {
+                    .map((area: any) => {
                       try {
                         const parsedArea = JSON.parse(area); // Parse area
                         if (parsedArea.province === selectedProvince) {
@@ -128,7 +132,7 @@ const AddressForm: React.FC<any> = ({ setSelectedAddress }: { setSelectedAddress
                         return null; // Handle invalid JSON
                       }
                     })
-                    .filter((areaEn) => areaEn !== null) // Remove null values
+                    .filter((areaEn: any) => areaEn !== null) // Remove null values
               )
           )
         )

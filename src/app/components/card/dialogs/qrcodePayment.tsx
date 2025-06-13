@@ -1,46 +1,52 @@
 import { $getFromLocal } from "@/app/helpers/helpers";
+import { useAppDispatch } from "@/reduxStore/hooks";
+import { VoidCart } from "@/reduxStore/slices/cartSlice";
 import FirestoreService from "@/servies/firestoreService";
 import { Dialog } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import QRCode from "react-qr-code";
 
 interface QRCodePaymentProps {
   open: boolean;
   handleOpen: () => void;
-  orderId: string;
+  createdOrder: any;
 }
 
-const QRCodePayment: React.FC<QRCodePaymentProps> = ({ open, handleOpen, orderId }) => {
-  const [order, setOrder] = useState<{ id: string; url: string }>({
-    id: orderId || "ord_998256056802693-207",
-    url: "",
-  });
+const QRCodePayment: React.FC<QRCodePaymentProps> = ({ open, handleOpen, createdOrder }) => {
+  const dispatch = useAppDispatch();
   useEffect(() => {
-    const sub$ = FirestoreService.getObserveSubDocument(
+    if (!createdOrder?.id) return;
+
+    FirestoreService.getObserveSubDocument(
       "vendors",
       $getFromLocal("vendor").id,
       "orders",
-      order.id
-    );
-
-    const subscription = sub$.subscribe({
+      createdOrder.id
+    ).subscribe({
       next: (order) => {
-        console.log("Live order:", order);
+        if (!order?.id) return;
+        if (order.onlinePayment.status != "awaiting_payment") {
+          if (order.onlinePayment.status == "payment_failed")
+            toast.error("Payment failed, please try again.", { duration: 5000 });
+          else {
+            toast.success("Payment Success.", { duration: 5000 });
+            handleOpen();
+            dispatch(VoidCart());
+          }
+        }
       },
       error: (err) => {
         console.error(err);
       },
+      complete: () => {},
     });
-
-    // later, to stop listening:
-    subscription.unsubscribe();
-  }, []);
+  }, [createdOrder]);
   return (
     <Dialog
       open={open}
       handler={handleOpen}
       className="flex justify-center  bg-transparent shadow-transparent"
-      placeholder={undefined}
     >
       <article className="flex flex-col justify-center text-center gap-2 bg-white shadow-xl shadow-gray-800 rounded-xl  ">
         <h1 className="font-semibold text-2xl text-gray-900 bg-primary w-full py-4 px-24 rounded-t-xl">
@@ -48,7 +54,7 @@ const QRCodePayment: React.FC<QRCodePaymentProps> = ({ open, handleOpen, orderId
         </h1>
         <div className="flex justify-center py-7">
           <QRCode
-            value={order.url}
+            value={createdOrder?.paymentUrl || ""}
             level="M"
             className="w-[150px] h-[150px] md:w-[200px] md:h-[200px]"
           />

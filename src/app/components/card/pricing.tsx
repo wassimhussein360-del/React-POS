@@ -18,8 +18,8 @@ const PricingDetails = () => {
 
     FirestoreService.getSubcollection("vendors", vendor.id, "discounts", {
       whereConditions: [{ field: "active", operator: "==", value: true }],
-    }).then((res) => {
-      dispatch(SetGeneralField({ field: "discounts", value: res }));
+    }).then((discountsRes) => {
+      dispatch(SetGeneralField({ field: "discounts", value: discountsRes }));
     });
   }, [vendor]);
 
@@ -48,7 +48,6 @@ const PricingDetails = () => {
                           ...$cart.selections,
                           couponCode: dis.code,
                         },
-                        vendorId: vendor.id,
                       })
                     );
                   }}
@@ -59,16 +58,42 @@ const PricingDetails = () => {
             })}
         </Select>
       </div>
-      <div className="pricing-select w-1/2">
-        <Select
-          label="Shipping"
-          size="md"
-          className=" text-xs placeholder:text-xs"
-          placeholder="Select Store"
-        >
-          <Option className="text-xs">Option 1</Option>
-        </Select>
-      </div>
+
+      {$general.shippingMethods.length ? (
+        <div className="pricing-select w-1/2">
+          <Select
+            value={$cart.selections?.shippingMethod?.provider ?? ""}
+            label="Shipping"
+            size="md"
+            className=" text-xs placeholder:text-xs"
+          >
+            {$general.shippingMethods.map((method) => {
+              return (
+                <Option
+                  value={method.provider}
+                  key={method.provider}
+                  onClick={() => {
+                    dispatch(
+                      SetCartField({
+                        fieldName: "selections",
+                        value: {
+                          ...$cart.selections,
+                          shippingMethod: method,
+                        },
+                      })
+                    );
+                  }}
+                  className="text-xs"
+                >
+                  {method.methodName}
+                </Option>
+              );
+            })}
+          </Select>
+        </div>
+      ) : (
+        <></>
+      )}
     </section>
   );
 };

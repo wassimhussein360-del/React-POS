@@ -3,15 +3,11 @@ import { Card, CardBody, CardFooter, CardHeader } from "@material-tailwind/react
 
 export default function ProductSkeleton() {
   return (
-    <Card
-      className=" animate-pulse aspect-[4/5] flex flex-col items-center p-2"
-      placeholder={undefined}
-    >
+    <Card className=" animate-pulse aspect-[4/5] flex flex-col items-center p-2">
       <CardHeader
         shadow={false}
         floated={false}
         className="relative grid m-0   place-items-center bg-gray-300 w-[90%] aspect-square object-cover rounded-xl"
-        placeholder={undefined}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -28,29 +24,14 @@ export default function ProductSkeleton() {
           />
         </svg>
       </CardHeader>
-      <CardBody placeholder={undefined} className="p-0 w-full pt-5">
-        <Typography
-          as="div"
-          variant="h1"
-          className="mb-1 h-4 w-full rounded-full bg-gray-300"
-          placeholder={undefined}
-        >
+      <CardBody className="p-0 w-full pt-5">
+        <Typography as="div" variant="h1" className="mb-1 h-4 w-full rounded-full bg-gray-300">
           &nbsp;
         </Typography>
-        <Typography
-          as="div"
-          variant="h1"
-          className="mb-1 h-2 w-full rounded-full bg-gray-300"
-          placeholder={undefined}
-        >
+        <Typography as="div" variant="h1" className="mb-1 h-2 w-full rounded-full bg-gray-300">
           &nbsp;
         </Typography>
-        <Typography
-          as="div"
-          variant="h1"
-          className="mb-1 h-2 w-full rounded-full bg-gray-300"
-          placeholder={undefined}
-        >
+        <Typography as="div" variant="h1" className="mb-1 h-2 w-full rounded-full bg-gray-300">
           &nbsp;
         </Typography>
       </CardBody>

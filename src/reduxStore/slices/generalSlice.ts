@@ -9,6 +9,7 @@ export interface GeneralState {
   outlets: Array<any>;
   zone: Indexable;
   cartDrawer?: boolean;
+  shippingMethods: any[];
   [key: string]: any;
 }
 
@@ -19,6 +20,7 @@ const initialState: GeneralState = {
   order: {},
   outlets: [],
   zone: {},
+  shippingMethods: [],
 };
 
 const generalSlice = createSlice({

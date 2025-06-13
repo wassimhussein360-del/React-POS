@@ -1,8 +1,7 @@
 "use client";
 
-import { useLoader, useUser, useVendor } from "@/reduxStore/hooks";
+import { useLoader } from "@/reduxStore/hooks";
 import { Spinner } from "@material-tailwind/react";
-import { useRouter } from "next/navigation";
 
 const PageLoader = () => {
   const isLoading = useLoader();

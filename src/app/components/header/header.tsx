@@ -91,7 +91,7 @@ export default function Header() {
         value: refactoredOrder.order,
       })
     );
-  }, [$cart]);
+  }, [$cart, $general.zone]);
 
   const signOut = () => {
     localStorage.clear();
@@ -126,7 +126,6 @@ export default function Header() {
         <Select
           label="Select Store"
           className="flex"
-          placeholder="Select Store"
           value={$vendor?.id || ""}
           onChange={(value: any) => onStoreSelect(value)}
         >
@@ -147,7 +146,6 @@ export default function Header() {
         <Select
           label="Select Branch"
           className="flex"
-          placeholder="Select Branch"
           value={$general.branch?.id || ""}
           selected={() => $general.branch?.name?.en}
           onChange={(value: any) => onOutletSelect(value)}

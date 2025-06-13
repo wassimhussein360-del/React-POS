@@ -23,7 +23,6 @@ const CartInfo = ({ className }: { className: string }) => {
       SetCartField({
         fieldName: "address",
         value: undefined,
-        vendorId: vendor.id,
       })
     );
 
@@ -61,7 +60,6 @@ const CartInfo = ({ className }: { className: string }) => {
                           ...cart.selections,
                           orderType: orderType.toLowerCase(),
                         },
-                        vendorId: vendor.id,
                       })
                     );
                   }}
@@ -99,7 +97,6 @@ const CartInfo = ({ className }: { className: string }) => {
                   ...cart.selections,
                   specialInstructions: e.target.value,
                 },
-                vendorId: vendor.id,
               })
             )
           }

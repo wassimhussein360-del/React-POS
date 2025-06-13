@@ -10,9 +10,15 @@ interface UpdateStatusProps {
   open: boolean;
   handleOpen: () => void;
   orders: any[];
+  onStatusUpdated?: () => void;
 }
 
-const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, orders }) => {
+const UpdateStatusForm: React.FC<UpdateStatusProps> = ({
+  open,
+  handleOpen,
+  orders,
+  onStatusUpdated,
+}) => {
   const $vendor = useVendor() as Vendor;
 
   const [status, setStatus] = useState("");
@@ -34,9 +40,10 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
 
     updateOrderStatus(payload)
       .then((res: any) => {
-        if (res.data.success)
+        if (res.data.success) {
           toast.success(`Order with ref #${orders[index].orderRef} has been updated to ${status}`);
-        else
+          if (onStatusUpdated) onStatusUpdated();
+        } else
           toast.error(
             `Failed updating order status with ref #${orders[index].orderRef} to ${status}`
           );
@@ -49,6 +56,7 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
         setIsLoading(false);
       });
   };
+
   const getBody = () => {
     return (
       <div>
@@ -67,16 +75,9 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
             <Button
               key={index}
               size="lg"
-              className={`normal-case outline outline-transparent border  bg-${$getSeverity(
-                stu
-              )}-light w-[150px] ${
-                stu == status
-                  ? `bg-${$getSeverity(stu)} shadow-lg   border-white outline-${$getSeverity(
-                      stu
-                    )}  `
-                  : `text-${$getSeverity(stu)}`
-              }`}
-              placeholder={undefined}
+              className={`normal-case outline outline-transparent border w-[150px] ${
+                severityClasses[stu]
+              } ${stu === status ? `shadow-lg border-white outline-${severityClasses[stu]}` : ""}`}
               disabled={isLoading}
               onClick={() => setStatus(stu)}
             >
@@ -89,7 +90,6 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
 
         <Button
           className="normal-case  bg-secondary w-full flex-center gap-3"
-          placeholder={undefined}
           size="lg"
           disabled={isLoading || !status}
           onClick={() => handleSubmit(0)}
@@ -111,7 +111,6 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
       open={open}
       handler={handleOpen}
       className="flex justify-center  bg-transparent  !min-w-0 !w-[26rem] shadow-transparent  "
-      placeholder={undefined}
     >
       <article className=" bg-white shadow-xl shadow-gray-800 rounded-xl py-8 px-12">
         {getBody()}
@@ -121,3 +120,11 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
 };
 
 export default UpdateStatusForm;
+
+const severityClasses: any = {
+  pending: "bg-warning-light text-warning",
+  preparing: "bg-secondary-light text-secondary",
+  delivering: "bg-info-light text-info",
+  completed: "bg-success-light text-success",
+  default: "bg-black text-black",
+};

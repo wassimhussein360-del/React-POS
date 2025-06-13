@@ -131,15 +131,15 @@ const CustomerAndProductSelection = () => {
     if (!selectedCustomer) return;
     const foundCustomer = customers.find((cus) => cus.id == selectedCustomer);
     if (foundCustomer) {
-      dispatch(SetCartField({ fieldName: "customer", value: foundCustomer, vendorId: vendor.id }));
-      dispatch(SetCartField({ fieldName: "address", value: undefined, vendorId: vendor.id }));
+      dispatch(SetCartField({ fieldName: "customer", value: foundCustomer }));
+      dispatch(SetCartField({ fieldName: "address", value: undefined }));
     }
   }, [selectedCustomer]);
 
   useEffect(() => {
     if (newCustomer) {
       setSelectedCustomerName(newCustomer.name);
-      dispatch(SetCartField({ fieldName: "customer", value: newCustomer, vendorId: vendor.id }));
+      dispatch(SetCartField({ fieldName: "customer", value: newCustomer }));
     }
   }, [newCustomer, states]);
 
@@ -266,7 +266,6 @@ const CustomerAndProductSelection = () => {
             address ? "bg-secondary" : "bg-transparent"
           }`}
           size="sm"
-          placeholder={undefined}
           onClick={() => setAddressesDialog(true)}
         >
           <i
@@ -279,7 +278,6 @@ const CustomerAndProductSelection = () => {
         <Button
           className="ms-2 bg-primary flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
           size="sm"
-          placeholder={undefined}
           onClick={() => setAddCustomerDialog(true)}
         >
           <Plus />
@@ -341,7 +339,6 @@ const CustomerAndProductSelection = () => {
         <Button
           className="ms-2 bg-transparent border border-gray-400 flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
           size="sm"
-          placeholder={undefined}
           onClick={() => {
             setValue("isScanner", !getValue("isScanner"));
             setProductSearch("");

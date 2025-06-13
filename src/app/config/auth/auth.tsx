@@ -30,29 +30,42 @@ const AuthService = () => {
                 };
               }
 
-              FirestoreService.getCollection("vendors", condition).then((vendors) => {
-                const formattedVendors = formatVendors(vendors);
+              FirestoreService.getCollection("vendors", condition)
+                .then((vendors) => {
+                  const formattedVendors = formatVendors(vendors);
 
-                const localVendor = $getFromLocal("vendor");
-                const vendorToSave = localVendor || formattedVendors[0];
+                  const localVendor = $getFromLocal("vendor");
+                  const vendorToSave = localVendor || formattedVendors[0];
 
-                dispatch(
-                  SetUser({
-                    ...formattedUser,
-                    permissions: formattedUser.isAdmin
-                      ? undefined
-                      : vendorToSave.users.find((u: any) => u.id == formattedUser.id).permissions,
-                  })
-                );
+                  dispatch(
+                    SetUser({
+                      ...formattedUser,
+                      permissions: formattedUser.isAdmin
+                        ? undefined
+                        : vendorToSave.users.find((u: any) => u.id == formattedUser.id).permissions,
+                    })
+                  );
 
-                if (!localVendor) $writeOnLocal("vendor", vendorToSave);
-                dispatch(SetVendor(vendorToSave));
-                dispatch(SetLoader(false));
-                dispatch(SetVendors(formattedVendors));
-              });
+                  if (!localVendor) $writeOnLocal("vendor", vendorToSave);
+                  dispatch(SetVendor(vendorToSave));
+                  dispatch(SetLoader(false));
+                  dispatch(SetVendors(formattedVendors));
+
+                  toast.success("Login successful!");
+                  if (window.location.pathname === "/register") {
+                    navigator.push("/");
+                  }
+                })
+                .catch((err) => {
+                  navigator.push("/register");
+                });
+            } else {
+              navigator.push("/register");
             }
           })
           .catch((error) => {
+            navigator.push("/register");
+
             toast.error(error.message);
           });
       } else {
@@ -86,15 +99,17 @@ function formatVendors(vendors: any[]): Vendor[] {
         return;
       }
       if (payments[key].methods?.length) {
-        payments[key].methods = payments[key].methods.filter((m) => m.active);
+        payments[key].methods = payments[key].methods.filter((m: { active: any }) => m.active);
       }
     });
+
     return {
       id: vendor.id,
       name: $translate(vendor.name),
       logo: $getImgSrc(vendor.id, vendor.logo[0], "w=500"),
       apiKey: vendor.apikey,
       defaultCurrency: vendor.defaultCurrency || "KWD",
+      domains: vendor.domains || [],
       payments,
       users: vendor.users || [],
     };
