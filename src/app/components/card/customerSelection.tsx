@@ -198,6 +198,7 @@ const CustomerAndProductSelection = () => {
         <Menu>
           <MenuHandler>
             <Button
+              disabled={$general.cartCreated}
               className={`w-full text-start  normal-case bg-transparent hover:shadow-none flex justify-between items-center  border border-gray-500 shadow-none rounded-xl
                 ${selectedCustomerName ? "text-primary" : "text-gray-400"}`}
             >
@@ -264,93 +265,97 @@ const CustomerAndProductSelection = () => {
           className={`ms-2  flex-center rounded-full p-0 shadow aspect-square min-w-10 min-h-10
             ${cart.customer && cart.selections?.orderType == "delivery" ? "" : " !hidden "}  ${
             address ? "bg-secondary" : "bg-transparent"
-          }`}
+          } ${$general.cartSubmitted && !cart.address ? "border border-danger shadow-danger" : ""}`}
           size="sm"
           onClick={() => setAddressesDialog(true)}
         >
           <i
             className={`bi  flex-center   text-lg ${
               address ? "text-primary bi-geo-alt-fill" : "bi-geo-alt text-secondary"
-            }`}
+            } ${$general.cartSubmitted && !cart.address ? "text-red-800" : ""} `}
           ></i>
         </Button>
 
-        <Button
-          className="ms-2 bg-primary flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
-          size="sm"
-          onClick={() => setAddCustomerDialog(true)}
-        >
-          <Plus />
-        </Button>
+        {$general.cartCreated || (
+          <Button
+            className="ms-2 bg-primary flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
+            size="sm"
+            onClick={() => setAddCustomerDialog(true)}
+          >
+            <Plus />
+          </Button>
+        )}
       </div>
 
       {/* Product Selection */}
 
-      <div className="flex">
-        <section
-          ref={sectionRef}
-          className="relative w-full"
-          onClick={() => setValue("showProducts", products.length > 0)}
-        >
-          <aside
-            className="flex justify-between w-full bg-transparent ps-6 pe-3 text-xs items-center 
+      {$general.cartCreated || (
+        <div className="flex">
+          <section
+            ref={sectionRef}
+            className="relative w-full"
+            onClick={() => setValue("showProducts", products.length > 0)}
+          >
+            <aside
+              className="flex justify-between w-full bg-transparent ps-6 pe-3 text-xs items-center 
       border border-gray-500 shadow-none rounded-xl hover:border-gray-900 h-full"
-          >
-            <input
-              type="text"
-              ref={inputRef}
-              value={productSearch}
-              placeholder={getValue("isScanner") ? "Scan Products" : "Search Products"}
-              className="w-fit focus:border-0 focus:outline-none"
-              onChange={(e) => setProductSearch(e.target.value)}
-            />
-            {productLoading && <Spinner className="w-4 h-4" />}
-          </aside>
+            >
+              <input
+                type="text"
+                ref={inputRef}
+                value={productSearch}
+                placeholder={getValue("isScanner") ? "Scan Products" : "Search Products"}
+                className="w-fit focus:border-0 focus:outline-none"
+                onChange={(e) => setProductSearch(e.target.value)}
+              />
+              {productLoading && <Spinner className="w-4 h-4" />}
+            </aside>
 
-          <aside
-            className={`${
-              getValue("showProducts") && !getValue("isScanner")
-                ? "absolute bg-white z-10 p-3 mt-1 w-full border border-gray-500 shadow-lg rounded-xl"
-                : "hidden"
-            }`}
-          >
-            {products.map((pr: Item, i: number) => (
-              <div
-                key={i}
-                className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-100"
-                onClick={() => {
-                  handleProductSelect(pr);
-                }}
-              >
-                <img src={pr.images[0].url} alt={pr.name.en} className="w-8 h-8 rounded-full" />
-                <div>
-                  <p className="text-sm">{$translate(pr.name)}</p>
-                  <p className="text-xs">
-                    <span className="text-warning">
-                      {$currency()} {pr.price.toFixed(2)}
-                    </span>
-                  </p>
+            <aside
+              className={`${
+                getValue("showProducts") && !getValue("isScanner")
+                  ? "absolute bg-white z-10 p-3 mt-1 w-full border border-gray-500 shadow-lg rounded-xl"
+                  : "hidden"
+              }`}
+            >
+              {products.map((pr: Item, i: number) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                    handleProductSelect(pr);
+                  }}
+                >
+                  <img src={pr.images[0].url} alt={pr.name.en} className="w-8 h-8 rounded-full" />
+                  <div>
+                    <p className="text-sm">{$translate(pr.name)}</p>
+                    <p className="text-xs">
+                      <span className="text-warning">
+                        {$currency()} {pr.price.toFixed(2)}
+                      </span>
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </aside>
-        </section>
+              ))}
+            </aside>
+          </section>
 
-        <Button
-          className="ms-2 bg-transparent border border-gray-400 flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
-          size="sm"
-          onClick={() => {
-            setValue("isScanner", !getValue("isScanner"));
-            setProductSearch("");
-          }}
-        >
-          {getValue("isScanner") ? (
-            <SearchIcon color="black"></SearchIcon>
-          ) : (
-            <BarcodeIcon className="w-5 h-5"></BarcodeIcon>
-          )}
-        </Button>
-      </div>
+          <Button
+            className="ms-2 bg-transparent border border-gray-400 flex-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
+            size="sm"
+            onClick={() => {
+              setValue("isScanner", !getValue("isScanner"));
+              setProductSearch("");
+            }}
+          >
+            {getValue("isScanner") ? (
+              <SearchIcon color="black"></SearchIcon>
+            ) : (
+              <BarcodeIcon className="w-5 h-5"></BarcodeIcon>
+            )}
+          </Button>
+        </div>
+      )}
 
       {/* End Product Selection */}
     </section>

@@ -4,7 +4,7 @@ import CardTotals from "./cardTotals";
 import ActionsBtns from "./actionsBtns";
 import PaymentMethods from "./paymentMethods";
 import CartItems from "./cartItems";
-import { useAppDispatch, useCart, useVendor } from "@/reduxStore/hooks";
+import { useAppDispatch, useCart, useGeneral, useVendor } from "@/reduxStore/hooks";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
 import React, { useEffect } from "react";
 import CustomerAndProductSelection from "./customerSelection";
@@ -13,8 +13,8 @@ import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 
 const CartInfo = ({ className }: { className: string }) => {
   const dispatch = useAppDispatch();
-  const vendor = useVendor() as Vendor;
   const cart = useCart();
+  const $general = useGeneral();
 
   useEffect(() => {
     if (cart.selections?.orderType != "pickup") return;
@@ -44,13 +44,13 @@ const CartInfo = ({ className }: { className: string }) => {
           <h6 className="text-sm">Cart</h6>
           <ButtonGroup size="sm">
             {["Delivery", "Pickup"].map((orderType) => {
+              const isSelected = cart.selections?.orderType == orderType.toLowerCase();
+              if ($general.cartCreated && !isSelected) return null;
               return (
                 <Button
                   key={orderType}
                   className={`p-0 px-2 normal-case  border-none shadow ${
-                    cart.selections?.orderType == orderType.toLowerCase()
-                      ? "bg-primary"
-                      : "bg-transparent text-primary"
+                    isSelected ? "bg-primary" : "bg-transparent text-primary"
                   }`}
                   onClick={() => {
                     dispatch(
@@ -89,6 +89,7 @@ const CartInfo = ({ className }: { className: string }) => {
         <Textarea
           label="Special Instructions"
           value={cart.selections?.specialInstructions}
+          disabled={$general.cartCreated}
           onChange={(e) =>
             dispatch(
               SetCartField({

@@ -592,7 +592,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
         formattedOrder?.selections?.shippingMethod &&
         formattedOrder.selections?.shippingMethod?.rate &&
         pricingType !== "local" &&
-        formattedOrder?.selections?.shippingMethod.provider == zone.provider
+        formattedOrder?.selections?.shippingMethod?.provider == zone?.provider
       ) {
         deliveryFee = formattedOrder.selections?.shippingMethod?.rate || 0;
       }

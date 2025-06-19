@@ -2,7 +2,7 @@ import { CancelIcon } from "@/assets/icons";
 import { useEffect, useState } from "react";
 import { Item } from "@/app/abstraction/types";
 import { RemoveItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
-import { useAppDispatch } from "@/reduxStore/hooks";
+import { useAppDispatch, useGeneral } from "@/reduxStore/hooks";
 import ProductDetails from "../products/productDetails";
 import { $currency, $toTitleCase, $translate } from "@/app/helpers/helpers";
 import SelectedModifiersSummary from "./modifiersSummary";
@@ -17,6 +17,8 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
   const dispatch = useAppDispatch();
   const [isVisible, setIsVisible] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
+
+  const $general = useGeneral();
 
   useEffect(() => {
     setIsVisible(true);
@@ -72,35 +74,44 @@ const SingleItem: React.FC<SingleItemProps> = ({ item, index }) => {
         </section>
       </aside>
 
-      <aside className="flex-center gap-2">
+      {$general.cartCreated ? (
         <section className="border border-gray-400 rounded flex text-xs">
-          <button
-            onClick={() =>
-              item.quantity > 1 ? updateQuantity(item.quantity - 1) : removeItemFromCart()
-            }
-            className="bg-white text-gray-900 font-bold rounded-s border-r border-gray-400 w-5 h-5 p-0 "
-          >
-            -
-          </button>
           <button className="bg-white text-gray-900 w-5 h-5 p-0" disabled={true}>
             {item.quantity}
           </button>
-          <button
-            onClick={() =>
-              item.stockQuantity <= 0 && item.isStockManagement
-                ? null
-                : updateQuantity(item.quantity + 1)
-            }
-            className="bg-white text-gray-900 rounded-e border-l border-gray-400 w-5 h-5 p-0"
-          >
-            +
-          </button>
         </section>
-
-        <button onClick={() => removeItemFromCart()} className="p-0">
-          <CancelIcon />
-        </button>
-      </aside>
+      ) : (
+        <section className=" flex ">
+          <aside className="flex-center border text-xs  border-gray-400 rounded  gap-2">
+            <button
+              onClick={() =>
+                item.quantity > 1 ? updateQuantity(item.quantity - 1) : removeItemFromCart()
+              }
+              className="bg-white text-gray-900 font-bold rounded-s border-r border-gray-400 w-5 h-5 p-0 "
+            >
+              -
+            </button>
+            <button className="bg-white text-gray-900 w-5 h-5 p-0" disabled={true}>
+              {item.quantity}
+            </button>
+            <button
+              onClick={() =>
+                item.stockQuantity <= 0 && item.isStockManagement
+                  ? null
+                  : updateQuantity(item.quantity + 1)
+              }
+              className="bg-white text-gray-900 rounded-e border-l border-gray-400 w-5 h-5 p-0"
+            >
+              +
+            </button>
+          </aside>
+          {!$general.cartCreated && (
+            <button onClick={() => removeItemFromCart()} className="p-0">
+              <CancelIcon />
+            </button>
+          )}
+        </section>
+      )}
     </div>
   );
 };

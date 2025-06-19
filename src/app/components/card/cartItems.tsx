@@ -25,13 +25,15 @@ const CartItems: React.FC<CartItemsProps> = ({}) => {
               {items.length}
             </p>
           </span>
-          <nav
-            className="flex items-center text-xs text-danger cursor-pointer"
-            onClick={clearAllItems}
-          >
-            <CancelIcon />
-            Clear All
-          </nav>
+          {!$general.cartCreated && (
+            <nav
+              className="flex items-center text-xs text-danger cursor-pointer"
+              onClick={clearAllItems}
+            >
+              <CancelIcon />
+              Clear All
+            </nav>
+          )}
         </section>
       )}
       {items.map((itm, i) => (

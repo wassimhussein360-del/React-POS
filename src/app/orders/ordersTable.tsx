@@ -26,11 +26,12 @@ import { AnalyticsVariables, Indexable } from "../abstraction/types";
 import UpdateStatusForm from "./updateStatusForm";
 
 const TABLE_HEAD = [
+  { name: "", sortable: false },
   { name: "Ordered", sortable: true, sortBy: "createdAt" },
   { name: "Customer", sortable: false },
   { name: "Cart Items", sortable: false },
   { name: "Type & Payment", sortable: true, sortBy: "paymentMethod" },
-  { name: "Total", sortable: true, sortBy: "totalAmount" },
+  { name: "Total", sortable: true, sortBy: "total" },
   { name: "Status", sortable: true, sortBy: "status" },
 ];
 
@@ -55,7 +56,7 @@ const OrdersTable = () => {
     if (!selectedOrders.some((ord) => ord.id == clickedOrder.id) && selectedOrders.length === 0) {
       pressTimerRef.current = setTimeout(() => {
         setSelectedOrders([...selectedOrders, clickedOrder]);
-      }, 600); // Adjust time for long press (600ms)
+      }, 0); // Adjust time for long press (600ms)
     } else {
       selectedOrders.some((ord) => ord.id == clickedOrder.id)
         ? setSelectedOrders(selectedOrders.filter((ord) => ord.id !== clickedOrder.id))
@@ -98,7 +99,11 @@ const OrdersTable = () => {
   }, [vendor, currentPage, filters, sorSetting]);
 
   useEffect(() => {
+    console.log({ 1: search });
+
     if (search.length < 3 && search) return;
+    console.log({ 2: search });
+
     setIsSearching(true);
 
     algoliaSearch((vendor as { id: string }).id, "orders", search)
@@ -250,14 +255,20 @@ const OrdersTable = () => {
                   return (
                     <tr
                       key={index}
-                      onPointerDown={(e) => handleMouseDown(orders[index])}
-                      onMouseLeave={handleMouseLeave}
-                      onTouchEnd={handleMouseLeave}
-                      onMouseUp={handleMouseLeave}
                       className={`${
                         selectedOrders.some((ord) => ord.id == id) ? "bg-primary-light   " : ""
                       }`}
                     >
+                      <td className={classes}>
+                        <div className="flex-center" onClick={() => handleMouseDown(orders[index])}>
+                          <input
+                            type="checkbox"
+                            onChange={() => {}}
+                            checked={selectedOrders.some((ord) => ord.id == id)}
+                            className="accent-secondary  cursor-pointer  h-4 w-4"
+                          />
+                        </div>
+                      </td>
                       {/* Ordered Date */}
                       <td className={classes}>
                         <Typography variant="small" color="blue-gray" className="font-normal">

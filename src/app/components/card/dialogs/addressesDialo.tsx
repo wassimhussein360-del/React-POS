@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import { Chevron } from "@/assets/icons";
 import { getShippingRates } from "@/servies/fire-functions";
 import { getOrderPayload } from "../actionsBtns";
+import { isCartCreatedToastMassage } from "../paymentMethods";
 
 interface CashPayProps {
   open: boolean;
@@ -56,6 +57,8 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
   }, [customer]);
 
   useEffect(() => {
+    setGlobalAddress(undefined);
+
     const updateAddress = async () => {
       let { _outlet, _zone }: Indexable = { _outlet: null, _zone: null };
       const outlets = $general.outlets;
@@ -76,21 +79,30 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
         addresses.unshift(selectedAddress);
       }
 
-      dispatch(
-        SetCartField({
-          fieldName: "address",
-          value: selectedAddress,
-        })
-      );
+      setGlobalAddress(selectedAddress);
     };
 
     updateAddress();
   }, [selectedAddress]);
 
+  function setGlobalAddress(value: any) {
+    console.log({ value });
+
+    dispatch(
+      SetCartField({
+        fieldName: "address",
+        value: value,
+      })
+    );
+  }
   useEffect(() => {
     if (!$cart.address) {
       setSelectedAddress({});
     } else {
+      if (!open) return;
+
+      handleOpen();
+      toast.success("Address selected successfully !!");
       getShippings();
     }
   }, [$cart.address, $general.zone]);
@@ -114,7 +126,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
       if (hasInvalidItem) {
         toast.error(
           "Unable to switch branch: some products aren't available at the selected address's branch.",
-          { duration: 10_000 }
+          { duration: 4_000 }
         );
         setSelectedAddress({});
         return false;
@@ -193,80 +205,84 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
   const getBody = () => {
     return (
       <section className=" max-w-[400px] min-w-[400px] overflow-auto   mt-4 pb-5 max-h-[300px] px-8">
-        {addresses.map((address, index) => (
-          <aside
-            key={index}
-            className={` shadow-sm  rounded-lg px-5 py-2 border   text-xs   mb-2 ${
-              selectedAddress.id == address.id ? "border-gray-900 " : " border-gray-400"
-            } `}
-            onClick={() => setOpenedAddress(index == openedAddress ? -1 : index)}
-          >
-            <div
-              className={`text-lg font-semibold   flex justify-between items-center
+        {addresses.map((address, index) => {
+          if (selectedAddress.id != address.id && $general.cartCreated) return;
+          return (
+            <aside
+              key={index}
+              className={` shadow-sm  rounded-lg px-5 py-2 border   text-xs   mb-2 ${
+                selectedAddress.id == address.id ? "border-gray-900 " : " border-gray-400"
+              } `}
+            >
+              <div
+                className={`text-lg font-semibold   flex justify-between items-center
               ${selectedAddress.id == address.id ? "text-primary" : " "}
               `}
-            >
-              <h2 className="">
-                {address.area}
-                {address.label && <span className=""> • {$toTitleCase(address.label)}</span>}
-              </h2>
-              <Chevron className="w-4 h-4 fill-white"></Chevron>
-            </div>
-            <figure
-              className={openedAddress == index ? "address-opened" : "address-closed"}
-              onClick={() => setSelectedAddress(address)}
-            >
-              <hr
-                className={`my-2 border ${
-                  selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
-                }`}
-              />
-              <section className="flex justify-between">
-                <div className="text-center">
-                  <p>Street</p>
-                  <p className="text-lg font-medium">{address.street || "--"}</p>
-                </div>
-
-                <div className="text-center">
-                  <p>Building</p>
-                  <p className="text-lg font-medium">{address.building || "--"}</p>
-                </div>
-
-                <div className="text-end">
-                  <p>Floor</p>
-                  <p className="text-lg font-medium ">{address.floor || "--"}</p>
-                </div>
-              </section>
-              <hr
-                className={`my-2 border ${
-                  selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
-                }`}
-              />
-
-              <section className="flex justify-between">
-                <div className="">
-                  <p>Country</p>
-                  <p className="text-lg font-medium"> {address.country || "--"}</p>
-                </div>
-
-                <div>
-                  <p>Province</p>
-                  <p className="text-lg font-medium">{address.province || "--"}</p>
-                </div>
-              </section>
-
-              <hr
-                className={`my-2 border ${
-                  selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
-                }`}
-              />
-              <div>
-                <p className="text-xs ">Special Instructions</p>
-                <p className=" text-lg  font-medium">{address.specialInstruction || "--"}</p>
+              >
+                <h2 className=" cursor-pointer" onClick={() => setSelectedAddress(address)}>
+                  {address.area}
+                  {address.label && <span className=""> • {$toTitleCase(address.label)}</span>}
+                </h2>
+                <span
+                  className="cursor-pointer"
+                  onClick={() => setOpenedAddress(index == openedAddress ? -1 : index)}
+                >
+                  <Chevron className="w-4 h-4 fill-white"></Chevron>
+                </span>
               </div>
-            </figure>
-          </aside>
-        ))}
+              <figure className={openedAddress == index ? "address-opened" : "address-closed"}>
+                <hr
+                  className={`my-2 border ${
+                    selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
+                  }`}
+                />
+                <section className="flex justify-between">
+                  <div className="text-center">
+                    <p>Street</p>
+                    <p className="text-lg font-medium">{address.street || "--"}</p>
+                  </div>
+
+                  <div className="text-center">
+                    <p>Building</p>
+                    <p className="text-lg font-medium">{address.building || "--"}</p>
+                  </div>
+
+                  <div className="text-end">
+                    <p>Floor</p>
+                    <p className="text-lg font-medium ">{address.floor || "--"}</p>
+                  </div>
+                </section>
+                <hr
+                  className={`my-2 border ${
+                    selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
+                  }`}
+                />
+
+                <section className="flex justify-between">
+                  <div className="">
+                    <p>Country</p>
+                    <p className="text-lg font-medium"> {address.country || "--"}</p>
+                  </div>
+
+                  <div>
+                    <p>Province</p>
+                    <p className="text-lg font-medium">{address.province || "--"}</p>
+                  </div>
+                </section>
+
+                <hr
+                  className={`my-2 border ${
+                    selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
+                  }`}
+                />
+                <div>
+                  <p className="text-xs ">Special Instructions</p>
+                  <p className=" text-lg  font-medium">{address.specialInstruction || "--"}</p>
+                </div>
+              </figure>
+            </aside>
+          );
+        })}
       </section>
     );
   };
@@ -282,7 +298,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
           <p className="text-center text-secondary font-medium">Choose Address</p>
           <i className="bi bi-geo text-primary font-semibold "></i>
         </div>
-        {!!addresses.length && (
+        {!!addresses.length && !$general.cartCreated && (
           <p
             className="text-center text-xs underline cursor-pointer hover:font-semibold hover:scale-105 transition-transform"
             onClick={() => setAddNew(!addNew)}

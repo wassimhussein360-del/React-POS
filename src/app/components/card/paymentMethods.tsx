@@ -1,15 +1,17 @@
 import { useState } from "react";
 import CashPayDialog from "./dialogs/cashPay";
 import { Menu, MenuHandler, MenuList, Radio, Typography } from "@material-tailwind/react";
-import { useAppDispatch, useCart, useVendor } from "@/reduxStore/hooks";
+import { useAppDispatch, useCart, useGeneral, useVendor } from "@/reduxStore/hooks";
 import { Vendor } from "@/app/abstraction/types";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
+import toast from "react-hot-toast";
 
 const PaymentMethods = ({ totalBill }: any) => {
   const dispatch = useAppDispatch();
 
   const $vendor = useVendor() as Vendor;
   const $cart = useCart();
+  const $general = useGeneral();
 
   // cash dialog
   const [openCashDialog, setOpenCashDialog] = useState(false);
@@ -18,6 +20,8 @@ const PaymentMethods = ({ totalBill }: any) => {
   };
 
   const setPaymentMethod = (paymentId: string) => {
+    if (isCartCreatedToastMassage($general.cartCreated, "unable to change payment method")) return;
+
     dispatch(
       SetCartField({
         fieldName: "selections",
@@ -131,3 +135,8 @@ const paymentsMap: any = {
   payByLink: { name: "Link", cartValue: "Pay by link", icon: "link-45deg" },
   posCard: { name: "Card", cartValue: "POS Card", icon: "credit-card-2-front" },
 };
+
+export function isCartCreatedToastMassage(isCreated: boolean, massage: string) {
+  if (isCreated) toast.error(`Cart already created, ${massage}`);
+  return isCreated;
+}

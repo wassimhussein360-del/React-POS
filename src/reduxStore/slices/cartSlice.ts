@@ -1,4 +1,5 @@
 import { Indexable, Item } from "@/app/abstraction/types";
+import { isCartCreatedToastMassage } from "@/app/components/card/paymentMethods";
 import { $deepEqual, $getFromLocal, $writeOnLocal } from "@/app/helpers/helpers";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
@@ -34,6 +35,8 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     AddItem: (state, action) => {
+      if (isCartCreatedToastMassage(!!state.paymentUrl, "Unable to add new item")) return;
+
       if (!state.key) {
         state.key = nanoid(10);
         state.active = true;
@@ -79,6 +82,8 @@ const cartSlice = createSlice({
       setCartToLocal(vendorId, state);
     },
     UpdateItem: (state, action: PayloadAction<Item>) => {
+      if (isCartCreatedToastMassage(!!state.paymentUrl, "Unable to update cart item")) return;
+
       let itemToUpdate = action.payload;
 
       const itemIndex = state.items.findIndex((item) =>
@@ -97,6 +102,8 @@ const cartSlice = createSlice({
       setCartToLocal($getFromLocal("vendor").id, state);
     },
     RemoveItem: (state, action) => {
+      if (isCartCreatedToastMassage(!!state.paymentUrl, "Unable to remove an item")) return;
+
       const { id, key } = action.payload;
 
       const hasKey = key !== undefined; // Ensure `0` is treated as a valid key
@@ -123,6 +130,8 @@ const cartSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; quantity: number; key?: number }>
     ) => {
+      if (isCartCreatedToastMassage(!!state.paymentUrl, "Unable to update quantity")) return;
+
       const { id, quantity, key } = action.payload;
 
       const item = state.items.find((item) => (key ? item.key === key : item.id === id));

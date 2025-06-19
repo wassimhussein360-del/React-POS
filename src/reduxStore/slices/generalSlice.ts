@@ -8,12 +8,16 @@ export interface GeneralState {
   order: Indexable;
   outlets: Array<any>;
   zone: Indexable;
+  cartSubmitted: boolean;
+  cartCreated: boolean;
   cartDrawer?: boolean;
   shippingMethods: any[];
   [key: string]: any;
 }
 
 const initialState: GeneralState = {
+  cartCreated: false,
+  cartSubmitted: false,
   branch: {},
   products: [],
   discounts: [],

@@ -29,6 +29,7 @@ const PricingDetails = () => {
         <Select
           label="Discount"
           size="md"
+          disabled={$general.cartCreated}
           className="  placeholder:text-lg"
           value={$cart.selections?.couponCode || ""}
         >
@@ -65,13 +66,14 @@ const PricingDetails = () => {
             value={$cart.selections?.shippingMethod?.provider ?? ""}
             label="Shipping"
             size="md"
+            disabled={$general.cartCreated}
             className=" text-xs placeholder:text-xs"
           >
             {$general.shippingMethods.map((method) => {
               return (
                 <Option
-                  value={method.provider}
-                  key={method.provider}
+                  value={method?.provider}
+                  key={method?.provider}
                   onClick={() => {
                     dispatch(
                       SetCartField({

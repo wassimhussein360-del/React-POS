@@ -1,13 +1,14 @@
 import { HoldIcon, TrashIcon } from "@/assets/icons";
-import { useAppDispatch, useCart, useCartItems, useGeneral, useVendor } from "@/reduxStore/hooks";
+import { useAppDispatch, useCart, useCartItems, useGeneral } from "@/reduxStore/hooks";
 import { Button } from "@material-tailwind/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CartHolder from "./dialogs/cartHolder";
 import { SetCartField, VoidCart } from "@/reduxStore/slices/cartSlice";
 import toast from "react-hot-toast";
 import { createOrder } from "@/servies/fire-functions";
 import { $getFromLocal, $loader } from "@/app/helpers/helpers";
 import QRCodePayment from "./dialogs/qrcodePayment";
+import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 
 const ActionsBtns = () => {
   const cartItems = useCartItems();
@@ -19,6 +20,10 @@ const ActionsBtns = () => {
   const [openQrCode, setOpenQrCode] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<any>(null);
 
+  useEffect(() => {
+    dispatch(SetGeneralField({ field: "cartCreated", value: !!$cart.paymentUrl }));
+  }, [$cart]);
+
   const validateCart = (): boolean =>
     ![
       [!$general.order.customer, "Please select a customer."],
@@ -26,15 +31,22 @@ const ActionsBtns = () => {
       [$general.order.paymentMethod.id === "Unset", "Please select a payment method."],
       [!$cart.selections?.orderType, "Please choose an order type."],
       [
-        $cart.selections?.orderType === "delivery" && !$general.order.address.deliveryZoneId,
+        $cart.selections?.orderType === "delivery" &&
+          (!$general.order.address.deliveryZoneId || !$cart.address),
         "Please select an address.",
       ],
     ].some(([cond, msg]) => cond && (toast.error(msg), true));
 
   const makeOrder = () => {
+    dispatch(SetGeneralField({ field: "cartSubmitted", value: true }));
     if (!validateCart()) return;
+
     const o = $general.order;
     const payload = getOrderPayload(o);
+
+    console.log(payload);
+
+    console.log(payload);
 
     $loader(true);
 

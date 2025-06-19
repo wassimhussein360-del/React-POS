@@ -1,6 +1,6 @@
 import { Indexable, Item, Modifier, ModifierOption } from "@/app/abstraction/types";
 import { $currency, $translate } from "@/app/helpers/helpers";
-import { useAppDispatch, useCartItems } from "@/reduxStore/hooks";
+import { useAppDispatch, useCartItems, useGeneral } from "@/reduxStore/hooks";
 import { AddItem, UpdateItem, UpdateQuantity } from "@/reduxStore/slices/cartSlice";
 import { Button, Dialog, Input, Textarea } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
@@ -16,6 +16,7 @@ interface ProductDialogProps {
 const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, product }) => {
   const dispatch = useAppDispatch();
   const items = useCartItems();
+  const $general = useGeneral();
   const [temporaryItem, setTemporaryItem] = useState<Item>();
 
   const [validators, setValidators] = useState<{ [key: number]: { invalid: boolean } }>({});
@@ -27,7 +28,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
 
   useEffect(() => {
     const parsedItem = JSON.parse(JSON.stringify(product));
-    setTemporaryItem({ ...parsedItem, quantity: parsedItem.quantity || 1 });
+    setTemporaryItem({ ...parsedItem, quantity: parsedItem?.quantity || 1 });
 
     if (open && items.length) {
       setItemDetails();
@@ -39,7 +40,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
 
     if (matchings.length) {
       const totals = {
-        quantity: matchings.reduce((sum, prd) => sum + prd.quantity, 0),
+        quantity: matchings.reduce((sum, prd) => sum + prd?.quantity, 0),
         stock: matchings[0].stockQuantity,
       };
 
@@ -170,8 +171,8 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
           <section className="flex justify-between  mt-2 w-56">
             {product.isStockManagement ? (
               <p className="text-xs text-primary font-semibold">
-                {itemsTotals.quantity
-                  ? itemsTotals.stock + (product.quantity || 0) - (temporaryItem?.quantity || 0)
+                {itemsTotals?.quantity
+                  ? itemsTotals.stock + (product?.quantity || 0) - (temporaryItem?.quantity || 0)
                   : product.stockQuantity - (temporaryItem?.quantity || 0)}{" "}
                 Pcs
               </p>
@@ -210,7 +211,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
             <button
               onClick={() =>
                 (itemsTotals.stock || product.stockQuantity) +
-                  (product.quantity || 0) -
+                  (product?.quantity || 0) -
                   temporaryItem?.quantity >=
                   1 || !product.isStockManagement
                   ? updateQuantity((temporaryItem?.quantity || 0) + 1)
@@ -308,7 +309,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                                         )}
                                         {/* End Check Box */}
 
-                                        <p className={`text-xs  `}>
+                                        <p className={`text-xs cursor-pointer`}>
                                           {$translate({
                                             en: option?.nameEn || option.name?.en,
                                             ar: option?.nameAr || option.name?.ar,
@@ -324,7 +325,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                                           value={
                                             temporaryItem?.assignedModifiers[modifierIndex]?.list[
                                               optionIndex
-                                            ].quantity || 1
+                                            ]?.quantity || 1
                                           }
                                           onChange={(e) =>
                                             handleOptionQuantityChange(
@@ -343,7 +344,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                                               {(
                                                 option.price *
                                                 (temporaryItem?.assignedModifiers[modifierIndex]
-                                                  ?.list[optionIndex].quantity || 1)
+                                                  ?.list[optionIndex]?.quantity || 1)
                                               ).toFixed(2)}
                                             </nav>
                                           </>
@@ -382,6 +383,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                   !temporaryItem?.assignedModifiers.length ? "min-w-40" : "w-1/2"
                 } justify-center`}
                 onClick={() => saveToCart()}
+                disabled={$general.cartCreated}
               >
                 Save
               </Button>
@@ -392,6 +394,7 @@ const ProductDetails: React.FC<ProductDialogProps> = ({ open, handleOpen, produc
                 className={`normal-case flex  bg-secondary ${
                   !temporaryItem?.assignedModifiers.length ? "min-w-40" : "w-1/2"
                 } justify-center`}
+                disabled={$general.cartCreated}
                 onClick={() => addToCart()}
               >
                 Add
