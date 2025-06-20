@@ -106,7 +106,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
         getShippings();
       }
     }
-  }, [$cart.address, $general.order.address.deliveryZoneId]);
+  }, [$cart.address, $general.order.address?.deliveryZoneId]);
 
   const switchBranch = async (_outlet: any, _zone: any): Promise<boolean> => {
     // if the selected address has'nt found in any branch
@@ -177,7 +177,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
 
     const payload = { order: ord, vendorId: vendor?.id };
 
-    if (!payload.order.address.deliveryZoneId) return;
+    if (!payload.order.address?.deliveryZoneId) return;
     $loader(true);
 
     getShippingRates(payload)

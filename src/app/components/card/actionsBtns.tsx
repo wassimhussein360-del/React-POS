@@ -32,7 +32,7 @@ const ActionsBtns = () => {
       [!$cart.selections?.orderType, "Please choose an order type."],
       [
         $cart.selections?.orderType === "delivery" &&
-          (!$general.order.address.deliveryZoneId || !$cart.address),
+          (!$general.order.address?.deliveryZoneId || !$cart.address),
         "Please select an address.",
       ],
     ].some(([cond, msg]) => cond && (toast.error(msg), true));
