@@ -11,6 +11,8 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
   const customer = $cart.customer;
   const cartItems = formatCartItems($cart.items);
 
+  console.log(cartItems);
+
   // General Slice
   const allProducts = $general.products;
   const outlet = $general.branch;
@@ -397,6 +399,8 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
   };
 
   const dbProducts: any = {};
+  console.log({ allProducts });
+
   allProducts.forEach((product: Item) => {
     dbProducts[product.id] = product;
   });
@@ -410,6 +414,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
 
       // Find the corresponding product in the fetched products map
       const dbProduct: Item = dbProducts[product.id];
+      console.log({ dbProduct });
 
       const stockHandle = dbProduct?.handleStock || "showOutOfStock";
 
@@ -856,5 +861,6 @@ export const formatCartItems = (items: any[]) => {
       selectedModifiers,
     };
   });
+
   return items;
 };

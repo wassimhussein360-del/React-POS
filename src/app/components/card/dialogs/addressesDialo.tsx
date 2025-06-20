@@ -1,6 +1,6 @@
 import { Dialog } from "@material-tailwind/react";
 import "./cartDialogs.css";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   useAddress,
   useAppDispatch,
@@ -15,13 +15,12 @@ import "swiper/css/pagination";
 import AddressForm from "../forms/address";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
 import { Indexable } from "@/app/abstraction/types";
-import { $getFromLocal, $toTitleCase, $writeOnLocal } from "@/app/helpers/helpers";
+import { $getFromLocal, $loader, $toTitleCase, $writeOnLocal } from "@/app/helpers/helpers";
 import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 import toast from "react-hot-toast";
 import { Chevron } from "@/assets/icons";
 import { getShippingRates } from "@/servies/fire-functions";
 import { getOrderPayload } from "../actionsBtns";
-import { isCartCreatedToastMassage } from "../paymentMethods";
 
 interface CashPayProps {
   open: boolean;
@@ -56,38 +55,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
     });
   }, [customer]);
 
-  useEffect(() => {
-    setGlobalAddress(undefined);
-
-    const updateAddress = async () => {
-      let { _outlet, _zone }: Indexable = { _outlet: null, _zone: null };
-      const outlets = $general.outlets;
-
-      _outlet =
-        outlets.find(
-          (olt) =>
-            (_zone = olt.zones.find((zone: Indexable) =>
-              zone.areas.some((area: string) => JSON.parse(area).area.en === selectedAddress.area)
-            ))
-        ) || null;
-
-      if (!Object.keys(selectedAddress).length || !(await switchBranch(_outlet, _zone))) return;
-      setAddNew(false);
-
-      const tryFind = addresses.find((add) => add.id === selectedAddress.id);
-      if (!tryFind) {
-        addresses.unshift(selectedAddress);
-      }
-
-      setGlobalAddress(selectedAddress);
-    };
-
-    updateAddress();
-  }, [selectedAddress]);
-
   function setGlobalAddress(value: any) {
-    console.log({ value });
-
     dispatch(
       SetCartField({
         fieldName: "address",
@@ -95,22 +63,56 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
       })
     );
   }
-  useEffect(() => {
-    if (!$cart.address) {
-      setSelectedAddress({});
-    } else {
-      if (!open) return;
 
-      handleOpen();
-      toast.success("Address selected successfully !!");
-      getShippings();
+  const handleSelectAddress = async (address: any) => {
+    let _outlet: Indexable | null = null;
+    let _zone: Indexable | null = null;
+
+    const outlets = $general.outlets;
+
+    _outlet =
+      outlets.find((olt) => {
+        _zone = olt.zones.find((zone: Indexable) =>
+          zone.areas.some((area: string) => JSON.parse(area).area.en === address.area)
+        );
+        return _zone;
+      }) || null;
+
+    const result = await switchBranch(_outlet, _zone);
+
+    if (result) {
+      // valid: update local selected + global
+      setSelectedAddress(address);
+      setAddNew(false);
+      const tryFind = addresses.find((add) => add.id === address.id);
+      if (!tryFind) {
+        addresses.unshift(address);
+      }
+      setGlobalAddress(address);
+      if (open) {
+        toast.success("Address selected successfully !!");
+        handleOpen();
+      }
+    } else {
+      // invalid: do NOT set selected
+      // optionally show a message
     }
-  }, [$cart.address, $general.zone]);
+  };
+
+  useEffect(() => {
+    if ($cart.address && selectedAddress.id !== $cart.address.id) {
+      handleSelectAddress($cart.address);
+      if ($general.zone.id) {
+        getShippings();
+      }
+    }
+  }, [$cart.address, $general.order.address.deliveryZoneId]);
 
   const switchBranch = async (_outlet: any, _zone: any): Promise<boolean> => {
     // if the selected address has'nt found in any branch
+
     if (!_outlet || !_zone) {
-      toast.error("The Provided Address Does not belong to any branch !!", { duration: 10_000 });
+      toast.error("The Provided Address Does not belong to any branch !!", { duration: 5_000 });
       setSelectedAddress({});
       return false;
     }
@@ -160,12 +162,12 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
       dispatch(SetGeneralField({ field: "branch", value: _outlet }));
 
       toast.success("Switched to address belonging branch 👌");
-      handleOpen();
     }
     dispatch(SetGeneralField({ field: "zone", value: _zone }));
 
     return true;
   };
+
   const getShippings = () => {
     const order = getOrderPayload($general.order, $cart.address);
     const snapshot = JSON.parse(JSON.stringify(order.selections));
@@ -176,6 +178,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
     const payload = { order: ord, vendorId: vendor?.id };
 
     if (!payload.order.address.deliveryZoneId) return;
+    $loader(true);
 
     getShippingRates(payload)
       .then((shippingRatesResponse) => {
@@ -186,7 +189,10 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
           })
         );
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => {
+        $loader(false);
+      });
   };
 
   const fetchBranchProductsIds = (branchId: string): Promise<string[]> => {
@@ -202,6 +208,10 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
       });
   };
 
+  function isSelected(id: string) {
+    return $cart.address?.id == id;
+  }
+
   const getBody = () => {
     return (
       <section className=" max-w-[400px] min-w-[400px] overflow-auto   mt-4 pb-5 max-h-[300px] px-8">
@@ -211,15 +221,18 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
             <aside
               key={index}
               className={` shadow-sm  rounded-lg px-5 py-2 border   text-xs   mb-2 ${
-                selectedAddress.id == address.id ? "border-gray-900 " : " border-gray-400"
+                isSelected(address.id) ? "border-gray-900 " : " border-gray-400"
               } `}
             >
               <div
                 className={`text-lg font-semibold   flex justify-between items-center
-              ${selectedAddress.id == address.id ? "text-primary" : " "}
+              ${isSelected(address.id) ? "text-primary" : " "}
               `}
               >
-                <h2 className=" cursor-pointer" onClick={() => setSelectedAddress(address)}>
+                <h2
+                  className={`${isSelected(address.id) ? "" : "cursor-pointer"}`}
+                  onClick={() => (isSelected(address.id) ? null : handleSelectAddress(address))}
+                >
                   {address.area}
                   {address.label && <span className=""> • {$toTitleCase(address.label)}</span>}
                 </h2>
@@ -233,7 +246,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
               <figure className={openedAddress == index ? "address-opened" : "address-closed"}>
                 <hr
                   className={`my-2 border ${
-                    selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
+                    isSelected(address.id) ? "border-white opacity-10" : "gray-100"
                   }`}
                 />
                 <section className="flex justify-between">
@@ -254,7 +267,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
                 </section>
                 <hr
                   className={`my-2 border ${
-                    selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
+                    isSelected(address.id) ? "border-white opacity-10" : "gray-100"
                   }`}
                 />
 
@@ -272,7 +285,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
 
                 <hr
                   className={`my-2 border ${
-                    selectedAddress.id == address.id ? "border-white opacity-10" : "gray-100"
+                    isSelected(address.id) ? "border-white opacity-10" : "gray-100"
                   }`}
                 />
                 <div>
@@ -306,7 +319,7 @@ const AddressesDialog: React.FC<CashPayProps> = ({ open, handleOpen }) => {
             {addNew ? "Select An Existing Address" : " Add New Address"}
           </p>
         )}
-        {addNew ? <AddressForm setSelectedAddress={setSelectedAddress} /> : getBody()}
+        {addNew ? <AddressForm setSelectedAddress={handleSelectAddress} /> : getBody()}
       </article>
     </Dialog>
   );

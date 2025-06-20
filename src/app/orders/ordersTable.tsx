@@ -99,10 +99,7 @@ const OrdersTable = () => {
   }, [vendor, currentPage, filters, sorSetting]);
 
   useEffect(() => {
-    console.log({ 1: search });
-
     if (search.length < 3 && search) return;
-    console.log({ 2: search });
 
     setIsSearching(true);
 

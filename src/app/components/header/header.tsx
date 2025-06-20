@@ -82,8 +82,10 @@ export default function Header() {
   }, [$general.branch]);
 
   useEffect(() => {
-    if (!$vendor || !outlets) return;
+    if (!$vendor || !outlets || !$general.products.length) return;
+
     const refactoredOrder = refactorOrder($cart, $general);
+    console.log({ refactoredOrder });
 
     dispatch(
       SetGeneralField({
@@ -91,7 +93,7 @@ export default function Header() {
         value: refactoredOrder.order,
       })
     );
-  }, [$cart, $general.zone]);
+  }, [$cart, $general.products, $general.zone]);
 
   const signOut = () => {
     localStorage.clear();
@@ -110,6 +112,9 @@ export default function Header() {
   };
 
   const onOutletSelect = (id: string, branch?: any) => {
+    console.log(1);
+    console.log(branch);
+
     const newOutlet = branch ? branch : outlets.find((o) => o.id === id);
     $writeOnLocal("branch", newOutlet);
     dispatch(

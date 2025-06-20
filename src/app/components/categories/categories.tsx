@@ -40,12 +40,16 @@ const Categories: React.FC<{
 
   useEffect(() => {
     if (vendor?.id && $general.branch?.id) {
+      console.log(1000);
+
       setCategories([]);
       setSelectedCategory("all");
       // Fetch Products related to selected vendor
 
       FirestoreService.getSubcollection("vendors", vendor.id, "products").then(
         (fetchedProducts) => {
+          console.log(2000);
+
           const formattedProducts = formatProducts(fetchedProducts, $general.branch.id);
 
           setAllProducts(formattedProducts);

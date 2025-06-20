@@ -25,7 +25,7 @@ export async function algoliaSearch(storeId: string, index: string, text: string
         {
           indexName: index,
           query: text,
-          hitsPerPage: 50,
+          hitsPerPage: 200,
           facetFilters: [filters as string],
         },
       ],

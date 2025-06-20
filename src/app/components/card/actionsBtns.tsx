@@ -38,15 +38,11 @@ const ActionsBtns = () => {
     ].some(([cond, msg]) => cond && (toast.error(msg), true));
 
   const makeOrder = () => {
-    dispatch(SetGeneralField({ field: "cartSubmitted", value: true }));
-    if (!validateCart()) return;
-
     const o = $general.order;
     const payload = getOrderPayload(o);
 
-    console.log(payload);
-
-    console.log(payload);
+    dispatch(SetGeneralField({ field: "cartSubmitted", value: true }));
+    if (!validateCart()) return;
 
     $loader(true);
 

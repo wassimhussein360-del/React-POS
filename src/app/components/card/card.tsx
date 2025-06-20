@@ -86,7 +86,7 @@ const CartInfo = ({ className }: { className: string }) => {
       <section className="flex flex-col gap-2 my-3">
         <CartItems />
 
-        <Textarea
+        {/* <Textarea
           label="Special Instructions"
           value={cart.selections?.specialInstructions}
           disabled={$general.cartCreated}
@@ -102,7 +102,7 @@ const CartInfo = ({ className }: { className: string }) => {
             )
           }
           className=" max-h-[70px]  bg-[#F6F6F6] min-h-0 "
-        />
+        /> */}
         <hr />
       </section>
       {/* end Products added  */}
