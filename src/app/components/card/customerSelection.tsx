@@ -9,17 +9,7 @@ import {
   useVendor,
 } from "@/reduxStore/hooks";
 import { algoliaSearch } from "@/servies/algoliaSearch";
-import {
-  Button,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Spinner,
-  Input,
-} from "@material-tailwind/react";
-
-import { Popover, PopoverHandler, PopoverContent } from "@material-tailwind/react";
+import { Button, Spinner } from "@material-tailwind/react";
 
 import { useEffect, useRef, useState } from "react";
 import React from "react";
@@ -30,6 +20,7 @@ import { AddItem, SetCartField, UpdateQuantity } from "@/reduxStore/slices/cartS
 import NewCustomerDialog from "./dialogs/newCustomer";
 import AddressesDialog from "./dialogs/addressesDialo";
 import toast from "react-hot-toast";
+import CustomerPopover from "./customersPopover";
 
 const CustomerAndProductSelection = () => {
   const [customerSearch, setCustomerSearch] = useState<string>("");
@@ -172,7 +163,6 @@ const CustomerAndProductSelection = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const [open, setOpen] = useState(false);
 
   return (
     <section>
@@ -199,75 +189,20 @@ const CustomerAndProductSelection = () => {
       <h6 className="text-sm">Customers </h6>
       <div className="my-3 flex ">
         {/* Customer Selection */}
-        <Popover placement="bottom-start" open={open} handler={setOpen}>
-          <PopoverHandler>
-            <Button
-              disabled={$general.cartCreated}
-              className={`w-full text-start normal-case bg-transparent hover:shadow-none flex justify-between items-center border border-gray-500 shadow-none rounded-xl ${
-                selectedCustomerName ? "text-primary" : "text-gray-400"
-              }`}
-            >
-              {selectedCustomerName || "Walk in Customer"}
-              {customerLoading && <Spinner className="w-4 h-4" />}
-            </Button>
-          </PopoverHandler>
+        <CustomerPopover
+          $general={$general}
+          selectedCustomer={selectedCustomer}
+          setSelectedCustomer={setSelectedCustomer}
+          selectedCustomerName={selectedCustomerName}
+          setSelectedCustomerName={setSelectedCustomerName}
+          customerLoading={customerLoading}
+          customers={customers}
+          setCustomerSearch={setCustomerSearch}
+          $getColorFromString={$getColorFromString}
+          $getImgAlter={$getImgAlter}
+          $translate={$translate}
+        />
 
-          <PopoverContent
-            className="max-h-[20rem] overflow-y-auto z-[9999] p-2"
-            placeholder={undefined}
-            onPointerEnterCapture={undefined}
-            onPointerLeaveCapture={undefined}
-          >
-            <div className="mb-2">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full p-2 border border-gray-300 rounded hover:outline-none focus:border-gray-500"
-                autoFocus
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setCustomerSearch(value);
-                }}
-              />
-            </div>
-
-            {customers.map((cus, i) => (
-              <div
-                key={i}
-                className={`p-2 rounded cursor-pointer ${
-                  cus.id === selectedCustomer ? "bg-gray-200" : "hover:bg-gray-100"
-                }`}
-                onClick={() => {
-                  setSelectedCustomer(cus.id);
-                  setSelectedCustomerName(cus.name);
-                  setOpen(false); // ✅ close manually after selecting
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  {cus.image ? (
-                    <img src={cus.image} alt={cus.name} className="w-8 h-8 rounded-full" />
-                  ) : (
-                    <div
-                      className="w-8 h-8 flex items-center justify-center font-sourGummy font-semibold text-secondary rounded-full"
-                      style={{ backgroundColor: $getColorFromString(cus.id) }}
-                    >
-                      {$getImgAlter(cus.name)}
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm text-secondary">
-                      {$translate({
-                        en: cus.name || cus.displayName || cus.an?.displayName,
-                        ar: cus.ar?.displayName,
-                      })}
-                    </p>
-                    <p className="text-xs text-gray-400">{cus.phone}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </PopoverContent>
-        </Popover>
         {/* End Customer Selection */}
 
         <Button
