@@ -24,7 +24,6 @@ export default function CustomerPopover({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      toast.success(123);
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
@@ -41,7 +40,7 @@ export default function CustomerPopover({
       <Button
         disabled={$general.cartCreated}
         onClick={() => setOpen((prev) => !prev)}
-        className={`w-full text-start normal-case bg-transparent hover:shadow-none flex justify-between items-center border border-gray-500 shadow-none rounded-xl ${
+        className={`w-full  text-start normal-case bg-transparent hover:shadow-none flex justify-between items-center border border-gray-500 shadow-none rounded-xl ${
           selectedCustomerName ? "text-primary" : "text-gray-400"
         }`}
       >
@@ -54,7 +53,7 @@ export default function CustomerPopover({
           <input
             type="text"
             placeholder="Search..."
-            className="w-full px-2 py-1 mb-2 text-sm border border-gray-300 rounded-lg hover:outline-none focus:border-gray-500"
+            className="w-full px-2 py-1 mb-2 text-sm border border-gray-300 rounded-lg hover:outline-none focus:border-gray-500 focus:outline-none "
             autoFocus
             onChange={(e) => {
               const value = e.target.value;
