@@ -207,7 +207,11 @@ const CustomerAndProductSelection = () => {
             </Button>
           </MenuHandler>
           <MenuList className="max-h-[20rem] z-[9999]">
-            <MenuItem className="hover:bg-none p-0">
+            <MenuItem
+              className="hover:bg-none p-0"
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
               <input
                 type="text"
                 placeholder="Search..."

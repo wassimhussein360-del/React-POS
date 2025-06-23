@@ -85,7 +85,6 @@ export default function Header() {
     if (!$vendor || !outlets || !$general.products.length) return;
 
     const refactoredOrder = refactorOrder($cart, $general);
-    console.log({ refactoredOrder });
 
     dispatch(
       SetGeneralField({
@@ -112,9 +111,6 @@ export default function Header() {
   };
 
   const onOutletSelect = (id: string, branch?: any) => {
-    console.log(1);
-    console.log(branch);
-
     const newOutlet = branch ? branch : outlets.find((o) => o.id === id);
     $writeOnLocal("branch", newOutlet);
     dispatch(

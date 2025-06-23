@@ -11,8 +11,6 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
   const customer = $cart.customer;
   const cartItems = formatCartItems($cart.items);
 
-  console.log(cartItems);
-
   // General Slice
   const allProducts = $general.products;
   const outlet = $general.branch;
@@ -205,6 +203,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
       deliveryFee,
       shippingCouponCode: null,
     };
+
     if (availableDiscounts.length > 0) {
       const availableDiscount: any = availableDiscounts[availableDiscounts.length - 1];
       couponsUsed.push({
@@ -399,7 +398,6 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
   };
 
   const dbProducts: any = {};
-  console.log({ allProducts });
 
   allProducts.forEach((product: Item) => {
     dbProducts[product.id] = product;
@@ -414,7 +412,6 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
 
       // Find the corresponding product in the fetched products map
       const dbProduct: Item = dbProducts[product.id];
-      console.log({ dbProduct });
 
       const stockHandle = dbProduct?.handleStock || "showOutOfStock";
 
@@ -570,8 +567,10 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
   if (deliveryZoneId && formattedOrder.selections?.orderType == "delivery") {
     formattedOrder.outlet = outlet;
     const zone = $general.zone;
+
     if (zone) {
       formattedOrder.zone = zone;
+
       if (
         zone.shippingDetails?.provider &&
         zone.shippingDetails?.provider != "Local Delivery" &&
@@ -593,6 +592,7 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
       } else {
         deliveryFee = 0;
       }
+
       if (
         formattedOrder?.selections?.shippingMethod &&
         formattedOrder.selections?.shippingMethod?.rate &&
@@ -608,11 +608,14 @@ export const refactorOrder = ($cart: CartState, $general: GeneralState) => {
     formattedOrder.cart = formattedOrder.cart || {
       subTotal,
     };
+
     shippingDiscount = checkDeliveryDiscount(formattedOrder, deliveryFee, discounts);
+
     if (shippingDiscount.shippingCouponCode?.deductedAmount) {
       deliveryFee = 0;
     }
   }
+
   formattedOrder.shippingCouponCode = shippingDiscount?.shippingCouponCode || null;
   let finalCalculatedTotal =
     calculatedTotalAfterCartDiscount + deliveryFee - (orderData.customDiscount || 0);
