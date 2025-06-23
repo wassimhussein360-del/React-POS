@@ -23,8 +23,8 @@ export default function CustomerPopover({
   const popoverRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    toast.success("Click on the customer to select them");
     function handleClickOutside(event: MouseEvent) {
+      toast.success(123);
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
