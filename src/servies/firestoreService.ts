@@ -4,18 +4,7 @@ import { Observable } from "rxjs";
 
 const db = getFirestore(app);
 
-import {
-  query,
-  where,
-  orderBy,
-  limit,
-  startAfter,
-  Query,
-  DocumentData,
-  WhereFilterOp,
-  OrderByDirection,
-  DocumentSnapshot,
-} from "firebase/firestore";
+import { query, where, orderBy, limit, startAfter, Query, DocumentData, WhereFilterOp, OrderByDirection, DocumentSnapshot } from "firebase/firestore";
 
 type QueryCondition = {
   field: string;
@@ -79,13 +68,26 @@ class FirestoreService {
   }
 
   // Updated getSubcollection method using queryCollection
-  static async getSubcollection(
-    collectionName: string,
-    documentId: string,
-    subcollectionName: string,
-    options?: QueryOptions
-  ) {
+  static async getSubcollection(collectionName: string, documentId: string, subcollectionName: string, options?: QueryOptions) {
     return this.queryCollection([collectionName, documentId, subcollectionName], options);
+  }
+
+  static async getSubDocument(collectionName: string, documentId: string, subcollectionName: string, subdocumentId: string) {
+    try {
+      const subDocRef = doc(db, collectionName, documentId, subcollectionName, subdocumentId);
+      const docSnapshot = await getDoc(subDocRef);
+
+      if (docSnapshot.exists()) {
+        return {
+          id: docSnapshot.id,
+          ...docSnapshot.data(),
+        };
+      } else {
+        throw new Error(`Document with ID ${subdocumentId} not found in subcollection ${subcollectionName}`);
+      }
+    } catch (error: any) {
+      throw new Error(`Failed to get subdocument: ${error.message}`);
+    }
   }
 
   // New method for querying top-level collections
@@ -103,12 +105,7 @@ class FirestoreService {
     }
   }
 
-  static getObserveSubDocument(
-    collectionName: string,
-    documentId: string,
-    subcollectionName: string,
-    subdocumentId: string
-  ): Observable<DocumentData | null> {
+  static getObserveSubDocument(collectionName: string, documentId: string, subcollectionName: string, subdocumentId: string): Observable<DocumentData | null> {
     return new Observable((observer) => {
       try {
         const docRef = doc(db, collectionName, documentId, subcollectionName, subdocumentId);

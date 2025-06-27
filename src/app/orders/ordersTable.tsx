@@ -4,19 +4,7 @@ import { useVendor } from "@/reduxStore/hooks";
 import FirestoreService from "@/servies/firestoreService";
 import { useEffect, useRef, useState } from "react";
 
-import {
-  Card,
-  CardHeader,
-  Typography,
-  CardBody,
-  Chip,
-  CardFooter,
-  Avatar,
-  Input,
-  Badge,
-  Spinner,
-  Button,
-} from "@material-tailwind/react";
+import { Card, CardHeader, Typography, CardBody, Chip, CardFooter, Avatar, Input, Badge, Spinner, Button } from "@material-tailwind/react";
 import { SearchIcon } from "@/assets/icons";
 import { _getProducts } from "@/servies/analyticsServise";
 import Paginator from "../components/table/paginator";
@@ -24,6 +12,7 @@ import { $currency, $formatDate, $loader, $toTitleCase } from "../helpers/helper
 import { algoliaSearch } from "@/servies/algoliaSearch";
 import { AnalyticsVariables, Indexable } from "../abstraction/types";
 import UpdateStatusForm from "./updateStatusForm";
+import PrintPopover from "../components/printer/orderPrinter";
 
 const TABLE_HEAD = [
   { name: "", sortable: false },
@@ -33,6 +22,7 @@ const TABLE_HEAD = [
   { name: "Type & Payment", sortable: true, sortBy: "paymentMethod" },
   { name: "Total", sortable: true, sortBy: "total" },
   { name: "Status", sortable: true, sortBy: "status" },
+  { name: "Actions", sortable: false },
 ];
 
 const OrdersTable = () => {
@@ -58,9 +48,7 @@ const OrdersTable = () => {
         setSelectedOrders([...selectedOrders, clickedOrder]);
       }, 0); // Adjust time for long press (600ms)
     } else {
-      selectedOrders.some((ord) => ord.id == clickedOrder.id)
-        ? setSelectedOrders(selectedOrders.filter((ord) => ord.id !== clickedOrder.id))
-        : setSelectedOrders([...selectedOrders, clickedOrder]);
+      selectedOrders.some((ord) => ord.id == clickedOrder.id) ? setSelectedOrders(selectedOrders.filter((ord) => ord.id !== clickedOrder.id)) : setSelectedOrders([...selectedOrders, clickedOrder]);
     }
   };
 
@@ -134,12 +122,7 @@ const OrdersTable = () => {
 
   return (
     <>
-      <UpdateStatusForm
-        open={openForm}
-        handleOpen={() => setOpenForm(!openForm)}
-        orders={selectedOrders}
-        onStatusUpdated={handleStatusUpdated}
-      />
+      <UpdateStatusForm open={openForm} handleOpen={() => setOpenForm(!openForm)} orders={selectedOrders} onStatusUpdated={handleStatusUpdated} />
       <Card className="container shadow-[0px_0px_20px_rgba(0,0,0,0.1)]">
         <CardHeader floated={false} shadow={false} className="rounded-none">
           <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
@@ -156,10 +139,7 @@ const OrdersTable = () => {
               {!!selectedOrders.length && (
                 <Button className=" bg-secondary flex gap-1 text-primary ps-4 pe-3">
                   <span className="flex gap-2" onClick={() => setOpenForm(true)}>
-                    <nav className="rounded bg-primary px-1 text-secondary">
-                      {selectedOrders.length}
-                    </nav>{" "}
-                    Status
+                    <nav className="rounded bg-primary px-1 text-secondary">{selectedOrders.length}</nav> Status
                   </span>
                   <i
                     className="bi bi-x-lg text-danger ms-2"
@@ -173,17 +153,7 @@ const OrdersTable = () => {
 
               {/* Search */}
               <div className="w-auto md:w-72">
-                <Input
-                  label="Search"
-                  icon={
-                    isSearching ? (
-                      <Spinner className="h-5 w-5" />
-                    ) : (
-                      <SearchIcon className="h-5 w-5" />
-                    )
-                  }
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+                <Input label="Search" icon={isSearching ? <Spinner className="h-5 w-5" /> : <SearchIcon className="h-5 w-5" />} onChange={(e) => setSearch(e.target.value)} />
               </div>
               {/* End Search */}
             </div>
@@ -194,197 +164,117 @@ const OrdersTable = () => {
             <thead>
               <tr>
                 {TABLE_HEAD.map((head) => (
-                  <th
-                    key={head.name}
-                    className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                  >
+                  <th key={head.name} className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
                     <Typography
                       variant="small"
                       color="blue-gray"
-                      className={`font-normal leading-none opacity-70 ${
-                        head.sortable ? "cursor-pointer" : ""
-                      } ${head.sortBy == sorSetting.by ? "text-primary font-semibold" : ""}`}
+                      className={`font-normal leading-none opacity-70 ${head.sortable ? "cursor-pointer" : ""} ${head.sortBy == sorSetting.by ? "text-primary font-semibold" : ""}`}
                       onClick={() =>
                         head.sortable
                           ? setSortSetting({
                               by: head.sortBy ?? "",
-                              dir:
-                                sorSetting.by == head.sortBy && sorSetting.dir == "asc"
-                                  ? "desc"
-                                  : "asc",
+                              dir: sorSetting.by == head.sortBy && sorSetting.dir == "asc" ? "desc" : "asc",
                             })
                           : {}
                       }
                     >
                       {head.name}
-                      {head.sortable && (
-                        <i
-                          className={`bi ms-1 ${
-                            head.sortBy == sorSetting.by && sorSetting.dir == "asc"
-                              ? "bi-sort-down-alt"
-                              : "bi-sort-up"
-                          }`}
-                        ></i>
-                      )}
+                      {head.sortable && <i className={`bi ms-1 ${head.sortBy == sorSetting.by && sorSetting.dir == "asc" ? "bi-sort-down-alt" : "bi-sort-up"}`}></i>}
                     </Typography>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {orders.map(
-                (
-                  {
-                    customer,
-                    address,
-                    cart,
-                    paymentMethod,
-                    status,
-                    orderType,
-                    createdAt,
-                    orderRef,
-                    id,
-                  },
-                  index
-                ) => {
-                  const classes = "p-4 border-b border-blue-gray-50 ";
+              {orders.map(({ customer, address, cart, paymentMethod, status, orderType, createdAt, orderRef, id }, index) => {
+                const classes = "p-4 border-b border-blue-gray-50 ";
 
-                  return (
-                    <tr
-                      key={index}
-                      className={`${
-                        selectedOrders.some((ord) => ord.id == id) ? "bg-primary-light   " : ""
-                      }`}
-                    >
-                      <td className={classes}>
-                        <div className="flex-center" onClick={() => handleMouseDown(orders[index])}>
-                          <input
-                            type="checkbox"
-                            onChange={() => {}}
-                            checked={selectedOrders.some((ord) => ord.id == id)}
-                            className="accent-secondary  cursor-pointer  h-4 w-4"
-                          />
+                return (
+                  <tr key={index} className={`${selectedOrders.some((ord) => ord.id == id) ? "bg-primary-light   " : ""}`}>
+                    <td className={classes}>
+                      <div className="flex-center" onClick={() => handleMouseDown(orders[index])}>
+                        <input type="checkbox" onChange={() => {}} checked={selectedOrders.some((ord) => ord.id == id)} className="accent-secondary  cursor-pointer  h-4 w-4" />
+                      </div>
+                    </td>
+                    {/* Ordered Date */}
+                    <td className={classes}>
+                      <Typography variant="small" color="blue-gray" className="font-normal">
+                        {createdAt ? $formatDate(createdAt, "DD, MMM, YY - HH:MM") : ""}
+                      </Typography>
+                      <Typography variant="small" className="text-gray-600">
+                        #{orderRef}
+                      </Typography>
+                    </td>
+                    {/* End Ordered Date */}
+
+                    {/* Customer Details */}
+                    <td className={classes}>
+                      <div className={"flex items-center gap-2"}>
+                        <img className="rounded-full w-12 h-12" src={customer.image || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYFhNLjRKHgrAPc6QcPbyLKcqHWmrMS6ZOqg&s"}></img>
+                        <div className="">
+                          <Typography variant="small" className="font-bold">
+                            {customer.name}
+                          </Typography>
+                          <Typography variant="small" className="text-gray-600">
+                            {[address.country || "", address.area || ""].filter((a) => a).join(", ")}
+                          </Typography>
                         </div>
-                      </td>
-                      {/* Ordered Date */}
-                      <td className={classes}>
-                        <Typography variant="small" color="blue-gray" className="font-normal">
-                          {createdAt ? $formatDate(createdAt, "DD, MMM, YY - HH:MM") : ""}
-                        </Typography>
-                        <Typography variant="small" className="text-gray-600">
-                          #{orderRef}
-                        </Typography>
-                      </td>
-                      {/* End Ordered Date */}
+                      </div>
+                    </td>
+                    {/* End Customer Details */}
 
-                      {/* Customer Details */}
-                      <td className={classes}>
-                        <div className={"flex items-center gap-2"}>
-                          <img
-                            className="rounded-full w-12 h-12"
-                            src={
-                              customer.image ||
-                              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYFhNLjRKHgrAPc6QcPbyLKcqHWmrMS6ZOqg&s"
-                            }
-                          ></img>
-                          <div className="">
-                            <Typography variant="small" className="font-bold">
-                              {customer.name}
-                            </Typography>
-                            <Typography variant="small" className="text-gray-600">
-                              {[address.country || "", address.area || ""]
-                                .filter((a) => a)
-                                .join(", ")}
-                            </Typography>
-                          </div>
-                        </div>
-                      </td>
-                      {/* End Customer Details */}
+                    {/* Cart Items */}
+                    <td className={classes}>
+                      <div className="flex items-center flex-wrap gap-2 ">
+                        {cart.cartItems.map((item: any, itemIndex: number) => {
+                          return (
+                            <Badge content={item.quantity} invisible key={itemIndex} withBorder className="text-[9px] !w-2  bg-gray-200 text-secondary">
+                              <Avatar src={item.image} alt={item.name} size="md" className="border border-gray-400 w-12 h-12 min-w-12 bg-blue-gray-50/50 object-contain p-1" />
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </td>
+                    {/* End Cart Items */}
 
-                      {/* Cart Items */}
-                      <td className={classes}>
-                        <div className="flex items-center flex-wrap gap-2 ">
-                          {cart.cartItems.map((item: any, itemIndex: number) => {
-                            return (
-                              <Badge
-                                content={item.quantity}
-                                invisible
-                                key={itemIndex}
-                                withBorder
-                                className="text-[9px] !w-2  bg-gray-200 text-secondary"
-                              >
-                                <Avatar
-                                  src={item.image}
-                                  alt={item.name}
-                                  size="md"
-                                  className="border border-gray-400 w-12 h-12 min-w-12 bg-blue-gray-50/50 object-contain p-1"
-                                />
-                              </Badge>
-                            );
-                          })}
-                        </div>
-                      </td>
-                      {/* End Cart Items */}
+                    {/* Order Type*/}
+                    <td className={classes}>
+                      <div className={`w-full flex flex-col  rounded-full gap-1`}>
+                        <Chip size="sm" className="w-min normal-case rounded-full" variant="ghost" value={$toTitleCase(orderType)} color={getColor(paymentMethod) as any} />
+                        {paymentMethod != "Unset" && <Chip size="sm" className="w-min rounded-full " variant="gradient" value={paymentMethod} color={getColor(paymentMethod) as any} />}
+                      </div>
+                    </td>
+                    {/* End Order Type */}
 
-                      {/* Order Type*/}
-                      <td className={classes}>
-                        <div className={`w-full flex flex-col  rounded-full gap-1`}>
-                          <Chip
-                            size="sm"
-                            className="w-min normal-case rounded-full"
-                            variant="ghost"
-                            value={$toTitleCase(orderType)}
-                            color={getColor(paymentMethod) as any}
-                          />
-                          {paymentMethod != "Unset" && (
-                            <Chip
-                              size="sm"
-                              className="w-min rounded-full "
-                              variant="gradient"
-                              value={paymentMethod}
-                              color={getColor(paymentMethod) as any}
-                            />
-                          )}
-                        </div>
-                      </td>
-                      {/* End Order Type */}
+                    {/* Quantity & Price */}
+                    <td className={classes}>
+                      <Typography variant="small" color="blue-gray" className="font-normal">
+                        X {cart.quantity}
+                      </Typography>
+                      <Typography variant="small" color="orange" className="font-normal">
+                        {$currency()} <b>{cart.total.toFixed(2)}</b>
+                      </Typography>
+                    </td>
+                    {/* End Quantity & Price */}
 
-                      {/* Quantity & Price */}
-                      <td className={classes}>
-                        <Typography variant="small" color="blue-gray" className="font-normal">
-                          X {cart.quantity}
-                        </Typography>
-                        <Typography variant="small" color="orange" className="font-normal">
-                          {$currency()} <b>{cart.total}</b>
-                        </Typography>
-                      </td>
-                      {/* End Quantity & Price */}
+                    <td className={classes}>
+                      <div className="w-min">
+                        <Chip size="sm" className=" rounded-full " variant="ghost" value={statusesMap[status.toLowerCase()]} color={getColor(status.toLowerCase()) as any} />
+                      </div>
+                    </td>
 
-                      <td className={classes}>
-                        <div className="w-min">
-                          <Chip
-                            size="sm"
-                            className=" rounded-full "
-                            variant="ghost"
-                            value={statusesMap[status.toLowerCase()]}
-                            color={getColor(status.toLowerCase()) as any}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                }
-              )}
+                    {/* Actions */}
+                    <td className="text-center">
+                      <PrintPopover orderId={id}></PrintPopover>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </CardBody>
         <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-          <Paginator
-            itemsPerPage={itemsPerPage}
-            dataSize={totalItems}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-          />
+          <Paginator itemsPerPage={itemsPerPage} dataSize={totalItems} currentPage={currentPage} setCurrentPage={setCurrentPage} />
         </CardFooter>
       </Card>
     </>
