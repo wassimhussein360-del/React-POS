@@ -30,11 +30,7 @@ const ActionsBtns = () => {
       [!$general.order.cart.cartItems.length, "Your cart is empty. Add items to proceed."],
       [$general.order.paymentMethod.id === "Unset", "Please select a payment method."],
       [!$cart.selections?.orderType, "Please choose an order type."],
-      [
-        $cart.selections?.orderType === "delivery" &&
-          (!$general.order.address?.deliveryZoneId || !$cart.address),
-        "Please select an address.",
-      ],
+      [$cart.selections?.orderType === "delivery" && (!$general.order.address?.deliveryZoneId || !$cart.address), "Please select an address."],
     ].some(([cond, msg]) => cond && (toast.error(msg), true));
 
   const makeOrder = () => {
@@ -75,32 +71,17 @@ const ActionsBtns = () => {
   return (
     <section className="flex gap-3 flex-col">
       <CartHolder open={openCartHolder} handleOpen={() => setOpenCartHolder(!openCartHolder)} />
-      <QRCodePayment
-        open={openQrCode}
-        handleOpen={() => setOpenQrCode(!openQrCode)}
-        createdOrder={paymentUrl}
-      />
-      <Button
-        className="normal-case justify-center rounded flex gap-1 bg-secondary "
-        onClick={() => ($cart.paymentUrl ? setOpenQrCode(true) : makeOrder())}
-      >
+      <QRCodePayment open={openQrCode} handleOpen={() => setOpenQrCode(!openQrCode)} createdOrder={paymentUrl} />
+      <Button className="normal-case justify-center rounded flex gap-1 bg-secondary " onClick={() => ($cart.paymentUrl ? setOpenQrCode(true) : makeOrder())}>
         {$cart.paymentUrl ? "Scan To Pay" : "Make Order"}
       </Button>
       <aside className="flex gap-3">
-        <Button
-          className="normal-case flex justify-center items-center rounded gap-1 w-1/2 bg-danger "
-          disabled={cartItems.length == 0}
-          onClick={() => dispatch(VoidCart())}
-        >
+        <Button className="normal-case flex justify-center items-center rounded gap-1 w-1/2 bg-danger " disabled={cartItems.length == 0} onClick={() => dispatch(VoidCart())}>
           <TrashIcon className="size-3" />
           Void
         </Button>
 
-        <Button
-          className="normal-case flex justify-center rounded items-center gap-1 w-1/2 bg-warning "
-          disabled={cartItems.length == 0}
-          onClick={() => setOpenCartHolder(true)}
-        >
+        <Button className="normal-case flex justify-center rounded items-center gap-1 w-1/2 bg-warning " disabled={cartItems.length == 0} onClick={() => setOpenCartHolder(true)}>
           <HoldIcon />
           Hold
         </Button>
@@ -117,6 +98,7 @@ export const getOrderPayload = (o: any, address?: any) => {
     id: o.id,
     orderRef: o.orderRef,
     source: "POS",
+    status: "preparing",
     customer: o.customer,
     vendorId: vendor.id,
     cartItems: o.cart.cartItems,
