@@ -98,7 +98,6 @@ export const getOrderPayload = (o: any, address?: any) => {
     id: o.id,
     orderRef: o.orderRef,
     source: "POS",
-    status: "preparing",
     customer: o.customer,
     vendorId: vendor.id,
     cartItems: o.cart.cartItems,
