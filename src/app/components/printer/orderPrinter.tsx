@@ -78,15 +78,29 @@ const PrintPopover: React.FC<Props> = ({ orderId }) => {
     $loader(true);
     FirestoreService.getSubDocument("vendors", vendor.id, "orders", orderId)
       .then((orderResponse) => {
+        console.log(orderResponse);
+
         setOrder(orderResponse as Order);
         _setTotals();
-      })
-      .finally(() => {
+
         if (order?.id) {
+          console.log(2);
+
           setShowPrintPopUp(false);
           $loader(false);
-          new PrintOrderComponent(order, isEn, isThermal);
         }
+      })
+      .finally(() => {
+        console.log(1);
+
+        setTimeout(() => {
+          if (order?.id) {
+            console.log(2);
+            setShowPrintPopUp(false);
+            new PrintOrderComponent(order, isEn, isThermal);
+          }
+          $loader(false);
+        }, 1_000);
       });
   }
 
