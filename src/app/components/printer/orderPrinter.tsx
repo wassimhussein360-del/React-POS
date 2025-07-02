@@ -82,25 +82,20 @@ const PrintPopover: React.FC<Props> = ({ orderId }) => {
 
         setOrder(orderResponse as Order);
         _setTotals();
-
-        if (order?.id) {
-          console.log(2);
-
-          setShowPrintPopUp(false);
-          $loader(false);
-        }
       })
       .finally(() => {
         console.log(1);
 
         setTimeout(() => {
+          console.log(2);
+
           if (order?.id) {
-            console.log(2);
+            console.log(3);
             setShowPrintPopUp(false);
             new PrintOrderComponent(order, isEn, isThermal);
           }
           $loader(false);
-        }, 1_000);
+        }, 2_000);
       });
   }
 
