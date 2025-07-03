@@ -25,13 +25,16 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, order
 
     setIsLoading(true);
 
-    const payload = {
+    const payload: any = {
       status: status,
       vendorId: $vendor.id,
       orderId: orders[index].id,
-      paid: status == "completed",
       userId: orders[index].customer.id,
     };
+
+    if (status == "completed") {
+      payload.paid = true;
+    }
 
     updateOrderStatus(payload)
       .then((res: any) => {
