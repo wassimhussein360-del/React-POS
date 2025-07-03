@@ -13,12 +13,7 @@ interface UpdateStatusProps {
   onStatusUpdated?: () => void;
 }
 
-const UpdateStatusForm: React.FC<UpdateStatusProps> = ({
-  open,
-  handleOpen,
-  orders,
-  onStatusUpdated,
-}) => {
+const UpdateStatusForm: React.FC<UpdateStatusProps> = ({ open, handleOpen, orders, onStatusUpdated }) => {
   const $vendor = useVendor() as Vendor;
 
   const [status, setStatus] = useState("");
@@ -34,7 +29,7 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({
       status: status,
       vendorId: $vendor.id,
       orderId: orders[index].id,
-      paid: paid,
+      paid: status == "completed",
       userId: orders[index].customer.id,
     };
 
@@ -43,10 +38,7 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({
         if (res.data.success) {
           toast.success(`Order with ref #${orders[index].orderRef} has been updated to ${status}`);
           if (onStatusUpdated) onStatusUpdated();
-        } else
-          toast.error(
-            `Failed updating order status with ref #${orders[index].orderRef} to ${status}`
-          );
+        } else toast.error(`Failed updating order status with ref #${orders[index].orderRef} to ${status}`);
       })
       .catch((err) => {
         console.error(err);
@@ -60,11 +52,7 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({
   const getBody = () => {
     return (
       <div>
-        <Typography
-          variant="h4"
-          color="blue-gray"
-          className="mb-1  text-center font-sourGummy text-secondary   rounded-full"
-        >
+        <Typography variant="h4" color="blue-gray" className="mb-1  text-center font-sourGummy text-secondary   rounded-full">
           Status Form
         </Typography>
 
@@ -75,9 +63,7 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({
             <Button
               key={index}
               size="lg"
-              className={`normal-case outline outline-transparent border w-[150px] ${
-                severityClasses[stu]
-              } ${stu === status ? `shadow-lg border-white outline-${severityClasses[stu]}` : ""}`}
+              className={`normal-case outline outline-transparent border w-[150px] ${severityClasses[stu]} ${stu === status ? `shadow-lg border-white outline-${severityClasses[stu]}` : ""}`}
               disabled={isLoading}
               onClick={() => setStatus(stu)}
             >
@@ -88,12 +74,7 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({
 
         <hr className="my-6" />
 
-        <Button
-          className="normal-case  bg-secondary w-full flex-center gap-3"
-          size="lg"
-          disabled={isLoading || !status}
-          onClick={() => handleSubmit(0)}
-        >
+        <Button className="normal-case  bg-secondary w-full flex-center gap-3" size="lg" disabled={isLoading || !status} onClick={() => handleSubmit(0)}>
           {isLoading ? (
             <>
               Updating Status ... <Spinner className="w-4" />
@@ -107,14 +88,8 @@ const UpdateStatusForm: React.FC<UpdateStatusProps> = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      handler={handleOpen}
-      className="flex justify-center  bg-transparent  !min-w-0 !w-[26rem] shadow-transparent  "
-    >
-      <article className=" bg-white shadow-xl shadow-gray-800 rounded-xl py-8 px-12">
-        {getBody()}
-      </article>
+    <Dialog open={open} handler={handleOpen} className="flex justify-center  bg-transparent  !min-w-0 !w-[26rem] shadow-transparent  ">
+      <article className=" bg-white shadow-xl shadow-gray-800 rounded-xl py-8 px-12">{getBody()}</article>
     </Dialog>
   );
 };
