@@ -17,6 +17,7 @@ import { ActivateCart, VoidCart } from "@/reduxStore/slices/cartSlice";
 import FirestoreService from "@/servies/firestoreService";
 import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 import { refactorOrder } from "../card/factoryMethod";
+import Link from "next/link";
 
 export default function Header() {
   const dispatch = useAppDispatch();
@@ -148,14 +149,9 @@ export default function Header() {
       <div className="border-b border-gray-300 flex  justify-between items-center py-3  px-2  ">
         <article className="flex items-end">
           {/* Logo  */}
-          <img
-            src={vendor?.logo}
-            className="lg:w-10 w-8 rounded-xl me-2 cursor-pointer"
-            alt="Small Logo"
-            onClick={() => {
-              window.location.href = "/";
-            }}
-          />
+          <Link href={"/"}>
+            <img src={vendor?.logo} className="lg:w-10 w-8 rounded-xl me-2 cursor-pointer" alt="Small Logo" />
+          </Link>
 
           {/* End Logo */}
         </article>
