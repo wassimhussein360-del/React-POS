@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npm run build & firebase deploy --only functions hosting:menasa-pos"
+    "deploy": "npm run build & firebase deploy --only hosting:menasa-pos"
   },
   "dependencies": {
     "@apollo/client": "^3.12.7",

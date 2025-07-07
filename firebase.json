@@ -9,7 +9,6 @@
   ],
   "hosting": {
     "site": "menasa-pos",
-    "public": "out",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
