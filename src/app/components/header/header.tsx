@@ -5,14 +5,7 @@ import { Badge, Menu, MenuHandler, MenuItem, MenuList } from "@material-tailwind
 import { Select, Option } from "@material-tailwind/react";
 
 import "./header.css";
-import {
-  useAppDispatch,
-  useCart,
-  useGeneral,
-  useUser,
-  useVendor,
-  useVendors,
-} from "@/reduxStore/hooks";
+import { useAppDispatch, useCart, useGeneral, useUser, useVendor, useVendors } from "@/reduxStore/hooks";
 import { use, useEffect, useState } from "react";
 import { $getFromLocal, $toTitleCase, $translate, $writeOnLocal } from "@/app/helpers/helpers";
 import React from "react";
@@ -49,10 +42,7 @@ export default function Header() {
         whereConditions: [{ field: "active", operator: "==", value: true }],
       }).then((_outlets) => {
         const storedOutlet = $getFromLocal("branch");
-        const selectedOutlet =
-          storedOutlet && _outlets.some((ou) => ou.id === storedOutlet.id)
-            ? storedOutlet
-            : _outlets[0];
+        const selectedOutlet = storedOutlet && _outlets.some((ou) => ou.id === storedOutlet.id) ? storedOutlet : _outlets[0];
 
         dispatch(
           SetGeneralField({
@@ -124,12 +114,7 @@ export default function Header() {
   const getSelectVendorMenu = (className: string) => {
     return (
       <section className={className}>
-        <Select
-          label="Select Store"
-          className="flex"
-          value={$vendor?.id || ""}
-          onChange={(value: any) => onStoreSelect(value)}
-        >
+        <Select label="Select Store" className="flex" value={$vendor?.id || ""} onChange={(value: any) => onStoreSelect(value)}>
           {vendors.map((vendor: Vendor, vendorIndex) => (
             <Option key={vendorIndex} value={vendor.id} className="flex gap-2">
               <img src={vendor.logo} className=" w-5 h-5" alt="Small Logo" />
@@ -144,13 +129,7 @@ export default function Header() {
   const getSelectOutletMenu = (className: string) => {
     return (
       <section className={className}>
-        <Select
-          label="Select Branch"
-          className="flex"
-          value={$general.branch?.id || ""}
-          selected={() => $general.branch?.name?.en}
-          onChange={(value: any) => onOutletSelect(value)}
-        >
+        <Select label="Select Branch" className="flex" value={$general.branch?.id || ""} selected={() => $general.branch?.name?.en} onChange={(value: any) => onOutletSelect(value)}>
           {outlets.map((outlet: any, index) => (
             <Option key={index} value={outlet.id} className="flex gap-2">
               <img src={outlet.image} className=" w-5 h-5" alt="Small Logo" />
@@ -174,7 +153,7 @@ export default function Header() {
             className="lg:w-10 w-8 rounded-xl me-2 cursor-pointer"
             alt="Small Logo"
             onClick={() => {
-              navigator.push("/");
+              window.location.href = "/";
             }}
           />
 
@@ -199,12 +178,8 @@ export default function Header() {
                 <nav className="flex">
                   <img src={user.image} className="object-cover  w-8 h-8 rounded me-1"></img>
                   <nav>
-                    <h5 className="text-xs font-semibold text-gray-800 text-nowrap">
-                      {$toTitleCase(user?.name)}
-                    </h5>
-                    <h4 className="text-xs text-primary shadow  w-min rounded font-sourGummy font-semibold px-1 ">
-                      {$toTitleCase(user?.isAdmin ? "Admin" : user.role)}
-                    </h4>
+                    <h5 className="text-xs font-semibold text-gray-800 text-nowrap">{$toTitleCase(user?.name)}</h5>
+                    <h4 className="text-xs text-primary shadow  w-min rounded font-sourGummy font-semibold px-1 ">{$toTitleCase(user?.isAdmin ? "Admin" : user.role)}</h4>
                   </nav>
                 </nav>
                 <span className="px-2">
@@ -213,10 +188,7 @@ export default function Header() {
               </section>
             </MenuHandler>
             <MenuList className="p-1">
-              <MenuItem
-                onClick={() => signOut()}
-                className="flex items-center gap-2  text-danger hover:text-danger hover:bg-danger-light text-xs"
-              >
+              <MenuItem onClick={() => signOut()} className="flex items-center gap-2  text-danger hover:text-danger hover:bg-danger-light text-xs">
                 <OutIcon className="w-4 h-4" />
                 Sign Out
               </MenuItem>
@@ -228,19 +200,13 @@ export default function Header() {
               <button className="lg:hidden p-0">
                 {" "}
                 {/* Add button element here */}
-                <img
-                  src={user.image}
-                  className="object-cover rounded-full aspect-square min-w-6 min-h-6 max-w-6 max-h-6 cursor-pointer"
-                />
+                <img src={user.image} className="object-cover rounded-full aspect-square min-w-6 min-h-6 max-w-6 max-h-6 cursor-pointer" />
               </button>
             </MenuHandler>
             <MenuList className="p-1 z-[9999] ">
               {" "}
               {/* Ensure proper z-index */}
-              <MenuItem
-                onClick={() => signOut()}
-                className="flex items-center gap-2 text-danger hover:bg-danger-light text-xs"
-              >
+              <MenuItem onClick={() => signOut()} className="flex items-center gap-2 text-danger hover:bg-danger-light text-xs">
                 <OutIcon className="w-4 h-4" />
                 Sign Out
               </MenuItem>
@@ -260,10 +226,7 @@ export default function Header() {
               dispatch(SetGeneralField({ field: "cartDrawer", value: !$general.cartDrawer }));
             }}
           >
-            <Badge
-              content={$cart.items.length}
-              className="max-w-[20px] min-w-[20px] max-h-[20px] min-h-[20px]"
-            >
+            <Badge content={$cart.items.length} className="max-w-[20px] min-w-[20px] max-h-[20px] min-h-[20px]">
               <Bag />
             </Badge>
           </section>

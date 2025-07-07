@@ -9,16 +9,19 @@ const SubHeader = () => {
   const navigator = useRouter();
   const $user = useUser();
 
+  function toOrders() {
+    window.location.href = "/orders";
+  }
   return (
     <article className="flex justify-between px-3 my-5 flex-wrap gap-2">
       <section className="flex gap-2 ">
         {($user?.isAdmin || $user?.permissions?.Orders.view) && (
-          <Link href={"/orders"}>
+          <span onClick={() => toOrders()}>
             <Button className="normal-case flex gap-1 bg-secondary">
               <OrdersCards />
               View Orders
             </Button>
-          </Link>
+          </span>
         )}
       </section>
       <section>
