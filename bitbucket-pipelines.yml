@@ -1,0 +1,38 @@
+image: google/cloud-sdk:latest
+
+pipelines:
+  branches:
+    master:
+      - step:
+          name: Deploy to Staging with Production Artifact Build
+          size: 2x
+          services:
+            - docker
+          script:
+            # Decode the Base64 encoded service account key
+            - echo $GOOGLE_APPLICATION_CREDENTIALS | base64 -d > key.json
+
+            # Authenticate with Google Cloud
+            - gcloud auth activate-service-account --key-file=key.json
+            - gcloud config set project menasa-saas
+            - gcloud auth configure-docker me-central1-docker.pkg.dev
+
+            # Disable BuildKit
+            - export DOCKER_BUILDKIT=0
+
+            # Build the Docker image
+            - docker build -t me-central1-docker.pkg.dev/menasa-saas/pos-artifact/posapp:latest .
+
+            # Push the Docker image
+            - docker push me-central1-docker.pkg.dev/menasa-saas/pos-artifact/posapp:latest
+
+            # Deploy to Cloud Run for Production environment
+            - gcloud run deploy pos --image=me-central1-docker.pkg.dev/menasa-saas/pos-artifact/posapp:latest --port=3000 --no-traffic --region=me-central1 --allow-unauthenticated
+
+            # Deploy to Cloud Run for Staging
+            - gcloud run deploy posstaging --image=me-me-central1-docker.pkg.dev/menasa-saas/pos-artifact/posapp:latest --port=3000 --region=me-central1 --allow-unauthenticated
+
+definitions:
+  services:
+    docker:
+      memory: 3072
