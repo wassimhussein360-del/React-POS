@@ -9,6 +9,7 @@
     "lint": "next lint",
     "deploy": "npm run build & firebase deploy --only hosting:menasa-pos",
     "start_prod": "npx serve@latest out -p 3000"
+
   },
   "dependencies": {
     "@apollo/client": "^3.12.7",
