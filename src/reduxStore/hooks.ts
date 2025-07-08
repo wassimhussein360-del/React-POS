@@ -8,3 +8,10 @@ export const useAppStore = useStore.withTypes<AppStore>();
 
 export const useCartItems = () => useAppSelector((state) => state.cart.items);
 export const useCart = () => useAppSelector((state) => state.cart);
+export const useUser = () => useAppSelector((state) => state.user.user);
+export const useVendors = () => useAppSelector((state) => state.user.vendors);
+export const useVendor = () => useAppSelector((state) => state.user.vendor);
+export const useLoader = () => useAppSelector((state) => state.user.isLoading);
+export const useCustomer = () => useAppSelector((state) => state.cart.customer);
+export const useAddress = () => useAppSelector((state) => state.cart.address);
+export const useGeneral = () => useAppSelector((state) => state.general);

@@ -1,20 +1,38 @@
-import { CancelIcon, Plus } from "@/assets/icons";
-import { Select, Option, Button, Textarea } from "@material-tailwind/react";
-import SingleItem from "./SingleItem";
+import { Button, Textarea, ButtonGroup } from "@material-tailwind/react";
 import PricingDetails from "./pricing";
 import CardTotals from "./cardTotals";
 import ActionsBtns from "./actionsBtns";
 import PaymentMethods from "./paymentMethods";
 import CartItems from "./cartItems";
-import { useState } from "react";
-import { useAppDispatch } from "@/reduxStore/hooks";
+import { useAppDispatch, useCart, useGeneral, useVendor } from "@/reduxStore/hooks";
 import { SetCartField } from "@/reduxStore/slices/cartSlice";
+import React, { useEffect } from "react";
+import CustomerAndProductSelection from "./customerSelection";
+import { Vendor } from "@/app/abstraction/types";
+import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 
-interface CartItemsProps {
-  subtotal: number;
-}
 const CartInfo = ({ className }: { className: string }) => {
   const dispatch = useAppDispatch();
+  const cart = useCart();
+  const $general = useGeneral();
+
+  useEffect(() => {
+    if (cart.selections?.orderType != "pickup") return;
+
+    dispatch(
+      SetCartField({
+        fieldName: "address",
+        value: undefined,
+      })
+    );
+
+    dispatch(
+      SetGeneralField({
+        field: "zone",
+        value: {},
+      })
+    );
+  }, [cart.selections?.orderType]);
 
   return (
     <section
@@ -22,37 +40,43 @@ const CartInfo = ({ className }: { className: string }) => {
     >
       {/* category info */}
       <section>
-        <h6 className="text-sm">Categories</h6>
-        <p className="text-gray-700 text-xs">Transaction ID: #569985</p>
+        <aside className="flex justify-between ">
+          <h6 className="text-sm">Cart</h6>
+          <ButtonGroup size="sm">
+            {["Delivery", "Pickup"].map((orderType) => {
+              const isSelected = cart.selections?.orderType == orderType.toLowerCase();
+              if ($general.cartCreated && !isSelected) return null;
+              return (
+                <Button
+                  key={orderType}
+                  className={`p-0 px-2 normal-case  border-none shadow ${
+                    isSelected ? "bg-primary" : "bg-transparent text-primary"
+                  }`}
+                  onClick={() => {
+                    dispatch(
+                      SetCartField({
+                        fieldName: "selections",
+                        value: {
+                          ...cart.selections,
+                          orderType: orderType.toLowerCase(),
+                        },
+                      })
+                    );
+                  }}
+                >
+                  {orderType}
+                </Button>
+              );
+            })}
+          </ButtonGroup>
+        </aside>
       </section>
       {/* end category info */}
 
       <br />
 
       {/* customer info */}
-      <section>
-        <h6 className="text-sm">Customers Information</h6>
-        <div className="my-3 flex ">
-          <Select
-            label="Walk in Customer"
-            size="md"
-            className="rounded-xl"
-            placeholder="Select Store"
-          >
-            <Option>Option 1</Option>
-          </Select>
-          <Button
-            className="ms-2 bg-primary flex items-center justify-center rounded-full p-0 aspect-square min-w-10 min-h-10 "
-            size="sm"
-            placeholder={undefined}
-          >
-            <Plus />
-          </Button>
-        </div>
-        <Select label="Search Products" size="md" className="rounded-xl" placeholder="Select Store">
-          <Option>Option 1</Option>
-        </Select>
-      </section>
+      <CustomerAndProductSelection />
       {/* end customer info */}
 
       <br />
@@ -62,11 +86,23 @@ const CartInfo = ({ className }: { className: string }) => {
       <section className="flex flex-col gap-2 my-3">
         <CartItems />
 
-        <Textarea
-          label="Message"
-          onChange={(e) => dispatch(SetCartField({ fieldName: "message", value: e.target.value }))}
-          className="rounded-xl  max-h-[100px] bg-[#F6F6F6]"
-        />
+        {/* <Textarea
+          label="Special Instructions"
+          value={cart.selections?.specialInstructions}
+          disabled={$general.cartCreated}
+          onChange={(e) =>
+            dispatch(
+              SetCartField({
+                fieldName: "selections",
+                value: {
+                  ...cart.selections,
+                  specialInstructions: e.target.value,
+                },
+              })
+            )
+          }
+          className=" max-h-[70px]  bg-[#F6F6F6] min-h-0 "
+        /> */}
         <hr />
       </section>
       {/* end Products added  */}

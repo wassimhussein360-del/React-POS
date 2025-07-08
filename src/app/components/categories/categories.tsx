@@ -1,12 +1,68 @@
 import { Chevron } from "@/assets/icons";
 import SingleCategoryCard from "./singleCategoryCard";
 import allCategoriesIcon from "@/assets/images/categories.png";
+import { useEffect, useState } from "react";
+import { Category, Item } from "@/app/abstraction/types";
+import FirestoreService from "@/servies/firestoreService";
+import CategorySkeleton from "./categorySkeletone";
+import { useCart, useGeneral, useVendor } from "@/reduxStore/hooks";
+import { formatProducts } from "../products/products";
+import { Spinner } from "@material-tailwind/react";
+import { useDispatch } from "react-redux";
+import { SetCartField } from "@/reduxStore/slices/cartSlice";
+import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
+import { $translate } from "@/app/helpers/helpers";
 
-const Categories: React.FC<any> = ({}) => {
-  const totalCategories = () => {
-    const quantities = categories.map((cat) => cat.quantity);
-    return quantities.reduce((sum, quantity) => sum + quantity);
+const Categories: React.FC<{
+  products: Item[];
+  setProducts: Function;
+  setAllProducts: Function;
+}> = ({ products, setProducts, setAllProducts }) => {
+  const dispatch = useDispatch();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  const vendor = useVendor();
+  const $cart = useCart();
+  const $general = useGeneral();
+
+  useEffect(() => {
+    if (products.length && vendor) {
+      FirestoreService.getSubcollection("vendors", vendor.id, "categories").then(
+        (fetchedCategories) => {
+          const formattedCategories: Category[] = formatCategories(fetchedCategories, products);
+
+          setCategories(formattedCategories);
+        }
+      );
+    }
+  }, [products]);
+
+  useEffect(() => {
+    if (vendor?.id && $general.branch?.id) {
+      setCategories([]);
+      setSelectedCategory("all");
+      // Fetch Products related to selected vendor
+
+      FirestoreService.getSubcollection("vendors", vendor.id, "products").then(
+        (fetchedProducts) => {
+          const formattedProducts = formatProducts(fetchedProducts, $general.branch.id);
+
+          setAllProducts(formattedProducts);
+          setProducts(formattedProducts);
+
+          dispatch(SetGeneralField({ field: "products", value: formattedProducts }));
+        }
+      );
+    }
+  }, [vendor, $general.branch]);
+
+  const handleCategoryClick = (category: Category) => {
+    setSelectedCategory(category.id);
+
+    setProducts(category.products);
   };
+
   return (
     <article className="">
       <section className="flex justify-between items-center mb-4">
@@ -14,23 +70,53 @@ const Categories: React.FC<any> = ({}) => {
           <h4 className="font-semibold">Categories</h4>
           <p className="text-sm text-gray-500">Select From Below Categories</p>
         </aside>
-        <aside className="flex gap-4">
+        {/* <aside className="flex gap-4">
           <Chevron className="  rotate-90 w-4 h-4 cursor-pointer" />
           <Chevron className=" -rotate-90 w-4 h-4 cursor-pointer" />
-        </aside>
+        </aside> */}
       </section>
 
-      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6    gap-5 ">
-        <SingleCategoryCard
-          category={{
-            name: "All Categories",
-            quantity: totalCategories(),
-            image: "",
-          }}
-        />
-        {categories.map((cat, i) => {
-          return <SingleCategoryCard key={i} category={cat} className={""} />;
-        })}
+      <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6   gap-5 ">
+        {categories.length ? (
+          <>
+            <SingleCategoryCard
+              className={
+                selectedCategory === "all"
+                  ? "border-secondary shadow-xl border-2"
+                  : "cursor-pointer"
+              }
+              category={{
+                name: "All Categories",
+                quantity: products.length,
+                image: "",
+              }}
+              onClick={() => {
+                setSelectedCategory("all");
+                setProducts(products);
+              }}
+            />
+            {categories.map((cat, i) => {
+              return (
+                <SingleCategoryCard
+                  key={i}
+                  category={cat}
+                  className={
+                    selectedCategory === cat.id
+                      ? "border-secondary shadow-xl border-2"
+                      : "cursor-pointer"
+                  }
+                  onClick={() => handleCategoryClick(cat)}
+                />
+              );
+            })}
+          </>
+        ) : (
+          <>
+            {new Array(10).fill(0).map((cat, i) => {
+              return <CategorySkeleton key={i} />;
+            })}
+          </>
+        )}
       </section>
     </article>
   );
@@ -38,28 +124,25 @@ const Categories: React.FC<any> = ({}) => {
 
 export default Categories;
 
-const categories = [
-  {
-    name: "Boukhour",
-    image:
-      "https://daralsmow.com/wp-content/uploads/2023/03/%D8%A8%D8%AE%D9%88%D8%B1-%D8%A7%D9%84%D9%88%D8%B1%D8%AF-%D8%A7%D9%84%D8%B7%D8%A7%D8%A6%D9%81%D9%8A-%D9%85%D8%B9-%D9%85%D9%83%D9%88%D9%86%D8%A7%D8%AA.jpg",
-    quantity: 120,
-  },
-  {
-    name: "Perfumes",
-    image:
-      "https://static.vecteezy.com/system/resources/previews/035/940/256/non_2x/ai-generated-perfume-glass-isolated-on-transparent-background-free-png.png",
-    quantity: 200,
-  },
-  {
-    name: "Mubkhars",
-    image:
-      "https://daralteeb.com.kw/wp-content/uploads/2020/03/Hair-Brazier-Black-e1584383449412.jpg",
-    quantity: 150,
-  },
-  {
-    name: "Oud",
-    image: "https://www.cotebougie.com/blog/wp-content/uploads/2022/03/diffuseur-oud-1.jpg",
-    quantity: 80,
-  },
-];
+function formatCategories(categories: any[], allProducts: Item[]): Category[] {
+  return categories
+    .filter((cat) => cat.active)
+    .filter((cat) => {
+      const relatedProducts = allProducts.filter((pr) => {
+        return pr.categoriesIds.includes(cat.id);
+      });
+
+      return relatedProducts.length > 0;
+    })
+    .map((cat) => {
+      const relatedProducts = allProducts.filter((pr) => pr.categoriesIds.includes(cat.id));
+
+      return {
+        id: cat.id,
+        name: $translate(cat.name),
+        image: cat.images?.length ? cat.images[0].url : "",
+        quantity: relatedProducts.length,
+        products: relatedProducts,
+      };
+    });
+}

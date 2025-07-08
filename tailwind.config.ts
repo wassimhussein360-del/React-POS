@@ -12,6 +12,12 @@ module.exports = withMT({
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "monospace"],
+        outfit: ["var(--font-outfit)", "sans-serif"],
+        sourGummy: ["var(--font-sour-gummy)", "sans-serif"],
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

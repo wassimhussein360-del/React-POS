@@ -2,7 +2,6 @@
 import { useRef } from "react";
 import { Provider } from "react-redux";
 import { makeStore, AppStore } from "./store";
-import { AddItem } from "./slices/cartSlice";
 
 export default function StoreProvider({ children }: { children: React.ReactNode }) {
   const storeRef = useRef<AppStore | null>(null);
@@ -11,7 +10,7 @@ export default function StoreProvider({ children }: { children: React.ReactNode 
     storeRef.current = makeStore();
 
     //TODO Dispatch an action to the cart slice
-    // items.forEach((item) => storeRef.current!.dispatch(AddItem(item)));
+    //  storeRef.current!.dispatch(AddItem(item))
   }
 
   return <Provider store={storeRef.current}>{children}</Provider>;

@@ -1,37 +1,32 @@
 import { Chevron } from "@/assets/icons";
-import React, { useEffect } from "react";
+import React from "react";
 import SingleProduct from "./singleProduct";
-import { Item, Modifier } from "@/app/abstraction/types";
-import FirestoreService from "@/servies/firestoreService";
+import { Item } from "@/app/abstraction/types";
 import ProductSkeleton from "./productSkeletone";
 
-interface ProductProps {}
+import "./products.css";
 
-const Products: React.FC<ProductProps> = ({}) => {
-  const [products, setProducts] = React.useState<Item[]>([]);
-  useEffect(() => {
-    FirestoreService.getSubcollection("vendors", "UVCVz6a9GWLzuRGnGVfx", "products").then(
-      (fetchedProducts) => {
-        setProducts(formatProducts(fetchedProducts));
-      }
-    );
-  }, []);
+interface ProductProps {
+  products: Item[];
+}
+
+const Products: React.FC<ProductProps> = ({ products }) => {
   return (
     <article>
       <section className="flex justify-between items-center mb-4">
         <h4 className="font-semibold ">Products</h4>
-        <aside className="flex gap-4 ">
+        {/* <aside className="flex gap-4 ">
           <Chevron className="  rotate-90 w-4 h-4 cursor-pointer" />
           <Chevron className=" -rotate-90 w-4 h-4 cursor-pointer" />
-        </aside>
+        </aside> */}
       </section>
-      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6  gap-5">
+      <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6  gap-5 max-h-[420px]  custom-grid">
         {products.length
           ? products.map((pr, i) => {
               return <SingleProduct key={i} product={pr} />;
             })
-          : new Array(10).fill(0).map(() => {
-              return <ProductSkeleton />;
+          : new Array(10).fill(0).map((num, index: number) => {
+              return <ProductSkeleton key={index} />;
             })}
       </section>
     </article>
@@ -40,52 +35,35 @@ const Products: React.FC<ProductProps> = ({}) => {
 
 export default Products;
 
-const formatProducts = (products: any[]): Item[] => {
+export const formatProducts = (products: any[], outletId: string): Item[] => {
   const formattedProducts = products
-    .filter((product) => product.stockQuantity > 0)
+    .filter(
+      (product) =>
+        (product.isStockManagement ? product.stockQuantity > 0 : true) &&
+        product.branchesIds.includes(outletId)
+    )
     .map((product) => {
-      return {
-        id: product.id,
-        name: product.name.en,
-        price: product.price,
-        quantity: 1,
-        barcode: product.id,
-        stock: product.stockQuantity,
-        modifiers:
-          product.assignedModifiers
-            .filter((assignedMd: any) => assignedMd.active && assignedMd.list.length > 0)
-            .map((md: any) => {
-              if (!md.active) return;
+      // Deep clone the product
+      const clonedProduct = JSON.parse(JSON.stringify(product));
 
-              const modifier: Modifier = {
-                type: md.type,
-                required: md.required,
-                multiple: md.multiple,
-                name: md.name?.en || md.nameEn,
-
-                options: md.list
-                  .filter((filterOption: any) => filterOption.active)
-                  .map((opt: any) => {
-                    if (!opt.active) return;
-
-                    return {
-                      name: opt.name?.en || opt.nameEn,
-                      price: parseFloat(opt.price || "0"),
-                      value: opt.color || undefined,
-                    };
-                  }),
+      // Process modifiers separately and assign back
+      const updatedModifiers = clonedProduct.assignedModifiers
+        .filter((assignedMd: any) => assignedMd.active && assignedMd.list.length > 0)
+        .map((md: any) => ({
+          ...md,
+          list: md.list
+            .filter((filterOption: any) => filterOption.active)
+            .map((opt: any) => {
+              return {
+                ...opt,
+                price: parseFloat(opt.price), // Ensure new price is assigned
               };
+            }),
+        }));
 
-              if (modifier.multiple) {
-                modifier.min = parseInt(md.minSelection);
-                modifier.max = parseInt(md.maxSelection);
-              }
-
-              return modifier;
-            }) || [],
-
-        category: product.categories.map((cat: any) => cat.name.en).join(", "),
-        image: product.images[0].url,
+      return {
+        ...clonedProduct,
+        assignedModifiers: updatedModifiers, // Assign updated modifiers back
       };
     });
 

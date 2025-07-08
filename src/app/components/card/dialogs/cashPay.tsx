@@ -42,17 +42,12 @@ const CashPayDialog: React.FC<CashPayProps> = ({ open, handleOpen, totalBill }) 
   const getBody = () => {
     return (
       <div className="mx-auto  w-full max-w-xs">
-        <Typography className="mb-4 font-normal text-blue-gray-500" placeholder={undefined}>
+        <Typography className="mb-4 font-normal text-blue-gray-500">
           Enter the amount the customer paid to calculate the refund amount.
         </Typography>
         <div className="flex flex-col items-center justify-between">
           <div className="mt-4 w-full max-w-sm">
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className="mb-1 font-medium"
-              placeholder={undefined}
-            >
+            <Typography variant="small" color="blue-gray" className="mb-1 font-medium">
               Customer Paid
             </Typography>
             <div className="relative flex w-full max-w-sm">
@@ -68,7 +63,6 @@ const CashPayDialog: React.FC<CashPayProps> = ({ open, handleOpen, totalBill }) 
                 }}
                 value={paidAmount}
                 onChange={(e) => setPaidAmount(e.target.value)}
-                crossOrigin={undefined}
               />
               <Menu placement="bottom-start">
                 <MenuHandler>
@@ -77,20 +71,18 @@ const CashPayDialog: React.FC<CashPayProps> = ({ open, handleOpen, totalBill }) 
                     variant="text"
                     color="blue-gray"
                     className="h-10 w-14 shrink-0 rounded-l-none border border-l-0 border-blue-gray-200 bg-transparent px-3"
-                    placeholder={undefined}
                     disabled={true}
                   >
                     {paidCurrency}
                   </Button>
                 </MenuHandler>
-                <MenuList className="max-h-[20rem] max-w-[18rem] z-[99999]" placeholder={undefined}>
+                <MenuList className="max-h-[20rem] max-w-[18rem] z-[99999]">
                   {currencies.map((currency, index) => {
                     return (
                       <MenuItem
                         key={currency}
                         value={currency}
                         onClick={() => handleCurrencyChange("paid", currency)}
-                        placeholder={undefined}
                       >
                         {currency}
                       </MenuItem>
@@ -105,12 +97,7 @@ const CashPayDialog: React.FC<CashPayProps> = ({ open, handleOpen, totalBill }) 
           <br />
 
           <div className="w-full max-w-sm">
-            <Typography
-              variant="small"
-              color="blue-gray"
-              className="mb-1 font-medium"
-              placeholder={undefined}
-            >
+            <Typography variant="small" color="blue-gray" className="mb-1 font-medium">
               Refunded Amount
             </Typography>
             <div className=" flex w-full">
@@ -128,7 +115,6 @@ const CashPayDialog: React.FC<CashPayProps> = ({ open, handleOpen, totalBill }) 
                   className: "min-w-0",
                 }}
                 value={refundAmount || ""}
-                crossOrigin={undefined}
                 disabled={true}
               />
               <Menu placement="bottom-start">
@@ -138,23 +124,18 @@ const CashPayDialog: React.FC<CashPayProps> = ({ open, handleOpen, totalBill }) 
                     variant="text"
                     color="blue-gray"
                     className="h-10 w-14 shrink-0 rounded-l-none border border-l-0 border-blue-gray-200 bg-transparent px-3"
-                    placeholder={undefined}
                     disabled={true}
                   >
                     {paidCurrency}
                   </Button>
                 </MenuHandler>
-                <MenuList
-                  className="max-h-[20rem] max-w-[12rem]  z-[99999]"
-                  placeholder={undefined}
-                >
+                <MenuList className="max-h-[20rem] max-w-[12rem]  z-[99999]">
                   {currencies.map((currency, index) => {
                     return (
                       <MenuItem
                         key={currency}
                         value={refundCurrency}
                         onClick={() => handleCurrencyChange("refund", currency)}
-                        placeholder={undefined}
                       >
                         {currency}
                       </MenuItem>
@@ -174,7 +155,6 @@ const CashPayDialog: React.FC<CashPayProps> = ({ open, handleOpen, totalBill }) 
       open={open}
       handler={handleOpen}
       className="flex justify-center  bg-transparent shadow-transparent"
-      placeholder={undefined}
     >
       <article className="flex flex-col justify-center text-center gap-2 bg-white shadow-xl shadow-gray-800 rounded-xl py-12 px-20">
         {getBody()}

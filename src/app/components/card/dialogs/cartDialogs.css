@@ -1,1 +1,13 @@
+.address-closed {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease-out, opacity 0.2s ease-in;
+}
 
+.address-opened {
+  max-height: 500px; /* Adjust this value based on your content's maximum height */
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in, opacity 0.3s ease-out;
+}
