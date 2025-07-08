@@ -33,8 +33,7 @@ const PaymentMethods = ({ totalBill }: any) => {
     );
   };
   const getIcon = (payment: string, addClass?: string) => {
-    const className =
-      "font-semibold text-xs bg-primary text-secondary p-1 rounded-lg border border-secondary ";
+    const className = "font-semibold text-xs bg-primary text-secondary p-1 rounded-lg border border-secondary ";
     return payment == "Credit Card" ? (
       <p className={`${className}`}>Credit</p>
     ) : payment == "Apple Pay" ? (
@@ -48,12 +47,7 @@ const PaymentMethods = ({ totalBill }: any) => {
 
   function Icon() {
     return (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="h-full w-full scale-105"
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-full w-full scale-105">
         <path
           fillRule="evenodd"
           d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
@@ -74,11 +68,7 @@ const PaymentMethods = ({ totalBill }: any) => {
             <div
               key={index}
               className={`rounded border border-gray-400 flex items-center justify-center flex-col h-20 w-20 
-              ${
-                $cart.selections?.paymentMethod == paymentsMap[key].cartValue
-                  ? "bg-secondary text-primary"
-                  : "cursor-pointer font-thin"
-              }`}
+              ${$cart.selections?.paymentMethod == paymentsMap[key].cartValue ? "bg-secondary text-primary" : "cursor-pointer font-thin"}`}
               onClick={() => setPaymentMethod(paymentsMap[key].cartValue)}
             >
               <h6 className="font-sourGummy ">{paymentsMap[key].name}</h6>
@@ -89,11 +79,7 @@ const PaymentMethods = ({ totalBill }: any) => {
               <MenuHandler>
                 <div
                   className={`rounded border border-gray-400 flex items-center justify-center flex-col h-20 w-20 cursor-pointer 
-            ${
-              value.methods.some((m: any) => m.id == $cart.selections?.paymentMethod)
-                ? "bg-secondary text-primary"
-                : " font-thin"
-            }`}
+            ${value.methods.some((m: any) => m.id == $cart.selections?.paymentMethod) ? "bg-secondary text-primary" : " font-thin"}`}
                 >
                   <h6 className="font-sourGummy ">{paymentsMap[key].name}</h6>
                   {getIcon($cart.selections?.paymentMethod || "", " fill-primary")}

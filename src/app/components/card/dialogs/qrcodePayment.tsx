@@ -1,4 +1,4 @@
-import { $getFromLocal } from "@/app/helpers/helpers";
+import { $copyToClipboard, $getFromLocal } from "@/app/helpers/helpers";
 import { useAppDispatch } from "@/reduxStore/hooks";
 import { VoidCart } from "@/reduxStore/slices/cartSlice";
 import FirestoreService from "@/servies/firestoreService";
@@ -18,17 +18,11 @@ const QRCodePayment: React.FC<QRCodePaymentProps> = ({ open, handleOpen, created
   useEffect(() => {
     if (!createdOrder?.id) return;
 
-    FirestoreService.getObserveSubDocument(
-      "vendors",
-      $getFromLocal("vendor").id,
-      "orders",
-      createdOrder.id
-    ).subscribe({
+    FirestoreService.getObserveSubDocument("vendors", $getFromLocal("vendor").id, "orders", createdOrder.id).subscribe({
       next: (order) => {
         if (!order?.id) return;
         if (order.onlinePayment.status != "awaiting_payment") {
-          if (order.onlinePayment.status == "payment_failed")
-            toast.error("Payment failed, please try again.", { duration: 5000 });
+          if (order.onlinePayment.status == "payment_failed") toast.error("Payment failed, please try again.", { duration: 5000 });
           else {
             toast.success("Payment Success.", { duration: 5000 });
             handleOpen();
@@ -43,21 +37,14 @@ const QRCodePayment: React.FC<QRCodePaymentProps> = ({ open, handleOpen, created
     });
   }, [createdOrder]);
   return (
-    <Dialog
-      open={open}
-      handler={handleOpen}
-      className="flex justify-center  bg-transparent shadow-transparent"
-    >
+    <Dialog open={open} handler={handleOpen} className="flex justify-center  bg-transparent shadow-transparent">
       <article className="flex flex-col justify-center text-center gap-2 bg-white shadow-xl shadow-gray-800 rounded-xl  ">
         <h1 className="font-semibold text-2xl text-gray-900 bg-primary w-full py-4 px-24 rounded-t-xl">
           Scan To Pay
+          {createdOrder?.paymentUrl && <i className="bi bi-copy ps-2 cursor-pointer" onClick={() => $copyToClipboard(createdOrder?.paymentUrl)}></i>}
         </h1>
         <div className="flex justify-center py-7">
-          <QRCode
-            value={createdOrder?.paymentUrl || ""}
-            level="M"
-            className="w-[150px] h-[150px] md:w-[200px] md:h-[200px]"
-          />
+          <QRCode value={createdOrder?.paymentUrl || ""} level="M" className="w-[150px] h-[150px] md:w-[200px] md:h-[200px]" />
         </div>
       </article>
     </Dialog>

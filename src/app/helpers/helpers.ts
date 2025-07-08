@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { text } from "stream/consumers";
 
 export function $calculateDiscountAmount(discount: number, originalPrice: number): number {
@@ -10,6 +11,12 @@ export function $calculateDiscountAmount(discount: number, originalPrice: number
 export function $getPriceAfterDiscount(discount: number, originalPrice: number): number {
   const discountAmount = $calculateDiscountAmount(discount, originalPrice);
   return parseFloat((originalPrice - discountAmount).toFixed(2));
+}
+
+export function $copyToClipboard(toClipboard: string) {
+  navigator.clipboard.writeText(toClipboard).then(() => {
+    toast.success(`copied 👍`);
+  });
 }
 
 export function $getSingularOrPlural(text: string, quantity: number): string {
@@ -160,20 +167,7 @@ export function $deepEqual(obj1: any, obj2: any): boolean {
 export function $formatDate(date: Date, format: string): string {
   date = new Date(date);
 
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
