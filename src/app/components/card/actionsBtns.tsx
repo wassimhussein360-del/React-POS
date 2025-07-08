@@ -1,14 +1,14 @@
+import { $getFromLocal, $loader } from "@/app/helpers/helpers";
 import { HoldIcon, TrashIcon } from "@/assets/icons";
 import { useAppDispatch, useCart, useCartItems, useGeneral } from "@/reduxStore/hooks";
+import { SetCartField, VoidCart } from "@/reduxStore/slices/cartSlice";
+import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
+import { createOrder } from "@/servies/fire-functions";
 import { Button } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
-import CartHolder from "./dialogs/cartHolder";
-import { SetCartField, VoidCart } from "@/reduxStore/slices/cartSlice";
 import toast from "react-hot-toast";
-import { createOrder } from "@/servies/fire-functions";
-import { $getFromLocal, $loader } from "@/app/helpers/helpers";
+import CartHolder from "./dialogs/cartHolder";
 import QRCodePayment from "./dialogs/qrcodePayment";
-import { SetGeneralField } from "@/reduxStore/slices/generalSlice";
 
 const ActionsBtns = () => {
   const cartItems = useCartItems();
@@ -31,7 +31,7 @@ const ActionsBtns = () => {
       [$general.order.paymentMethod.id === "Unset", "Please select a payment method."],
       [!$cart.selections?.orderType, "Please choose an order type."],
       [$cart.selections?.orderType === "delivery" && (!$general.order.address?.deliveryZoneId || !$cart.address), "Please select an address."],
-    ].some(([cond, msg]) => cond && (toast.error(msg), true));
+    ].some(([cond, msg]) => cond && (toast.error(msg as string), true));
 
   const makeOrder = () => {
     const o = $general.order;
