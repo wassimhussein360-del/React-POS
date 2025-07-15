@@ -12,7 +12,7 @@ const SubHeader = () => {
   return (
     <article className="flex justify-between px-3 my-5 flex-wrap gap-2">
       <section className="flex gap-2 ">
-        {($user?.isAdmin || $user?.permissions?.Orders.view) && (
+        {($user?.isAdmin || $user?.permissions?.Orders?.view) && (
           <Link href={"/orders"}>
             <Button className="normal-case flex gap-1 bg-secondary">
               <OrdersCards />

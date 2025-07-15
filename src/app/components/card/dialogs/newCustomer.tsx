@@ -1,14 +1,4 @@
-import {
-  Button,
-  Dialog,
-  Input,
-  Menu,
-  MenuHandler,
-  MenuItem,
-  MenuList,
-  Spinner,
-  Typography,
-} from "@material-tailwind/react";
+import { Button, Dialog, Input, Menu, MenuHandler, MenuItem, MenuList, Spinner, Typography } from "@material-tailwind/react";
 import "./cartDialogs.css";
 import { useEffect, useState } from "react";
 import { useCart, useVendor } from "@/reduxStore/hooks";
@@ -102,11 +92,7 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
   const getBody = () => {
     return (
       <div>
-        <Typography
-          variant="h4"
-          color="blue-gray"
-          className="mb-1  text-center font-sourGummy text-secondary   rounded-full"
-        >
+        <Typography variant="h4" color="blue-gray" className="mb-1  text-center font-sourGummy text-secondary   rounded-full">
           New Customer
         </Typography>
 
@@ -114,18 +100,12 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
 
         {/* Name */}
         <div className="w-full max-w-[24rem]">
-          <Typography
-            variant="small"
-            color="blue-gray"
-            className="mb-1 ms-2 text-xs font-medium text-gray-500"
-          >
+          <Typography variant="small" color="blue-gray" className="mb-1 ms-2 text-xs font-medium text-gray-500">
             Enter Customer Name
           </Typography>
           <div className="relative flex w-full">
             <Input
               type="text"
-              pattern="[0-9]*"
-              inputMode="numeric"
               placeholder="customer name"
               value={form.name}
               onChange={(e) => setFormValue("name", e.target.value)}
@@ -146,34 +126,19 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
 
         {/* Input Number */}
         <div className="w-full max-w-[24rem]">
-          <Typography
-            variant="small"
-            color="blue-gray"
-            className="mb-1 ms-2 text-xs font-medium text-gray-500"
-          >
+          <Typography variant="small" color="blue-gray" className="mb-1 ms-2 text-xs font-medium text-gray-500">
             Enter Phone Number
           </Typography>
           <div className="relative flex w-full">
             <Menu placement="bottom-start">
               <MenuHandler>
-                <Button
-                  ripple={false}
-                  variant="text"
-                  color="blue-gray"
-                  className="h-10 w-14 shrink-0 rounded-r-none border border-r-0 border-blue-gray-200 bg-transparent px-3"
-                >
+                <Button ripple={false} variant="text" color="blue-gray" className="h-10 w-14 shrink-0 rounded-r-none border border-r-0 border-blue-gray-200 bg-transparent px-3">
                   {selectedCountryCode}
                 </Button>
               </MenuHandler>
               <MenuList className="max-h-[20rem] max-w-[18rem] z-[9999]">
                 {COUNTRIES.map((country, index) => (
-                  <MenuItem
-                    key={index}
-                    onClick={() => setselectedCountryCode(country.code)}
-                    className={`${
-                      selectedCountryCode == country.code ? "bg-gray-300 text-secondary" : ""
-                    }`}
-                  >
+                  <MenuItem key={index} onClick={() => setselectedCountryCode(country.code)} className={`${selectedCountryCode == country.code ? "bg-gray-300 text-secondary" : ""}`}>
                     {country.name} ({country.code})
                   </MenuItem>
                 ))}
@@ -202,11 +167,7 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
         {/* End Input Number */}
         <br />
         <br />
-        <Button
-          className="normal-case  bg-secondary w-full flex-center gap-3"
-          disabled={isLoading}
-          onClick={() => handleSubmit()}
-        >
+        <Button className="normal-case  bg-secondary w-full flex-center gap-3" disabled={isLoading} onClick={() => handleSubmit()}>
           {isLoading ? (
             <>
               Adding Customer ... <Spinner className="w-4" />
@@ -220,14 +181,8 @@ const NewCustomerDialog: React.FC<CashPayProps> = ({ open, handleOpen, setCustom
   };
 
   return (
-    <Dialog
-      open={open}
-      handler={handleOpen}
-      className="flex justify-center  bg-transparent shadow-transparent  "
-    >
-      <article className=" bg-white shadow-xl shadow-gray-800 rounded-xl py-8 px-12">
-        {getBody()}
-      </article>
+    <Dialog open={open} handler={handleOpen} className="flex justify-center  bg-transparent shadow-transparent  ">
+      <article className=" bg-white shadow-xl shadow-gray-800 rounded-xl py-8 px-12">{getBody()}</article>
     </Dialog>
   );
 };
