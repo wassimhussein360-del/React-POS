@@ -40,59 +40,29 @@ const SingleProduct: React.FC<SingleProductProps> = ({ product, className }) => 
   }, [items, product]);
 
   return (
-    <Badge
-      content={itemsTotals.quantity}
-      className={`bg-primary rounded-md top-0 ${itemsTotals.quantity || "hidden"}`}
-    >
-      <ProductDetails
-        open={openDetails}
-        handleOpen={() => setOpenDetails(!openDetails)}
-        product={product}
-      />
+    <Badge content={itemsTotals.quantity} className={`bg-primary rounded-md top-0 ${itemsTotals.quantity || "hidden"}`}>
+      <ProductDetails open={openDetails} handleOpen={() => setOpenDetails(!openDetails)} product={product} />
       <figure
-        className={`flex flex-col justify-between border  p-2 w-full   rounded ${
-          itemsTotals.quantity
-            ? "rounded-xl border-secondary shadow-xl border-2"
-            : "border-gray-300"
-        } ${
-          itemsTotals.quantity && itemsTotals.stock <= 0 && product.isStockManagement
-            ? "opacity-50"
-            : "cursor-pointer"
+        className={`flex flex-col justify-between border  p-2 w-full   rounded ${itemsTotals.quantity ? "rounded-xl border-secondary shadow-xl border-2" : "border-gray-300"} ${
+          itemsTotals.quantity && itemsTotals.stock <= 0 && product.isStockManagement ? "opacity-50" : "cursor-pointer"
         } ${className}`}
         onClick={() =>
           !(itemsTotals.quantity && itemsTotals.stock <= 0) || !product.isStockManagement
             ? !product.assignedModifiers.length
-              ? dispatch(
-                  itemsTotals.quantity > 0
-                    ? UpdateQuantity({ id: product.id, quantity: itemsTotals.quantity + 1 })
-                    : AddItem({ ...product, quantity: 1 })
-                )
+              ? dispatch(itemsTotals.quantity > 0 ? UpdateQuantity({ id: product.id, quantity: itemsTotals.quantity + 1 }) : AddItem({ ...product, quantity: 1 }))
               : setOpenDetails(true)
             : undefined
         }
       >
         <section className="flex flex-col items-center">
-          <img
-            src={product.images[0].url}
-            className=" w-[90%] aspect-square object-cover rounded-xl"
-          />
+          <img src={product.images[0].url} className=" w-[90%] aspect-square object-cover rounded-xl" />
           <aside className="pt-4  w-full">
-            <p className="text-xs text-gray-800">
-              {product.categories.map((cat: Indexable) => $translate(cat.name)).join(", ")}
-            </p>
-            <h4 className="text-gray-900 font-semibold  text-xs truncate">
-              {$translate(product.name)}
-            </h4>
+            <p className="text-xs text-gray-800">{product.categories.map((cat: Indexable) => $translate(cat.name)).join(", ")}</p>
+            <h4 className="text-gray-900 font-semibold  text-xs truncate">{$translate(product.name)}</h4>
           </aside>
         </section>
         <section className="flex justify-between">
-          {!product.isStockManagement ? (
-            <p></p>
-          ) : (
-            <p className={`text-xs text-primary font-semibold`}>
-              {itemsTotals.quantity ? itemsTotals.stock : product.stockQuantity} Pcs
-            </p>
-          )}
+          {!product.isStockManagement ? <p></p> : <p className={`text-xs text-primary font-semibold`}>{itemsTotals.quantity ? itemsTotals.stock : product.stockQuantity} Pcs</p>}
           <p className="text-xs text-gray-800">
             {$currency()} {product.price.toFixed(2)}
           </p>

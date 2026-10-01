@@ -36,12 +36,10 @@ const Products: React.FC<ProductProps> = ({ products }) => {
 export default Products;
 
 export const formatProducts = (products: any[], outletId: string): Item[] => {
+  console.log(products.find((p) => p.name.en === "Tequila Strawberry"));
+
   const formattedProducts = products
-    .filter(
-      (product) =>
-        (product.isStockManagement ? product.stockQuantity > 0 : true) &&
-        product.branchesIds.includes(outletId)
-    )
+    .filter((product) => (product.isStockManagement ? product.stockQuantity > 0 : true) && product.branchesIds.includes(outletId))
     .map((product) => {
       // Deep clone the product
       const clonedProduct = JSON.parse(JSON.stringify(product));
